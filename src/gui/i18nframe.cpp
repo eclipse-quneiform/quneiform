@@ -62,6 +62,11 @@ void I18NFrame::InitControls()
             m_editBar = new wxRibbonButtonBar(editPanel);
 
             m_editBar->AddButton(
+                wxID_FIND, _(L"Find"),
+                wxArtProvider::GetBitmap(wxART_FIND, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
+                    .ConvertToImage());
+
+            m_editBar->AddButton(
                 wxID_PASTE, _(L"Paste"),
                 wxArtProvider::GetBitmap(wxART_PASTE, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
                     .ConvertToImage());
@@ -352,6 +357,9 @@ void I18NFrame::InitControls()
     wxAcceleratorTable accelTable(std::size(accelEntries), accelEntries);
     SetAcceleratorTable(accelTable);
 
+    Bind(wxEVT_FIND, &I18NFrame::OnFind, this);
+    Bind(wxEVT_FIND_NEXT, &I18NFrame::OnFind, this);
+    Bind(wxEVT_FIND_CLOSE, &I18NFrame::OnFind, this);
     Bind(wxEVT_CLOSE_WINDOW,
          [this](wxCloseEvent& event)
          {
@@ -359,6 +367,19 @@ void I18NFrame::InitControls()
              SaveProjectIfNeeded();
              event.Skip();
          });
+    Bind(
+        wxEVT_RIBBONBUTTONBAR_CLICKED,
+        [this]([[maybe_unused]] wxCommandEvent&)
+        {
+            if (m_findDlg == nullptr)
+                {
+                m_findDlg = new wxFindReplaceDialog(this, &m_findData, _(L"Find"));
+                }
+
+            m_findDlg->Show();
+            m_findDlg->SetFocus();
+        },
+        wxID_FIND);
     Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnNew, this, wxID_NEW);
     Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnOpen, this, wxID_OPEN);
     Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnSave, this, wxID_SAVE);
@@ -1648,4 +1669,54 @@ void I18NFrame::OnClose(wxCloseEvent& event)
     wxGetApp().m_defaultOptions.m_windowSize = ToDIP(GetSize());
     wxGetApp().m_defaultOptions.m_editorHeight = ToDIP(m_editor->GetSize().GetHeight());
     event.Skip();
+    }
+
+void I18NFrame::OnFind(wxFindDialogEvent& event)
+    {
+    // if they were just hitting Cancel then close
+    if (event.GetEventType() == wxEVT_FIND_CLOSE)
+        {
+        if (m_findDlg != nullptr)
+            {
+            m_findDlg->Destroy();
+            m_findDlg = nullptr;
+            }
+        return;
+        }
+
+    const int flags{ event.GetFlags() };
+    int searchFlags{ 0 };
+    if (flags & wxFR_MATCHCASE)
+        {
+        searchFlags = searchFlags | wxSTC_FIND_MATCHCASE;
+        }
+    if (flags & wxFR_WHOLEWORD)
+        {
+        searchFlags = searchFlags | wxSTC_FIND_WHOLEWORD;
+        }
+
+    m_editor->SearchAnchor();
+    long selStart, selEnd;
+    m_editor->GetSelection(&selStart, &selEnd);
+    long foundPos{ wxSTC_INVALID_POSITION };
+    if (flags & wxFR_DOWN)
+        {
+        m_editor->SetSelection(selEnd, selEnd);
+        m_editor->SearchAnchor();
+        foundPos = m_editor->SearchNext(searchFlags, event.GetFindString());
+        m_editor->SearchAnchor();
+        m_editor->EnsureCaretVisible();
+        }
+    else
+        {
+        foundPos = m_editor->SearchPrev(searchFlags, event.GetFindString());
+        m_editor->SearchAnchor();
+        m_editor->EnsureCaretVisible();
+        }
+
+    if (foundPos == wxSTC_INVALID_POSITION)
+        {
+        wxMessageBox(_(L"No further occurrences found."), _(L"Item Not Found"),
+                     wxOK | wxICON_INFORMATION, this);
+        }
     }

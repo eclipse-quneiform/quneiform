@@ -32,6 +32,8 @@ I18NArtProvider::I18NArtProvider()
                     { wxART_PASTE, L"images/paste.svg" },
                     { wxART_REDO, L"images/redo.svg" },
                     { wxART_UNDO, L"images/undo.svg" },
+                    { wxART_FIND, L"images/find.svg" },
+                    { wxART_FIND_AND_REPLACE, L"images/find-replace.svg" },
                     { L"ID_STRING_INFO", L"images/string-info.svg" },
                     { L"ID_CONVERT_STRING", L"images/convert-text.svg" },
                     { L"ID_SELECT_ALL", L"images/select-all.svg" },

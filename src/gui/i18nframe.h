@@ -33,6 +33,7 @@
 #include <wx/busyinfo.h>
 #include <wx/clipbrd.h>
 #include <wx/dataview.h>
+#include <wx/fdrepdlg.h>
 #include <wx/filename.h>
 #include <wx/fontenum.h>
 #include <wx/itemattr.h>
@@ -82,14 +83,15 @@ class I18NFrame : public wxFrame
     void OnConvertString([[maybe_unused]] wxCommandEvent&);
     void OnAbout([[maybe_unused]] wxCommandEvent&);
     void OnHelp([[maybe_unused]] wxCommandEvent&);
-
     void OnClose(wxCloseEvent& event);
+    void OnFind(wxFindDialogEvent& event);
 
   private:
     void OnEditButtonClicked(wxRibbonButtonBarEvent& event);
 
     void EnableEditBar(const bool enable)
         {
+        m_editBar->EnableButton(wxID_FIND, enable);
         m_editBar->EnableButton(wxID_UNDO, enable);
         m_editBar->EnableButton(wxID_REDO, enable);
         m_editBar->EnableButton(wxID_PASTE, enable);
@@ -136,6 +138,9 @@ class I18NFrame : public wxFrame
     wxTextCtrl* m_logWindow{ nullptr };
     wxString m_activeSourceFile;
     bool m_promptForFileSave{ true };
+
+    wxFindReplaceData m_findData;
+    wxFindReplaceDialog* m_findDlg{ nullptr };
 
     bool m_projectDirty{ false };
     wxString m_activeProjectFilePath;
