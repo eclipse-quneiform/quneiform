@@ -340,9 +340,6 @@ class NewProjectDialog final : public wxDialog
     // checks
     int64_t m_options{ i18n_check::review_style::no_checks };
 
-    wxString m_sampleText{ _DT(L"Sample Text") };
-    wxString m_previewText;
-
     wxStaticText* m_transLongerThresholdLabel{ nullptr };
     wxStaticText* m_transLongerThresholdtLabel{ nullptr };
     wxSlider* m_transLongerThresholdSlider{ nullptr };
@@ -354,6 +351,7 @@ class NewProjectDialog final : public wxDialog
     wxEditableListBox* m_exclusionList{ nullptr };
     wxEditableListBox* m_ignoredVarsList{ nullptr };
     wxStaticBoxSizer* m_previewSizer{ nullptr };
+    wxTextCtrl* m_sampleTextWindow{ nullptr };
     wxTextCtrl* m_previewTextWindow{ nullptr };
     };
 

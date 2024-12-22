@@ -108,7 +108,7 @@ void NewProjectDialog::UpdatePseudoTransOptions()
         }
     // do not call TransferDataToWindow() in here, as that will cause
     // this event handler to be called in an infinite loop
-    if (m_previewTextWindow != nullptr)
+    if (m_previewTextWindow != nullptr && m_sampleTextWindow != nullptr)
         {
         i18n_check::pseudo_translater ptrans;
         ptrans.set_pseudo_method(
@@ -116,7 +116,8 @@ void NewProjectDialog::UpdatePseudoTransOptions()
         ptrans.change_width(m_widthPseudoChange);
         ptrans.enable_tracking(m_pseudoTrack);
         ptrans.add_surrounding_brackets(m_addPseudoTransBrackets);
-        wxString mutatedValue = ptrans.mutate_message(m_sampleText.wc_string());
+        const wxString mutatedValue =
+            ptrans.mutate_message(m_sampleTextWindow->GetValue().wc_str());
         m_previewTextWindow->SetValue(mutatedValue);
         }
     }
@@ -840,11 +841,10 @@ void NewProjectDialog::CreateControls()
                                                  _(L"Sample Text:"), wxDefaultPosition,
                                                  wxDefaultSize),
                                 wxSizerFlags{}.CenterVertical());
-            gbPreviewSizer->Add(new wxTextCtrl(m_previewSizer->GetStaticBox(), ID_SAMPLE_TEXT,
-                                               wxString{}, wxDefaultPosition, wxDefaultSize,
-                                               wxTE_RICH2 | wxBORDER_THEME | wxTE_BESTWRAP,
-                                               wxGenericValidator(&m_sampleText)),
-                                wxSizerFlags{}.Expand());
+            m_sampleTextWindow = new wxTextCtrl(m_previewSizer->GetStaticBox(), ID_SAMPLE_TEXT,
+                                                _(L"Sample Text"), wxDefaultPosition, wxDefaultSize,
+                                                wxTE_RICH2 | wxBORDER_THEME | wxTE_BESTWRAP);
+            gbPreviewSizer->Add(m_sampleTextWindow, wxSizerFlags{}.Expand());
 
             gbPreviewSizer->Add(new wxStaticText(m_previewSizer->GetStaticBox(), wxID_STATIC,
                                                  _(L"Pseudo-translation:"), wxDefaultPosition,
@@ -852,8 +852,7 @@ void NewProjectDialog::CreateControls()
                                 wxSizerFlags{}.CenterVertical());
             m_previewTextWindow = new wxTextCtrl(
                 m_previewSizer->GetStaticBox(), wxID_ANY, wxString{}, wxDefaultPosition,
-                wxDefaultSize, wxTE_RICH2 | wxBORDER_THEME | wxTE_BESTWRAP | wxTE_READONLY,
-                wxGenericValidator(&m_previewText));
+                wxDefaultSize, wxTE_RICH2 | wxBORDER_THEME | wxTE_BESTWRAP | wxTE_READONLY);
             gbPreviewSizer->Add(m_previewTextWindow, wxSizerFlags{}.Expand());
 
             m_previewSizer->Add(gbPreviewSizer, wxSizerFlags{ 1 }.Expand().Border());
@@ -1002,4 +1001,7 @@ void NewProjectDialog::CreateControls()
                       wxSizerFlags{}.Expand().Border());
 
     SetSizerAndFit(mainDlgSizer);
+
+    TransferDataToWindow();
+    UpdatePseudoTransOptions();
     }
