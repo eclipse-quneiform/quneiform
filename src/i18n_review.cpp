@@ -1649,14 +1649,14 @@ namespace i18n_check
         // That could use a context also.
         std::wstring errorInfo;
         const auto printfCmds = load_cpp_printf_commands(str, errorInfo);
-        if (printfCmds.size() >= 3 || (!printfCmds.empty() && str.length() < 16))
+        if (printfCmds.size() >= 3 || (!printfCmds.empty() && str.length() < 10))
             {
             return true;
             }
 
         // String with many "%1" commands or a short string with at least one?
         const auto posCmds = load_positional_commands(str);
-        if (posCmds.size() >= 3 || (!posCmds.empty() && str.length() < 16))
+        if (posCmds.size() >= 3 || (!posCmds.empty() && str.length() < 10))
             {
             return true;
             }
