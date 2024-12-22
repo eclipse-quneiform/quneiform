@@ -40,7 +40,7 @@ namespace i18n_check
 
     // UINT MENU_ID_PRINT = 1'000;
     const std::wregex i18n_review::m_id_assignment_regex{
-        LR"((int|uint32_t|INT|UINT|wxWindowID|#define)([[:space:]]|const)*([a-zA-Z0-9_]*ID[a-zA-Z0-9_]*)[[:space:]]*[=\({]?[[:space:]\({]*([a-zA-Z0-9_ \+\-\'<>:\.]+){1}(.?))"
+        LR"((int|uint32_t|uint64_t|INT|UINT|wxWindowID|#define)( |\t|const)*([a-zA-Z0-9_]*ID[a-zA-Z0-9_]*)[ \t]*[=\({]?[ \t\({]*([a-zA-Z0-9_ \+\-\'<>:\.]+){1}(.?))"
     };
 
     const std::wregex i18n_review::m_diagnostic_function_regex{
@@ -533,7 +533,7 @@ namespace i18n_check
             m_sql_code,
             std::wregex(LR"(^(INSERT INTO|DELETE ([*] )?FROM).*)", std::regex_constants::icase),
             std::wregex(LR"(^ORDER BY.*)"), // more strict
-            std::wregex(LR"([(]*SELECT[[:space:]]+(COUNT|MIN|MAX|SUM|AVG)[(].*)"),
+            std::wregex(LR"([(]*SELECT[[:space:]]+(COUNT|MIN|MAX|SUM|AVG|DISTINCT)[(].*)"),
             std::wregex(LR"([(]*SELECT[[:space:]]+[A-Z_0-9\.]+,.*)"), std::wregex(LR"(^DSN=.*)"),
             std::wregex(LR"(^Provider=(SQLOLEDB|Search).*)"),
             std::wregex(LR"(^Connection: Keep-Alive$)"), std::wregex(LR"(ODBC;DSN=.*)"),
@@ -1359,7 +1359,7 @@ namespace i18n_check
 
             matches.emplace_back(
                 currentBlockOffset,
-                currentTextBlock.substr(0, stPositions.position() + stPositions.length()));
+                currentTextBlock.substr(0, stPositions.length()));
 
             currentBlockOffset += stPositions.length();
 
