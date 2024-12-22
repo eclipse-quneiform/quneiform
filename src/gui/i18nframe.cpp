@@ -959,6 +959,7 @@ void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent&)
     if (projDlg.ShowModal() == wxID_OK)
         {
         wxGetApp().m_defaultOptions = projDlg.GetAllOptions();
+        wxGetApp().SaveSettings();
         }
     }
 

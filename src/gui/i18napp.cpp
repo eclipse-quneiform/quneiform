@@ -171,7 +171,7 @@ bool I18NApp::OnInit()
 //------------------------------------------------------
 int I18NApp::OnExit()
     {
-    m_defaultOptions.Save(m_optionsFilePath);
+    SaveSettings();
 
     return 0;
     }
