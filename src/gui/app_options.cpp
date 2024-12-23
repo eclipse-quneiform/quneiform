@@ -25,11 +25,18 @@ void I18NOptions::Save(const wxString& filePath)
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, m_filePath));
 
     auto* exclPathsNode = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"excluded-paths");
-    for (const auto& exclFile : m_excludedPaths)
+    for (auto exclFile : m_excludedPaths)
         {
         if (!exclFile.empty())
             {
             auto* pathNode = new wxXmlNode(exclPathsNode, wxXML_ELEMENT_NODE, L"excluded-path");
+            // If a child folder or file of the main folder being analyzed,
+            // then just save the relative path. If the main folder changes in the project later,
+            // then these paths won't need to be updated.
+            if (exclFile.starts_with(m_filePath))
+                {
+                exclFile.erase(0, m_filePath.length());
+                }
             pathNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, exclFile));
             }
         }
