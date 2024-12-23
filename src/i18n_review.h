@@ -864,6 +864,14 @@ namespace i18n_check
         [[nodiscard]]
         static std::vector<std::wstring> load_numbers(std::wstring_view resource);
 
+        /** @brief Loads all matches from provided regex from a string.
+            @param resource The string to parse.
+            @param regEx The regular expression to match on.
+            @returns All matches from @c resource.*/
+        [[nodiscard]]
+        static std::vector<std::wstring> load_matches(std::wstring_view resource,
+                                                      const std::wregex& regEx);
+
       protected:
         /// @returns @c true if the next word in @c commentBlock is a suppression command,
         ///     along with the position of the end of the suppressed block of code.

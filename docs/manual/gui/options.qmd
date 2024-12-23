@@ -91,6 +91,12 @@ A string will be considered ambiguous if:
 - A short string with a `printf` or positional argument (e.g., "%2").
 - A longer string with three or more `printf` or positional arguments.
 
+::: {.notesection data-latex=""}
+`printf` or positional arguments will be ignored if following a colon and space.
+For example, a string such as "Name: %s\nDate: %s\Location: %s" may not need a comment.
+It is assumed that the label in front of the colon serves as a description for the following "%s"; thus, a warning will not be emitted. 
+:::
+
 **Deprecated macros and functions**: select this to check for deprecated text macros and functions.
 This will detect the usage of functions that are no longer relevant, and provide a suggested replacement.
 

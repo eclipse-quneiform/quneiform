@@ -1357,9 +1357,8 @@ namespace i18n_check
             currentBlockOffset += stPositions.position();
             currentTextBlock = currentTextBlock.substr(stPositions.position());
 
-            matches.emplace_back(
-                currentBlockOffset,
-                currentTextBlock.substr(0, stPositions.length()));
+            matches.emplace_back(currentBlockOffset,
+                                 currentTextBlock.substr(0, stPositions.length()));
 
             currentBlockOffset += stPositions.length();
 
@@ -1645,18 +1644,29 @@ namespace i18n_check
             return true;
             }
 
+        // we will ignore something like "Name: %s", where '%s'
+        // would obviously be a name of some sort
+        static const std::wregex colonAndPrintf{ LR"(\:( |\\t)%)" };
+        const auto colonAndPrintfs = load_matches(str, colonAndPrintf);
+
         // String with many printf commands or a short string with at least one?
         // That could use a context also.
         std::wstring errorInfo;
         const auto printfCmds = load_cpp_printf_commands(str, errorInfo);
-        if (printfCmds.size() >= 3 || (!printfCmds.empty() && str.length() < 10))
+        size_t nonObviousCommands = (colonAndPrintfs.size() > printfCmds.size()) ?
+                                        0 :
+                                        (printfCmds.size() - colonAndPrintfs.size());
+        if (nonObviousCommands >= 3 || (nonObviousCommands >= 1 && str.length() < 10))
             {
             return true;
             }
 
         // String with many "%1" commands or a short string with at least one?
         const auto posCmds = load_positional_commands(str);
-        if (posCmds.size() >= 3 || (!posCmds.empty() && str.length() < 10))
+        nonObviousCommands = (colonAndPrintfs.size() > posCmds.size()) ?
+                                 0 :
+                                 (posCmds.size() - colonAndPrintfs.size());
+        if (nonObviousCommands >= 3 || (nonObviousCommands >= 1 && str.length() < 10))
             {
             return true;
             }
@@ -2890,11 +2900,28 @@ namespace i18n_check
         }
 
     //------------------------------------------------
+    std::vector<std::wstring> i18n_review::load_matches(std::wstring_view resource,
+                                                        const std::wregex& regEx)
+        {
+        std::vector<std::wstring> results;
+
+        std::wstring_view::const_iterator searchStart{ resource.cbegin() };
+        std::match_results<std::wstring_view::const_iterator> res;
+        while (std::regex_search(searchStart, resource.cend(), res, regEx))
+            {
+            searchStart += res.position() + res.length();
+            results.push_back(res.str(0));
+            }
+        std::sort(results.begin(), results.end());
+        return results;
+        }
+
+    //------------------------------------------------
     std::vector<std::wstring> i18n_review::load_positional_commands(std::wstring_view resource)
         {
         std::vector<std::wstring> results;
 
-        std::wregex positionalRegex{ L"[%][L]?[0-9]{1,}" };
+        static const std::wregex positionalRegex{ L"[%][L]?[0-9]{1,}" };
         std::wstring_view::const_iterator searchStart{ resource.cbegin() };
         std::match_results<std::wstring_view::const_iterator> res;
         while (std::regex_search(searchStart, resource.cend(), res, positionalRegex))

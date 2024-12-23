@@ -3029,6 +3029,17 @@ TEST_CASE("CPP Tests", "[cpp]")
 
 TEST_CASE("Context", "[cpp][i18n]")
     {
+    SECTION("Colons negate printf")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        const wchar_t* code = LR"(SetTitle(wxString::Format(
+        _(L"Name: %s\nSize: %s\nCreated: %s %s\nModified: %s %s"), value));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
+        }
+
     SECTION("gettext Comment")
         {
         cpp_i18n_review cpp(false);
@@ -3090,7 +3101,14 @@ QString example = tr("UNTITLED");)";
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
         cpp.clear_results();
 
+        // "Copying: %3" is obvious enough
         code = LR"(QString example = tr("%1 of %2 files copied.\nCopying: %3");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 0);
+        cpp.clear_results();
+
+        code = LR"(QString example = tr("%1 of %2 files copied.\nCopying %3");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
