@@ -48,7 +48,7 @@ void InsertTransCommentDlg::CreateControls()
     functionComboSzr->Add(new wxStaticText(this, wxID_STATIC, _(L"Translator comment style:")),
                           wxSizerFlags{}.CenterVertical());
 
-    m_selectedTag = _DT(L"/* TRANSLATORS: */");
+    m_selectedTag = _DT(L"// TRANSLATORS:");
     functionComboSzr->Add(new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                        m_translatorTags, 0, wxGenericValidator(&m_selectedTag)),
                           wxSizerFlags{}.Left().CenterVertical().Border(wxLEFT));
