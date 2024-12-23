@@ -518,7 +518,7 @@ namespace i18n_check
                 { L"__WXMAC__", _WXTRANS_WSTR(L"Use __WXOSX__ instead of __WXMAC__.") });
             }
 
-        m_translatable_regexes = { std::wregex(LR"(Q[0-9](F|A)Y)") };
+        m_translatable_regexes = { std::wregex(LR"(Q[0-9](F|A)Y.*)") };
 
         m_untranslatable_regexes = {
             // nothing but numbers, punctuation, or control characters?
@@ -565,6 +565,8 @@ namespace i18n_check
             std::wregex(LR"(#[a-zA-Z0-9\-]{3,})"),
             // CSS
             std::wregex(LR"(a[:](hover|link))", std::regex_constants::icase),
+            std::wregex(LR"((width|height)[[:space:]]*\:[%]?[a-z]{2,4};)",
+                        std::regex_constants::icase),
             std::wregex(
                 LR"([\s\S]*(\{[[:space:]]*[a-zA-Z\-]+[[:space:]]*[:][[:space:]]*[0-9a-zA-Z\- \(\)\\;\:%#'",]+[[:space:]]*\})+[\s\S]*)"),
             std::wregex(
@@ -2210,6 +2212,22 @@ namespace i18n_check
                     std::regex_replace(strToReview, std::wregex(L"&#[[:digit:]]{2,4};"), L"");
                 }
 
+            // strings that may look like they should not be translatable, but are actually OK
+            for (const auto& reg : m_translatable_regexes)
+                {
+                if (std::regex_match(strToReview, reg))
+                    {
+#ifndef NDEBUG
+                    if (strToReview.length() > m_longest_internal_string.first.length())
+                        {
+                        m_longest_internal_string.first = strToReview;
+                        m_longest_internal_string.second = reg;
+                        }
+#endif
+                    return std::make_pair(false, strToReview.length());
+                    }
+                }
+
             // see if it has enough words
             const auto matchCount{ std::distance(
                 std::wsregex_iterator(strToReview.cbegin(), strToReview.cend(), m_1word_regex),
@@ -2295,22 +2313,6 @@ namespace i18n_check
             if (m_untranslatable_exceptions.find(strToReview) != m_untranslatable_exceptions.cend())
                 {
                 return std::make_pair(false, strToReview.length());
-                }
-
-            // strings that may look like they should not be translatable, but are actually OK
-            for (const auto& reg : m_translatable_regexes)
-                {
-                if (std::regex_match(strToReview, reg))
-                    {
-#ifndef NDEBUG
-                    if (strToReview.length() > m_longest_internal_string.first.length())
-                        {
-                        m_longest_internal_string.first = strToReview;
-                        m_longest_internal_string.second = reg;
-                        }
-#endif
-                    return std::make_pair(false, strToReview.length());
-                    }
                 }
 
             for (const auto& reg : m_untranslatable_regexes)

@@ -89,7 +89,7 @@ A string will be considered ambiguous if:
 - A single word with multiple punctuation marks embedded in it
 - It contains placeholder text (e.g., "###").
 - A short string with a `printf` or positional argument (e.g., "%2").
-- A longer string with three or more `printf` or positional arguments.
+- A longer string with multiple `printf` or positional arguments.
 
 ::: {.notesection data-latex=""}
 `printf` or positional arguments will be ignored if following a colon and space.

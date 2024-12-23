@@ -34,6 +34,14 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK(reviewer.is_untranslatable_string(L"#Something-else", false).first);
     CHECK(reviewer.is_untranslatable_string(L"#something-else", false).first);
     CHECK(reviewer.is_untranslatable_string(L"#somethingElse", false).first);
+    // CSS
+    CHECK(reviewer.is_untranslatable_string(L"height:%dpx;", false).first);
+    }
+
+TEST_CASE("translatable", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review reviewer{ false };
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"Q3FY%", false).first);
     }
 
 TEST_CASE("i18n string utils", "[i18nstringutil]")
