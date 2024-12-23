@@ -93,7 +93,7 @@ A string will be considered ambiguous if:
 
 ::: {.notesection data-latex=""}
 `printf` or positional arguments will be ignored if following a colon and space.
-For example, a string such as "Name: %s\nDate: %s\Location: %s" may not need a comment.
+For example, a string such as "Name: %s\\nDate: %s\\Location: %s" may not need a comment.
 It is assumed that the label in front of the colon serves as a description for the following "%s"; thus, a warning will not be emitted. 
 :::
 
@@ -168,7 +168,7 @@ All types of terminating marks are treated interchangeably, as not all languages
 **Check for inconsistent numbers**: select this to check for mismatching numbers between the source and target strings.
 
 Devanagari and full-width numbers will be converted to 7-bit ASCII numbers during the comparison.
-This ensures that "8859-1," "८८५९-१," and "８８５９-１" will be seen as the same number sequences.
+This ensures that "8859-1" and "８８５９-１" will be seen as the same number sequence.
 
 ::: {.notesection data-latex=""}
 Numbers will have all commas, periods, and non-breaking spaces removed when being compared.
@@ -191,8 +191,8 @@ The default is 400%, meaning that a translation can be four times longer than th
 This value can be changed by adjustsing the **Translation length threshold** slider.
 
 ::: {.tipsection data-latex=""}
-Setting this to 0% will instruct the program to warn if any translation is longer than the source string.
-This is useful for legacy software where resource-loading routines are using hardcoded string lengths.
+Setting this to 0% will instruct the program to warn if any translation exceeds the length of its source string by even one character.
+This is useful for legacy software where resource-loading routines are using the source strings' hardcoded lengths.
 :::
 
 **Review fuzzy translations**: select this to review fuzzy translations. This should only be selected if you intend to review translations

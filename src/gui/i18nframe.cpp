@@ -862,7 +862,7 @@ void I18NFrame::OnInsert(wxRibbonButtonBarEvent& event)
     menu.AppendSeparator();
 
     menuItem =
-        new wxMenuItem(&menu, XRCID("ID_INSERT_GETTEXT"), _(L"Mark Selection for Translation..."));
+        new wxMenuItem(&menu, XRCID("ID_INSERT_GETTEXT"), _(L"Make Selection Translatable..."));
     menuItem->SetBitmap(
         wxArtProvider::GetBitmap(L"ID_INSERT_GETTEXT", wxART_OTHER, FromDIP(wxSize{ 16, 16 })));
     menu.Append(menuItem);
@@ -1233,7 +1233,7 @@ void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent&)
         return;
         }
 
-    InsertTransMacroDlg dlg(this, selText, wxID_ANY, _("Mark Selection for Translation"),
+    InsertTransMacroDlg dlg(this, selText, wxID_ANY, _("Make Selection Translatable"),
                             TransMacroType::MarkForTranslation);
     if (dlg.ShowModal() != wxID_OK)
         {
