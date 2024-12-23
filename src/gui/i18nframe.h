@@ -62,6 +62,7 @@ class I18NFrame : public wxFrame
 
     void InitControls();
 
+  private:
     void OnNew([[maybe_unused]] wxCommandEvent&);
     void OnOpen([[maybe_unused]] wxCommandEvent&);
     void OnSave([[maybe_unused]] wxCommandEvent&);
@@ -85,8 +86,6 @@ class I18NFrame : public wxFrame
     void OnHelp([[maybe_unused]] wxCommandEvent&);
     void OnClose(wxCloseEvent& event);
     void OnFind(wxFindDialogEvent& event);
-
-  private:
     void OnFindCommand([[maybe_unused]] wxCommandEvent&);
     void OnEditButtonClicked(wxRibbonButtonBarEvent& event);
 
