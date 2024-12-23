@@ -135,6 +135,10 @@ void InsertTransMacroDlg::CreateControls()
     m_commentEntry =
         new wxTextCtrl(this, wxID_ANY, wxString{}, wxDefaultPosition, FromDIP(wxSize{ 500, 150 }),
                        wxTE_RICH2 | wxBORDER_THEME | wxTE_BESTWRAP, wxGenericValidator(&m_comment));
+#if wxUSE_SPELLCHECK
+    m_commentEntry->EnableProofCheck(
+        wxTextProofOptions::Default().GrammarCheck(true).SpellCheck(true));
+#endif
     mainDlgSizer->Add(m_commentEntry, wxSizerFlags{ 1 }.Expand().Border());
 
     if (m_macroType == TransMacroType::MarkForNoTranslation)
