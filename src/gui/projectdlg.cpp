@@ -726,7 +726,7 @@ void NewProjectDialog::CreateControls()
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
             gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), ID_CHECK_TRANS_LONGER_CHECK,
-                                        _(L"Check for inconsistent translation lengths"),
+                                        _(L"Check for suspect translation lengths"),
                                         wxDefaultPosition, wxDefaultSize, 0,
                                         wxGenericValidator(&m_lengthInconsistency)),
                          wxGBPosition(currentRow, 0), wxGBSpan{});

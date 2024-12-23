@@ -150,8 +150,8 @@ Translation catalogs
 (This will review "c-format," "kde-format," and "qt-format" strings in *gettext* files.)
 
 ::: {.warningsection data-latex=""}
-The checks performed here are strict; all `printf()` commands in translations must match
-their source counterpart exactly. For example, "*%lu*" vs. "*%l*" will emit a warning.
+The checks performed here are strict; all `printf()` commands in translations must match their source counterpart exactly.
+For example, "*%lu*" vs. "*%l*" will emit a warning.
 Questionable commands such as "*% s*" (space is only meant for numeric formatting) will also emit a warning.
 :::
 
@@ -185,12 +185,12 @@ It is assumed that the ordering of numbers can change in the translation; thus, 
 Translation catalogs (*continued...*)
 :::
 
-**Check for inconsistent translation lengths**: select this to check for suspect lengths of translations compared to their source strings.
+**Check for suspect translation lengths**: select this to check for translations that are suspiciously longer than their source strings.
 
 The default is 400%, meaning that a translation can be four times longer than the source string before emitting a warning.
 This value can be changed by adjustsing the **Translation length threshold** slider.
 
-::: {.notesection data-latex=""}
+::: {.tipsection data-latex=""}
 Setting this to 0% will instruct the program to warn if any translation is longer than the source string.
 This is useful for legacy software where resource-loading routines are using hardcoded string lengths.
 :::
