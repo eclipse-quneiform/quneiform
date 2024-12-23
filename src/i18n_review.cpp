@@ -1656,7 +1656,8 @@ namespace i18n_check
         size_t nonObviousCommands = (colonAndPrintfs.size() > printfCmds.size()) ?
                                         0 :
                                         (printfCmds.size() - colonAndPrintfs.size());
-        if (nonObviousCommands >= 3 || (nonObviousCommands >= 1 && str.length() < 10))
+        if (nonObviousCommands >= 3 || (nonObviousCommands >= 2 && str.length() < 16) ||
+            (nonObviousCommands >= 1 && str.length() < 10))
             {
             return true;
             }
@@ -1666,7 +1667,8 @@ namespace i18n_check
         nonObviousCommands = (colonAndPrintfs.size() > posCmds.size()) ?
                                  0 :
                                  (posCmds.size() - colonAndPrintfs.size());
-        if (nonObviousCommands >= 3 || (nonObviousCommands >= 1 && str.length() < 10))
+        if (nonObviousCommands >= 3 || (nonObviousCommands >= 2 && str.length() < 16) ||
+            (nonObviousCommands >= 1 && str.length() < 10))
             {
             return true;
             }

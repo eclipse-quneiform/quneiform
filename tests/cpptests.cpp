@@ -3040,7 +3040,18 @@ TEST_CASE("Context", "[cpp][i18n]")
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
         }
 
-    SECTION("gettext Comment")
+    SECTION("Medium length string")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        const wchar_t* code = LR"(SetTitle(wxString::Format(
+        _(L"%s\n%d days"), value));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
+        }
+
+    SECTION("gettext comment")
         {
         cpp_i18n_review cpp(false);
         cpp.set_style(check_needing_context);
@@ -3075,7 +3086,7 @@ TEST_CASE("Context", "[cpp][i18n]")
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
         }
 
-    SECTION("Qt Comment")
+    SECTION("Qt comment")
         {
         cpp_i18n_review cpp(false);
         cpp.set_style(check_needing_context);
@@ -3162,7 +3173,7 @@ QString example = tr("UNTITLED");)";
         cpp.clear_results();
         }
 
-    SECTION("Ambiguous Long Word")
+    SECTION("Ambiguous long word")
         {
         cpp_i18n_review cpp(false);
         cpp.set_style(check_needing_context);
