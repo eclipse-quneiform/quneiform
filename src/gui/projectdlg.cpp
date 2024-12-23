@@ -407,6 +407,10 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
     m_exceptionsShouldBeTranslatable = options.m_exceptionsShouldBeTranslatable;
     m_verbose = options.m_verbose;
     m_minWordsForClassifyingUnavailableString = options.m_minWordsForClassifyingUnavailableString;
+    if (m_exclusionList != nullptr)
+        {
+        m_exclusionList->SetStrings(m_excludedPaths);
+        }
     MinCppVersion(options.m_minCppVersion);
     TransferDataToWindow();
 
