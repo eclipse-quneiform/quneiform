@@ -87,6 +87,7 @@ class I18NFrame : public wxFrame
     void OnFind(wxFindDialogEvent& event);
 
   private:
+    void OnFindCommand([[maybe_unused]] wxCommandEvent&);
     void OnEditButtonClicked(wxRibbonButtonBarEvent& event);
 
     void EnableEditBar(const bool enable)

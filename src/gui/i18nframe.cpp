@@ -348,12 +348,13 @@ void I18NFrame::InitControls()
 
     SetSizer(mainSizer);
 
-    wxAcceleratorEntry accelEntries[5];
+    wxAcceleratorEntry accelEntries[6];
     accelEntries[0].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP);
     accelEntries[1].Set(wxACCEL_CMD, static_cast<int>(L'N'), wxID_NEW);
     accelEntries[2].Set(wxACCEL_CMD, static_cast<int>(L'O'), wxID_OPEN);
     accelEntries[3].Set(wxACCEL_CMD, static_cast<int>(L'S'), wxID_SAVE);
-    accelEntries[4].Set(wxACCEL_NORMAL, WXK_F5, wxID_REFRESH);
+    accelEntries[4].Set(wxACCEL_CMD, static_cast<int>(L'F'), wxID_FIND);
+    accelEntries[5].Set(wxACCEL_NORMAL, WXK_F5, wxID_REFRESH);
     wxAcceleratorTable accelTable(std::size(accelEntries), accelEntries);
     SetAcceleratorTable(accelTable);
 
@@ -367,19 +368,8 @@ void I18NFrame::InitControls()
              SaveProjectIfNeeded();
              event.Skip();
          });
-    Bind(
-        wxEVT_RIBBONBUTTONBAR_CLICKED,
-        [this]([[maybe_unused]] wxCommandEvent&)
-        {
-            if (m_findDlg == nullptr)
-                {
-                m_findDlg = new wxFindReplaceDialog(this, &m_findData, _(L"Find"));
-                }
-
-            m_findDlg->Show();
-            m_findDlg->SetFocus();
-        },
-        wxID_FIND);
+    Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnFindCommand, this, wxID_FIND);
+    Bind(wxEVT_MENU, &I18NFrame::OnFindCommand, this, wxID_FIND);
     Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnNew, this, wxID_NEW);
     Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnOpen, this, wxID_OPEN);
     Bind(wxEVT_RIBBONBUTTONBAR_CLICKED, &I18NFrame::OnSave, this, wxID_SAVE);
@@ -1671,6 +1661,21 @@ void I18NFrame::OnClose(wxCloseEvent& event)
     event.Skip();
     }
 
+//------------------------------------------------------
+void I18NFrame::OnFindCommand([[maybe_unused]] wxCommandEvent&)
+    {
+    if (m_findDlg == nullptr)
+        {
+        m_findData.SetFindString(m_editor->GetSelectedText());
+        m_findData.SetFlags(wxFR_DOWN);
+        m_findDlg = new wxFindReplaceDialog(this, &m_findData, _(L"Find"));
+        }
+
+    m_findDlg->Show();
+    m_findDlg->SetFocus();
+    }
+
+//------------------------------------------------------
 void I18NFrame::OnFind(wxFindDialogEvent& event)
     {
     // if they were just hitting Cancel then close
