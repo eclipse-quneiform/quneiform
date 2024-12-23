@@ -56,11 +56,15 @@ void InsertTransCommentDlg::CreateControls()
 
     mainDlgSizer->Add(new wxStaticText(this, wxID_STATIC, _(L"Explanation for translators:")),
                       wxSizerFlags{}.Border());
-    mainDlgSizer->Add(new wxTextCtrl(this, wxID_ANY, wxString{}, wxDefaultPosition,
-                                     FromDIP(wxSize{ 500, 150 }),
-                                     wxTE_RICH2 | wxTE_MULTILINE | wxBORDER_THEME | wxTE_BESTWRAP,
-                                     wxGenericValidator(&m_comment)),
-                      wxSizerFlags{ 1 }.Expand().Border());
+    wxTextCtrl* commentTextCtrl =
+        new wxTextCtrl(this, wxID_ANY, wxString{}, wxDefaultPosition, FromDIP(wxSize{ 500, 150 }),
+                       wxTE_RICH2 | wxTE_MULTILINE | wxBORDER_THEME | wxTE_BESTWRAP,
+                       wxGenericValidator(&m_comment));
+#if wxUSE_SPELLCHECK
+    commentTextCtrl->EnableProofCheck(
+        wxTextProofOptions::Default().GrammarCheck(true).SpellCheck(true));
+#endif
+    mainDlgSizer->Add(commentTextCtrl, wxSizerFlags{ 1 }.Expand().Border());
 
     mainDlgSizer->Add(CreateSeparatedButtonSizer(wxOK | wxCANCEL | wxHELP),
                       wxSizerFlags{}.Expand().Border());
