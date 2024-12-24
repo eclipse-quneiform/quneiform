@@ -541,7 +541,7 @@ namespace i18n_check
 
                         // see if the number of pipe or tabs (not literal, but embedded 't'
                         // characters) match
-                        static const std::wregex embeddedTabs{ LR"(\t|\|)" };
+                        static const std::wregex embeddedTabs{ LR"(\\t|\|)" };
                         srcResults = load_matches(src, embeddedTabs);
                         transResults = load_matches(trans, embeddedTabs);
                         if (srcResults.size() != transResults.size())
