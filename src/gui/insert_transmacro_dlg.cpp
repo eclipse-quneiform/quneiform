@@ -85,7 +85,8 @@ void InsertTransMacroDlg::CreateControls()
                                             _(L"Non-translatable marking function:")),
                        wxSizerFlags{}.CenterVertical());
 
-    m_selectedMacro = (m_macroType == TransMacroType::MarkForTranslation) ? L"_" : L"_DT";
+    m_selectedMacro =
+        (m_macroType == TransMacroType::MarkForTranslation) ? m_transMacros[0] : m_noTransMacros[0];
     macroComboSzr->Add(new wxChoice(this, ID_MACRO_COMBO, wxDefaultPosition, wxDefaultSize,
                                     (m_macroType == TransMacroType::MarkForTranslation) ?
                                         m_transMacros :
@@ -146,7 +147,7 @@ void InsertTransMacroDlg::CreateControls()
         mainDlgSizer->Add(
             new wxStaticText(
                 this, wxID_STATIC,
-                _(L"Note: include 'donttranslate.h' into your project to define these functions.")),
+                _(L"Note: include 'donttranslate.h' in your project to define these functions.")),
             wxSizerFlags{}.Expand().Border());
         }
 
