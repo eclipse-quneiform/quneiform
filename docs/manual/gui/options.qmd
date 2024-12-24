@@ -158,8 +158,11 @@ Questionable commands such as "*% s*" (space is only meant for numeric formattin
 **Check for inconsistent keyboard accelerators**: select this to check for mismatching keyboard accelerators between source and translation strings.
 This is performed by checking that both strings contain one '&' followed by an alphanumeric character.
 
-**Check for inconsistent casing or trailing punctuation, spaces, or newlines**: select this to check for mismatching trailing punctuation, spaces, or newlines between source and translation strings.
-This will also emit a warning if the source starts with an uppercase letter and the translation starts with a lowercase letter.
+**Check for inconsistent casing, separators, or trailing punctuation, spaces, or newlines**: select this to check for the following between source and translation strings:
+
+- Mismatching trailing punctuation, spaces, or newlines,
+- The source string starting with an uppercase letter and the translation starting with a lowercase letter.
+- Mismatching number of "\\t" and "|" symbols.
 
 In regards to punctuation, terminating characters such as periods, exclamation points, question marks, and colons are reviewed.
 For these, warnings will only be emitted if the source string has a terminating mark and the translation does not have either a terminating mark or closing parenthesis.

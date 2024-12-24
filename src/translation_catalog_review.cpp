@@ -462,7 +462,8 @@ namespace i18n_check
 
             if (static_cast<bool>(m_review_styles & check_consistency))
                 {
-                const auto reviewConsistency = [&catEntry](auto src, auto trans)
+                const auto reviewConsistency =
+                    [&catEntry, &printfStrings1, &printfStrings2](auto src, auto trans)
                 {
                     if (!src.empty() && !trans.empty())
                         {
@@ -500,6 +501,18 @@ namespace i18n_check
                                 }
                             }
                         else if (std::iswupper(src.front()) && std::iswlower(trans.front()))
+                            {
+                            catEntry.second.m_issues.emplace_back(
+                                translation_issue::consistency_issue,
+                                L"'" + src + _WXTRANS_WSTR(L"' vs. '") + trans + L"'");
+                            }
+
+                        // see if the number of pipe or tabs (not literal, but embedded 't'
+                        // characters) match
+                        static const std::wregex embeddedTabs{ LR"(\t|\|)" };
+                        printfStrings1 = load_matches(src, embeddedTabs);
+                        printfStrings2 = load_matches(trans, embeddedTabs);
+                        if (printfStrings1.size() != printfStrings2.size())
                             {
                             catEntry.second.m_issues.emplace_back(
                                 translation_issue::consistency_issue,

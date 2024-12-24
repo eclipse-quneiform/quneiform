@@ -713,8 +713,8 @@ void NewProjectDialog::CreateControls()
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
             gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
-                                        _(L"Check for inconsistent casing or trailing punctuation, "
-                                          "spaces, or newlines"),
+                                        _(L"Check for inconsistent casing, separators, "
+                                          "or trailing punctuation, spaces, or newlines"),
                                         wxDefaultPosition, wxDefaultSize, 0,
                                         wxGenericValidator(&m_transConsistency)),
                          wxGBPosition(currentRow, 0), wxGBSpan{});
