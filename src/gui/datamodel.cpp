@@ -176,6 +176,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
                  node->m_warningId == L"[numberInconsistency]" ||
                  node->m_warningId == L"[lengthInconsistency]" ||
                  node->m_warningId == L"[transInconsistency]" ||
+                 node->m_warningId == L"[halfWidth]" ||
                  node->m_warningId == L"[suspectL10NString]" ||
                  node->m_warningId == L"[suspectL10NUsage]" ||
                  node->m_warningId == L"[suspectI18NUsage]" ||

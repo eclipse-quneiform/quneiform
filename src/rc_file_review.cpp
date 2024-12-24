@@ -155,6 +155,18 @@ namespace i18n_check
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
                     }
+
+                if ((m_review_styles & check_halfwidth) &&
+                    !load_matches(tableEntry.second, m_halfwidth_range_regex).empty())
+                    {
+                    m_localizable_strings_with_halfwidths.emplace_back(
+                        tableEntry.second,
+                        string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                                std::wstring{}, std::wstring{}),
+                        m_file_name,
+                        std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
+                                       std::wstring::npos));
+                    }
                 }
             }
 

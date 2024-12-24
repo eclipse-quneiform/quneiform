@@ -17,6 +17,8 @@ namespace i18n_check
     {
     const std::wregex i18n_review::m_file_filter_regex{ LR"(([*][.][[:alnum:]\*]{1,5}[;]?)+$)" };
 
+    const std::wregex i18n_review::m_halfwidth_range_regex{ LR"([\uFF61-\uFFDC]+)" };
+
     const std::wregex i18n_review::m_url_email_regex{
         LR"(((http|ftp)s?:\/\/)?(www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))"
     };
@@ -1141,6 +1143,11 @@ namespace i18n_check
                 {
                 m_localizable_strings_with_surrounding_spaces.push_back(str);
                 }
+            if ((m_review_styles & check_halfwidth) &&
+                !load_matches(str.m_string, m_halfwidth_range_regex).empty())
+                {
+                m_localizable_strings_with_halfwidths.push_back(str);
+                }
             }
 
         if (m_review_styles & check_malformed_strings)
@@ -2071,6 +2078,7 @@ namespace i18n_check
         m_localizable_strings_ambiguous_needing_context.clear();
         m_localizable_strings_in_internal_call.clear();
         m_localizable_strings_with_surrounding_spaces.clear();
+        m_localizable_strings_with_halfwidths.clear();
         m_not_available_for_localization_strings.clear();
         m_marked_as_non_localizable_strings.clear();
         m_internal_strings.clear();

@@ -47,8 +47,12 @@ As an example, this will detect strings with large blocks of HTML tags that may 
 In this case, it may be recommended to format the string, replacing the HTML content with placeholders (e.g., `printf` commands).
 Another option is to concatenate the HTML tags with the localizable string at runtime.
 
-::: {.notesection data-latex=""}
-Adding a context to the string resource (e.g., a translator comment) will suppress this warning.
+::: {.tipsection data-latex=""}
+Adding a context to the string resource (e.g., a translator comment) will suppress this warning.\
+
+For example, a resource such as "%d of %zu" will emit this warning.
+Although not much can be done about the majority of this string being `printf` commands, a translator comment would help with explaining what they represent.
+By adding a comment, this warning (along with any ambiguity warnings) will be removed.
 :::
 
 **Translatable strings that are surrounded by spaces**: select this to check for translatable strings that start or begin with spaces.
@@ -187,6 +191,13 @@ It is assumed that the ordering of numbers can change in the translation; thus, 
 ::: {.optionssectiontitle data-latex=""}
 Translation catalogs (*continued...*)
 :::
+**Check for halfwidth characters**: select this to check for halfwidth Kanas, Hanguls, and punctuation in source and target strings.
+
+Halfwidth characters are generally only needed in legacy applications, where translations are limited to certain lengths.
+For example, applications that require a translation to not exceed its source string's length may need to resort to halfwidth Kanas (e.g., "ｼ") to accomplish this.
+For modern applications, it is preferred to use the fullwidth counterparts (e.g., "シ"), as it appears more professional.
+
+Including this check can be useful when updating translations for legacy applications undergoing modernization.
 
 **Check for suspect translation lengths**: select this to check for translations that are suspiciously longer than their source strings.
 

@@ -284,6 +284,38 @@ namespace i18n_check
                     }
                 }
 
+            if (static_cast<bool>(m_review_styles & check_halfwidth))
+                {
+                const auto reviewHW =
+                    [&catEntry, &srcResults, &transResults, &unrollStrings](auto src, auto trans)
+                {
+                    if (!src.empty())
+                        {
+                        srcResults = load_matches(src, m_halfwidth_range_regex);
+
+                        if (!srcResults.empty())
+                            {
+                            catEntry.second.m_issues.emplace_back(translation_issue::halfwidth,
+                                                                  unrollStrings(srcResults));
+                            }
+                        }
+
+                    if (!trans.empty())
+                        {
+                        transResults = load_matches(trans, m_halfwidth_range_regex);
+
+                        if (!transResults.empty())
+                            {
+                            catEntry.second.m_issues.emplace_back(translation_issue::halfwidth,
+                                                                  unrollStrings(transResults));
+                            }
+                        }
+                };
+
+                reviewHW(catEntry.second.m_source, catEntry.second.m_translation);
+                reviewHW(catEntry.second.m_source_plural, catEntry.second.m_translation_plural);
+                }
+
             if (static_cast<bool>(m_review_styles & check_numbers))
                 {
                 const auto reviewNumbers = [&catEntry, &printfStrings1, &printfStrings2,
@@ -463,7 +495,7 @@ namespace i18n_check
             if (static_cast<bool>(m_review_styles & check_consistency))
                 {
                 const auto reviewConsistency =
-                    [&catEntry, &printfStrings1, &printfStrings2](auto src, auto trans)
+                    [&catEntry, &srcResults, &transResults](auto src, auto trans)
                 {
                     if (!src.empty() && !trans.empty())
                         {
@@ -510,9 +542,9 @@ namespace i18n_check
                         // see if the number of pipe or tabs (not literal, but embedded 't'
                         // characters) match
                         static const std::wregex embeddedTabs{ LR"(\t|\|)" };
-                        printfStrings1 = load_matches(src, embeddedTabs);
-                        printfStrings2 = load_matches(trans, embeddedTabs);
-                        if (printfStrings1.size() != printfStrings2.size())
+                        srcResults = load_matches(src, embeddedTabs);
+                        transResults = load_matches(trans, embeddedTabs);
+                        if (srcResults.size() != transResults.size())
                             {
                             catEntry.second.m_issues.emplace_back(
                                 translation_issue::consistency_issue,

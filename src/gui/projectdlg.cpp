@@ -134,6 +134,7 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     m_printfMismatch = (m_options & i18n_check::review_style::check_mismatching_printf_commands);
     m_acceleratorMismatch = (m_options & i18n_check::review_style::check_accelerators);
     m_transConsistency = (m_options & i18n_check::review_style::check_consistency);
+    m_halfWidth = (m_options & i18n_check::review_style::check_halfwidth);
     m_numberInconsistency = (m_options & i18n_check::review_style::check_numbers);
     m_lengthInconsistency = (m_options & i18n_check::review_style::check_length);
     m_needsContext = (m_options & i18n_check::review_style::check_needing_context);
@@ -217,6 +218,10 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
     if (m_transConsistency)
         {
         m_options |= i18n_check::review_style::check_consistency;
+        }
+    if (m_halfWidth)
+        {
+        m_options |= i18n_check::review_style::check_halfwidth;
         }
     if (m_numberInconsistency)
         {
@@ -727,6 +732,13 @@ void NewProjectDialog::CreateControls()
                                         wxGenericValidator(&m_numberInconsistency)),
                          wxGBPosition(currentRow, 0), wxGBSpan{});
             gbSizer->Add(buildCodeLabel(L"numberInconsistency", poOptionsSizer->GetStaticBox()),
+                         wxGBPosition(currentRow++, 1), wxGBSpan{});
+
+            gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
+                                        _(L"Check for halfwidth characters"), wxDefaultPosition,
+                                        wxDefaultSize, 0, wxGenericValidator(&m_halfWidth)),
+                         wxGBPosition(currentRow, 0), wxGBSpan{});
+            gbSizer->Add(buildCodeLabel(L"halfWidth", poOptionsSizer->GetStaticBox()),
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
             gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), ID_CHECK_TRANS_LONGER_CHECK,

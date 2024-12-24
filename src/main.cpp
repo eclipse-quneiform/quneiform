@@ -226,6 +226,10 @@ int main(int argc, char* argv[])
                 {
                 rs |= i18n_check::review_style::check_consistency;
                 }
+            else if (r == "halfWidth")
+                {
+                rs |= i18n_check::review_style::check_halfwidth;
+                }
             else if (r == "numberInconsistency")
                 {
                 rs |= i18n_check::review_style::check_numbers;
@@ -361,6 +365,10 @@ int main(int argc, char* argv[])
             else if (r == "transInconsistency")
                 {
                 rs = rs & ~i18n_check::review_style::check_consistency;
+                }
+            else if (r == "halfWidth")
+                {
+                rs = rs & ~i18n_check::review_style::check_halfwidth;
                 }
             else if (r == "numberInconsistency")
                 {

@@ -175,6 +175,7 @@ loaded by your application for integration testing.
   numberInconsistency:     Check for mismatching numbers between the source and target strings.
   lengthInconsistency:     Check for suspect lengths of translations compared to their source strings.
   excessiveNonL10NContent: Check for translatable strings that contain large blocks on non-translatable content.
+  halfWidth:               Check for halfwidth Kanas, Hanguls, and punctuation in source and target strings.
 
 --disable: Which checks to not perform. (Refer to options available above.)
            This will override any options passed to "--enable".

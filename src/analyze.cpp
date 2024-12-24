@@ -382,6 +382,7 @@ namespace i18n_check
                                                                                L"")
                 << ((m_cpp->get_style() & check_accelerators) ? L"acceleratorMismatch\n" : L"")
                 << ((m_cpp->get_style() & check_consistency) ? L"transInconsistency\n" : L"")
+                << ((m_cpp->get_style() & check_halfwidth) ? L"halfWidth\n" : L"")
                 << ((m_cpp->get_style() & check_numbers) ? L"numberInconsistency\n" : L"")
                 << ((m_cpp->get_style() & check_length) ? L"lengthInconsistency\n" : L"")
                 << ((m_cpp->get_style() & check_needing_context) ? L"L10NStringNeedsContext\n" :
@@ -479,6 +480,15 @@ namespace i18n_check
                    << L"\"\t[spacesAroundL10NString]\n";
             }
 
+        for (const auto& val : m_rc->get_localizable_strings_with_halfwidths())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
+                   << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
+            report << _(L"String available for translation that contains halfwidth characters. "
+                        "Fullwidth characters are recommended.");
+            report << L"\"\t[halfWidth]\n";
+            }
+
         for (const auto& val : m_rc->get_bad_dialog_font_sizes())
             {
             report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
@@ -573,13 +583,20 @@ namespace i18n_check
                     }
                 else if (issue.first == translation_issue::consistency_issue)
                     {
-                    report
-                        << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                        << issue.second << L"\"\t\""
-                        << _(L"Mismatching first character casing, mismatching trailing punctuation/"
-                             "spaces/newlines, or mismatching number of tabs or pipe symbols "
-                             "between source and translation strings.")
-                        << "\"\t[transInconsistency]\n";
+                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                           << issue.second << L"\"\t\""
+                           << _(L"Mismatching first character casing, mismatching trailing "
+                                "punctuation/spaces/newlines, or mismatching number of tabs or "
+                                "pipe symbols between source and translation strings.")
+                           << "\"\t[transInconsistency]\n";
+                    }
+                else if (issue.first == translation_issue::halfwidth)
+                    {
+                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                           << issue.second << L"\"\t\""
+                           << _(L"Halfwidth characters detected. "
+                                "Fullwidth characters are recommended.")
+                           << "\"\t[halfWidth]\n";
                     }
                 }
             }
@@ -647,8 +664,8 @@ namespace i18n_check
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                    report << _(L"String available for translation that contains a "
-                                "large amount of non-translatable.");
+                report << _(L"String available for translation that contains a "
+                            "large amount of non-translatable.");
                 report << L"\t\"[excessiveNonL10NContent]\n";
                 }
 
@@ -678,6 +695,15 @@ namespace i18n_check
                             "This string may be getting concatenated at runtime instead of "
                             "using a formatting function.");
                 report << L"\"\t[spacesAroundL10NString]\n";
+                }
+            
+            for (const auto& val : sourceParser->get_localizable_strings_with_halfwidths())
+                {
+                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
+                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
+                report << _(L"String available for translation that contains halfwidth characters. "
+                             "Fullwidth characters are recommended.");
+                report << L"\"\t[halfWidth]\n";
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_in_internal_call())

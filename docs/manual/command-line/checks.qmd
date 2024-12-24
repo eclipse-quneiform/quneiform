@@ -171,6 +171,12 @@ Check for mismatching numbers between the source and target strings.
 
 This is performed on *gettext* \*.po files.
 
+- `halfWidth`
+
+Check for halfwidth Kanas, Hanguls, and punctuation in source and target strings.
+
+This is performed on *gettext* \*.po files.
+
 - `lengthInconsistency`
 
 Check for suspect lengths of translations compared to their source strings.

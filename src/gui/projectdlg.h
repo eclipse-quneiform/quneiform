@@ -302,6 +302,7 @@ class NewProjectDialog final : public wxDialog
     bool m_printfMismatch{ true };
     bool m_acceleratorMismatch{ true };
     bool m_transConsistency{ true };
+    bool m_halfWidth{ false };
     bool m_numberInconsistency{ false };
     bool m_lengthInconsistency{ false };
     bool m_needsContext{ false };

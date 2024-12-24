@@ -774,6 +774,7 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
                         i18n_check::review_style::check_mismatching_printf_commands);
             excludeFlag(L"[acceleratorMismatch]", i18n_check::review_style::check_accelerators);
             excludeFlag(L"[transInconsistency]", i18n_check::review_style::check_consistency);
+            excludeFlag(L"[halfWidth]", i18n_check::review_style::check_halfwidth);
             excludeFlag(L"[numberInconsistency]", i18n_check::review_style::check_numbers);
             excludeFlag(L"[lengthInconsistency]", i18n_check::review_style::check_length);
             excludeFlag(L"[L10NStringNeedsContext]",

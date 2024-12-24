@@ -538,6 +538,26 @@ msgstr "%d%d bloques en 0x%02x")";
 	CHECK(issues == 0);
 	}
 
+TEST_CASE("Halfwidths", "[po][l10n]")
+	{
+	po_file_review po(false);
+	po.set_style(check_halfwidth);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+#, c-format
+msgid "%d/%d blocks at 0x%02x"
+msgstr "%d%d ﾂｱ 0x%02x｡")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	const auto issues = std::count_if(
+		po.get_catalog_entries().cbegin(), po.get_catalog_entries().cend(), [](const auto& ent)
+		{ return ent.second.m_issues.size() > 0; });
+	CHECK(issues == 1);
+	}
+
 TEST_CASE("Printf c-format positionals", "[po][l10n]")
 	{
 	SECTION("C-format positionals")

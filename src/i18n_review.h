@@ -168,7 +168,8 @@ namespace i18n_check
         check_numbers = (static_cast<int64_t>(1) << 33),
         /// @brief Check for suspect lengths of translations compared to their source strings.
         check_length = (static_cast<int64_t>(1) << 34),
-        l10n_reserved5 = (static_cast<int64_t>(1) << 35),
+        /// @brief Check for halfwidth Kanas, Hanguls, and punctuation in source and target strings.
+        check_halfwidth = (static_cast<int64_t>(1) << 35),
         l10n_reserved6 = (static_cast<int64_t>(1) << 36),
         l10n_reserved7 = (static_cast<int64_t>(1) << 37),
         l10n_reserved8 = (static_cast<int64_t>(1) << 38),
@@ -222,7 +223,9 @@ namespace i18n_check
         /// @brief Translation contains large blocks on non-translatable content.
         excessive_nonl10n_content,
         /// @brief Translation contains malformed syntax (e.g., a bad accelerator key).
-        malformed_translation
+        malformed_translation,
+        /// @brief Translation contains halfwidth Kanas, Hanguls, and punctuation.
+        halfwidth
         };
 
     /// @brief File types that can be analyzed.
@@ -543,6 +546,13 @@ namespace i18n_check
         get_localizable_strings_with_surrounding_spaces() const noexcept
             {
             return m_localizable_strings_with_surrounding_spaces;
+            }
+
+        /// @returns The strings that contain halfwidth characters.
+        [[nodiscard]]
+        const std::vector<string_info>& get_localizable_strings_with_halfwidths() const noexcept
+            {
+            return m_localizable_strings_with_halfwidths;
             }
 
         /// @returns The strings that contain extended ASCII characters, but are not encoded.
@@ -1209,6 +1219,7 @@ namespace i18n_check
         std::vector<string_info> m_localizable_strings_ambiguous_needing_context;
         std::vector<string_info> m_localizable_strings_in_internal_call;
         std::vector<string_info> m_localizable_strings_with_surrounding_spaces;
+        std::vector<string_info> m_localizable_strings_with_halfwidths;
         std::vector<string_info> m_not_available_for_localization_strings;
         std::vector<string_info> m_deprecated_macros;
         std::vector<string_info> m_unencoded_strings;
@@ -1256,6 +1267,7 @@ namespace i18n_check
         static const std::wregex m_printf_cpp_pointer_regex;
         static const std::wregex m_positional_command_regex;
         static const std::wregex m_file_filter_regex;
+        static const std::wregex m_halfwidth_range_regex;
         std::vector<std::wregex> m_untranslatable_regexes;
         std::vector<std::wregex> m_translatable_regexes;
 
