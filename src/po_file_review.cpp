@@ -104,7 +104,8 @@ namespace i18n_check
                           std::back_inserter(formatFlags));
                 for (const auto& formatFlag : formatFlags)
                     {
-                    if (formatFlag == L"c-format" || formatFlag == L"cpp-format")
+                    if (formatFlag == L"c-format" || formatFlag == L"cpp-format" ||
+                        formatFlag == L"possible-c-format")
                         {
                         pofs = po_format_string::cpp_format;
                         formatSpecFound = true;
