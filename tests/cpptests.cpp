@@ -3086,6 +3086,35 @@ TEST_CASE("Context", "[cpp][i18n]")
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
         }
 
+    SECTION("gettext comment multiline")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        const wchar_t* code = LR"(SetTitle(wxString::Format(
+        // TRANSLATORS: %s is 
+        // app name
+        _(L"UNTITLED"), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
+        cpp.clear_results();
+        }
+
+    SECTION("gettext comment multiline leading comment")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        const wchar_t* code = LR"(SetTitle(wxString::Format(
+        // A developer comment
+        // TRANSLATORS: %s is 
+        // app name
+        _(L"UNTITLED"), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
+        cpp.clear_results();
+        }
+
     SECTION("Qt comment")
         {
         cpp_i18n_review cpp(false);

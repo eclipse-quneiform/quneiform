@@ -126,8 +126,9 @@ namespace i18n_check
                             cppText, std::next(cppText, static_cast<ptrdiff_t>(suppresionEnd + 2)));
                         std::advance(cppText, suppresionEnd);
                         }
-                    const size_t endPos = std::wcscspn(cppText, L"\n\r");
+
                     if (static_cast<bool>(m_review_styles & check_space_after_comment) &&
+                        std::next(cppText, 2) < endSentinel &&
                         static_cast<bool>(std::iswalnum(*std::next(cppText, 2))) &&
                         // something like "//--------" is OK
                         *std::next(cppText, 2) != L'-')
@@ -136,8 +137,14 @@ namespace i18n_check
                             string_info(std::wstring{}, string_info::usage_info{}, m_file_name,
                                         get_line_and_column((cppText - m_file_start))));
                         }
-                    clear_section(cppText, std::next(cppText, static_cast<ptrdiff_t>(endPos)));
-                    std::advance(cppText, endPos);
+                    // move to the end of the line
+                    if (const size_t endOfLine = std::wcscspn(cppText, L"\n\r");
+                        std::next(cppText, static_cast<ptrdiff_t>(endOfLine)) < endSentinel)
+                        {
+                        clear_section(cppText,
+                                      std::next(cppText, static_cast<ptrdiff_t>(endOfLine)));
+                        std::advance(cppText, endOfLine);
+                        }
                     // move to next character
                     while (std::next(cppText) < endSentinel && std::iswspace(*cppText))
                         {
@@ -147,6 +154,34 @@ namespace i18n_check
                     // if we have a translator comment to connect to it
                     if (m_context_comment_active && !isQtTransComment)
                         {
+                        // in case there are multiple lines of '//' comments,
+                        // then clear those now to maintain our contex comment active state
+                        while (std::next(cppText) < endSentinel && *cppText == L'/' &&
+                               *std::next(cppText) == L'/')
+                            {
+                            if (static_cast<bool>(m_review_styles & check_space_after_comment) &&
+                                std::next(cppText, 2) < endSentinel &&
+                                static_cast<bool>(std::iswalnum(*std::next(cppText, 2))) &&
+                                // something like "//--------" is OK
+                                *std::next(cppText, 2) != L'-')
+                                {
+                                m_comments_missing_space.push_back(string_info(
+                                    std::wstring{}, string_info::usage_info{}, m_file_name,
+                                    get_line_and_column((cppText - m_file_start))));
+                                }
+                            // move to the end of the line
+                            if (const size_t endOfLine = std::wcscspn(cppText, L"\n\r");
+                                std::next(cppText, static_cast<ptrdiff_t>(endOfLine)) < endSentinel)
+                                {
+                                clear_section(
+                                    cppText, std::next(cppText, static_cast<ptrdiff_t>(endOfLine)));
+                                std::advance(cppText, endOfLine);
+                                }
+                            while (std::next(cppText) < endSentinel && std::iswspace(*cppText))
+                                {
+                                std::advance(cppText, 1);
+                                }
+                            }
                         const wchar_t* openingParen = std::wcschr(cppText, L'(');
                         if (openingParen != nullptr && openingParen < endSentinel)
                             {
