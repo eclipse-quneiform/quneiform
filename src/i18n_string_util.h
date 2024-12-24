@@ -125,7 +125,7 @@ namespace i18n_string_util
     constexpr static bool is_question(const wchar_t ch) noexcept
         {
         // clang-format off
-        return (ch == L'?') ?       // !
+        return (ch == L'?') ?       // ?
             true : (ch == 0x061F) ? // Arabic
             true : (ch == 0xFF1F) ? // fullwidth
             true : false;
@@ -138,7 +138,7 @@ namespace i18n_string_util
     constexpr static bool is_colon(const wchar_t ch) noexcept
         {
         // clang-format off
-        return (ch == L':') ?       // !
+        return (ch == L':') ?       // :
             true : (ch == 0xFF1A) ? // fullwidth
             true : false;
         // clang-format on
