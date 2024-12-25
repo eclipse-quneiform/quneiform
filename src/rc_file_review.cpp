@@ -144,6 +144,18 @@ namespace i18n_check
                         }
                     }
 
+                if (m_review_styles & check_multipart_strings &&
+                    is_string_multipart(tableEntry.second))
+                    {
+                    m_multipart_strings.emplace_back(
+                        tableEntry.second,
+                        string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                                std::wstring{}, std::wstring{}),
+                        m_file_name,
+                        std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
+                                       std::wstring::npos));
+                    }
+
                 if ((m_review_styles & check_l10n_has_surrounding_spaces) &&
                     has_surrounding_spaces(tableEntry.second))
                     {

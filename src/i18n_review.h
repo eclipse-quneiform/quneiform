@@ -117,11 +117,12 @@ namespace i18n_check
         check_needing_context = (static_cast<int64_t>(1) << 14),
         /// @brief Check for suspect usage of i18n functions.
         check_suspect_i18n_usage = (static_cast<int64_t>(1) << 15),
-        /// @@brief Check for translatable strings that contain
+        /// @brief Check for translatable strings that contain
         ///     large blocks on non-translatable content.
         check_l10n_contains_excessive_nonl10n_content = (static_cast<int64_t>(1) << 16),
-        /// @private
-        i18n_reserved5 = (static_cast<int64_t>(1) << 17),
+        /// @brief Check for strings that appear to contain multiple parts that are
+        ///     being sliced at runtime.
+        check_multipart_strings = (static_cast<int64_t>(1) << 17),
         /// @private
         i18n_reserved6 = (static_cast<int64_t>(1) << 18),
         /// @private
@@ -225,7 +226,10 @@ namespace i18n_check
         /// @brief Translation contains malformed syntax (e.g., a bad accelerator key).
         malformed_translation,
         /// @brief Translation contains halfwidth Kanas, Hanguls, and punctuation.
-        halfwidth
+        halfwidth,
+        /// @brief Source strings that appears to contain multiple parts that are
+        ///     being sliced at runtime.
+        multipart_string
         };
 
     /// @brief File types that can be analyzed.
@@ -553,6 +557,13 @@ namespace i18n_check
         const std::vector<string_info>& get_localizable_strings_with_halfwidths() const noexcept
             {
             return m_localizable_strings_with_halfwidths;
+            }
+
+        /// @returns The strings that appear to contain multiple sections.
+        [[nodiscard]]
+        const std::vector<string_info>& get_multipart_strings() const noexcept
+            {
+            return m_multipart_strings;
             }
 
         /// @returns The strings that contain extended ASCII characters, but are not encoded.
@@ -938,6 +949,14 @@ namespace i18n_check
         [[nodiscard]]
         static bool is_string_ambiguous(std::wstring_view str);
 
+        /// @returns @c true if a string appears to contain sections that are being sliced at
+        ///     runtime. This is deduced from looking at embedded tabs, pipes (between words),
+        ///     and consecutive spaces. If there are more than two of these in a string, then it
+        ///     is probably being sliced at runtime.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_string_multipart(std::wstring_view str);
+
         /** @brief Processes a quote after its positions and respective
                 function/variable assignment has been found.
             @param[in,out] currentTextPos The current position into the text buffer.\n
@@ -1221,6 +1240,7 @@ namespace i18n_check
         std::vector<string_info> m_localizable_strings_with_surrounding_spaces;
         std::vector<string_info> m_localizable_strings_with_halfwidths;
         std::vector<string_info> m_not_available_for_localization_strings;
+        std::vector<string_info> m_multipart_strings;
         std::vector<string_info> m_deprecated_macros;
         std::vector<string_info> m_unencoded_strings;
         std::vector<string_info> m_printf_single_numbers;

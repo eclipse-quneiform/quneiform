@@ -538,6 +538,101 @@ msgstr "%d%d bloques en 0x%02x")";
 	CHECK(issues == 0);
 	}
 
+TEST_CASE("Multipart strings spaces", "[po][l10n]")
+	{
+	po_file_review po(false);
+	po.set_style(check_multipart_strings);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+msgid "Name   Address   City    State   "
+msgstr "Name   Address   City    State   ")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	const auto issues = std::count_if(
+		po.get_catalog_entries().cbegin(), po.get_catalog_entries().cend(), [](const auto& ent)
+		{ return ent.second.m_issues.size() > 0; });
+	CHECK(issues == 1);
+	}
+
+TEST_CASE("Multipart strings spaces non-issue", "[po][l10n]")
+	{
+	po_file_review po(false);
+	po.set_style(check_multipart_strings);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+msgid "Name Address  City State "
+msgstr "Name   Address   City    State   ")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	const auto issues = std::count_if(
+		po.get_catalog_entries().cbegin(), po.get_catalog_entries().cend(), [](const auto& ent)
+		{ return ent.second.m_issues.size() > 0; });
+	CHECK(issues == 0);
+	}
+
+TEST_CASE("Multipart strings pipes", "[po][l10n]")
+	{
+	po_file_review po(false);
+	po.set_style(check_multipart_strings);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+msgid "Name|Address|City|State"
+msgstr "Name   Address   City    State   ")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	const auto issues = std::count_if(
+		po.get_catalog_entries().cbegin(), po.get_catalog_entries().cend(), [](const auto& ent)
+		{ return ent.second.m_issues.size() > 0; });
+	CHECK(issues == 1);
+	}
+
+TEST_CASE("Multipart strings pipes nonissue", "[po][l10n]")
+	{
+	po_file_review po(false);
+	po.set_style(check_multipart_strings);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+msgid "Comma Separated Values (*.csv)|*.csv|Tab-delimited Text (*.txt)|*.txt"
+msgstr "Name   Address   City    State   ")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	const auto issues = std::count_if(
+		po.get_catalog_entries().cbegin(), po.get_catalog_entries().cend(), [](const auto& ent)
+		{ return ent.second.m_issues.size() > 0; });
+	CHECK(issues == 0);
+	}
+
+TEST_CASE("Multipart strings tabs", "[po][l10n]")
+	{
+	po_file_review po(false);
+	po.set_style(check_multipart_strings);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+msgid "Name\tAddress\tCity\tState"
+msgstr "Name   Address   City    State   ")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	const auto issues = std::count_if(
+		po.get_catalog_entries().cbegin(), po.get_catalog_entries().cend(), [](const auto& ent)
+		{ return ent.second.m_issues.size() > 0; });
+	CHECK(issues == 1);
+	}
+
 TEST_CASE("Tabs consistency", "[po][l10n]")
 	{
 	po_file_review po(false);

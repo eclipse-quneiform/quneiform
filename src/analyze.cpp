@@ -388,6 +388,7 @@ namespace i18n_check
                 << ((m_cpp->get_style() & check_needing_context) ? L"L10NStringNeedsContext\n" :
                                                                    L"")
                 << ((m_cpp->get_style() & check_l10n_contains_url) ? L"urlInL10NString\n" : L"")
+                << ((m_cpp->get_style() & check_multipart_strings) ? L"multipartString\n" : L"")
                 << ((m_cpp->get_style() & check_l10n_contains_excessive_nonl10n_content) ?
                         L"excessiveNonL10NContent\n" :
                         L"")
@@ -480,6 +481,16 @@ namespace i18n_check
                    << L"\"\t[spacesAroundL10NString]\n";
             }
 
+        for (const auto& val : m_rc->get_multipart_strings())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"String available for translation may contain multiple sections "
+                        "being sliced at runtime. Consider splitting each section into "
+                        "a separate resource.")
+                   << L"\"\t[multipartString]\n";
+            }
+
         for (const auto& val : m_rc->get_localizable_strings_with_halfwidths())
             {
             report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
@@ -557,6 +568,15 @@ namespace i18n_check
                            << _(L"Ambiguous string available for translation that is "
                                 "lacking a translator comment.")
                            << "\"\t[L10NStringNeedsContext]\n";
+                    }
+                else if (issue.first == translation_issue::multipart_string)
+                    {
+                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                           << issue.second << L"\"\t\""
+                           << _(L"String available for translation may contain multiple sections "
+                                "being sliced at runtime. Consider splitting each section into "
+                                "a separate resource.")
+                           << "\"\t[multipartString]\n";
                     }
                 else if (issue.first == translation_issue::accelerator_issue)
                     {
@@ -696,13 +716,23 @@ namespace i18n_check
                             "using a formatting function.");
                 report << L"\"\t[spacesAroundL10NString]\n";
                 }
-            
+
+            for (const auto& val : sourceParser->get_multipart_strings())
+                {
+                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
+                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
+                report << _(L"String available for translation may contain multiple sections "
+                            "being sliced at runtime. Consider splitting each section into "
+                            "a separate resource.");
+                report << L"\"\t[multipartString]\n";
+                }
+
             for (const auto& val : sourceParser->get_localizable_strings_with_halfwidths())
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
                 report << _(L"String available for translation that contains halfwidth characters. "
-                             "Fullwidth characters are recommended.");
+                            "Fullwidth characters are recommended.");
                 report << L"\"\t[halfWidth]\n";
                 }
 

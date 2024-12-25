@@ -139,6 +139,7 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     m_lengthInconsistency = (m_options & i18n_check::review_style::check_length);
     m_needsContext = (m_options & i18n_check::review_style::check_needing_context);
     m_urlInL10NString = (m_options & i18n_check::review_style::check_l10n_contains_url);
+    m_multipartString = (m_options & i18n_check::review_style::check_multipart_strings);
     m_excessiveNonTranslatableContentInL10NString =
         (m_options & i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
     m_spacesAroundL10NString =
@@ -242,6 +243,10 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
     if (m_excessiveNonTranslatableContentInL10NString)
         {
         m_options |= i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
+        }
+    if (m_multipartString)
+        {
+        m_options |= i18n_check::review_style::check_multipart_strings;
         }
     if (m_spacesAroundL10NString)
         {
@@ -581,6 +586,14 @@ void NewProjectDialog::CreateControls()
                                     wxGenericValidator(&m_spacesAroundL10NString)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});
         gbSizer->Add(buildCodeLabel(L"spacesAroundL10NString", checkOptionsSizer->GetStaticBox()),
+                     wxGBPosition(currentRow++, 1), wxGBSpan{});
+        
+        gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
+                                    _(LR"(Multipart strings ("mega strings"))"),
+                                    wxDefaultPosition, wxDefaultSize, 0,
+                                    wxGenericValidator(&m_multipartString)),
+                     wxGBPosition(currentRow, 0), wxGBSpan{});
+        gbSizer->Add(buildCodeLabel(L"multipartString", checkOptionsSizer->GetStaticBox()),
                      wxGBPosition(currentRow++, 1), wxGBSpan{});
 
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,

@@ -36,6 +36,9 @@ book:
       - gui/editing.qmd
       - gui/tools.qmd
       - gui/options.qmd
+    - part: "i18n & l10n Issues"
+      chapters:
+      - issues/mulitpart-strings.qmd
     - part: "Additional Features"
       chapters:
       - suppression.qmd

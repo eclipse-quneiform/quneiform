@@ -1126,6 +1126,10 @@ namespace i18n_check
                 {
                 m_unsafe_localizable_strings.push_back(str);
                 }
+            if ((m_review_styles & check_multipart_strings) && is_string_multipart(str.m_string))
+                {
+                m_multipart_strings.push_back(str);
+                }
             if ((m_review_styles & check_l10n_contains_url) &&
                 (std::regex_search(str.m_string, results, m_url_email_regex) ||
                  std::regex_search(str.m_string, results, m_us_phone_number_regex) ||
@@ -1570,6 +1574,13 @@ namespace i18n_check
                     }
                 }
             }
+        }
+
+    //--------------------------------------------------
+    bool i18n_review::is_string_multipart(std::wstring_view str)
+        {
+        static const std::wregex multiConsecSpaces{ LR"(([ ]{2,}|\\t|\b\|\b))" };
+        return load_matches(str, multiConsecSpaces).size() > 2;
         }
 
     //--------------------------------------------------
@@ -2079,6 +2090,7 @@ namespace i18n_check
         m_localizable_strings_in_internal_call.clear();
         m_localizable_strings_with_surrounding_spaces.clear();
         m_localizable_strings_with_halfwidths.clear();
+        m_multipart_strings.clear();
         m_not_available_for_localization_strings.clear();
         m_marked_as_non_localizable_strings.clear();
         m_internal_strings.clear();

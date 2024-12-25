@@ -54,7 +54,12 @@ For example, a resource such as "%d of %zu" will emit this warning.
 Although not much can be done about the majority of this string being `printf` commands, a translator comment would help with explaining what they represent.
 By adding a comment, this warning (along with any ambiguity warnings) will be removed.
 :::
+::::
 
+:::: {.optionssection data-latex=""}
+::: {.optionssectiontitle data-latex=""}
+Run the following checks (*continued...*)
+:::
 **Translatable strings that are surrounded by spaces**: select this to check for translatable strings that start or begin with spaces.
 (This is limited to actual space characters, and does not include tabs or newlines.)
 
@@ -66,12 +71,13 @@ piecing them together.
 An exception is made for strings that end with a colon followed by a space (": ").
 It is assumed that this part of tabular data being concatenated and will be ignored.
 :::
-::::
 
-:::: {.optionssection data-latex=""}
-::: {.optionssectiontitle data-latex=""}
-Run the following checks (*continued...*)
-:::
+**Multipart strings ("mega strings")**: select this to check for strings that appear to contain multiple parts that are being sliced into separate strings at runtime.
+
+Refer to @sec-multipart-strings for an overview of this issue.
+
+This check should be ran when modernizing legacy software.
+
 **Suspect i18n function usage**: select this to check for suspect usage of i18n functions.
 
 This will check for issues such as:
@@ -100,7 +106,12 @@ A string will be considered ambiguous if:
 For example, a string such as "Name: %s\\nDate: %s\\Location: %s" may not need a comment.
 It is assumed that the label in front of the colon serves as a description for the following "%s"; thus, a warning will not be emitted. 
 :::
+::::
 
+:::: {.optionssection data-latex=""}
+::: {.optionssectiontitle data-latex=""}
+Run the following checks (*continued...*)
+:::
 **Deprecated macros and functions**: select this to check for deprecated text macros and functions.
 This will detect the usage of functions that are no longer relevant, and provide a suggested replacement.
 

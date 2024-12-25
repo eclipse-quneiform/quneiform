@@ -128,6 +128,14 @@ namespace i18n_check
                         translation_issue::source_needing_context_issue, catEntry.second.m_source);
                     }
                 }
+            if (static_cast<bool>(m_review_styles & check_multipart_strings))
+                {
+                if (is_string_multipart(catEntry.second.m_source))
+                    {
+                    catEntry.second.m_issues.emplace_back(translation_issue::multipart_string,
+                                                          catEntry.second.m_source);
+                    }
+                }
             if (static_cast<bool>(m_review_styles & check_mismatching_printf_commands))
                 {
                 if (catEntry.second.m_po_format == po_format_string::cpp_format)

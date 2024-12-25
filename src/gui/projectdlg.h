@@ -307,6 +307,7 @@ class NewProjectDialog final : public wxDialog
     bool m_lengthInconsistency{ false };
     bool m_needsContext{ false };
     bool m_urlInL10NString{ true };
+    bool m_multipartString{ false };
     bool m_excessiveNonTranslatableContentInL10NString{ false };
     bool m_spacesAroundL10NString{ false };
     bool m_deprecatedMacro{ true };

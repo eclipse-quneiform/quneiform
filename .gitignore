@@ -16,3 +16,5 @@
 /docs/manual/.quarto
 /docs/manual/book/site_libs
 /docs/manual/*.tex
+/docs/manual/book/issues/mulitpart-strings_files/
+/docs/manual/issues/mulitpart-strings_files/

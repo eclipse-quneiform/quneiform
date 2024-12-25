@@ -250,6 +250,10 @@ int main(int argc, char* argv[])
                 {
                 rs |= i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
                 }
+            else if (r == "multipartString")
+                {
+                rs |= i18n_check::review_style::check_multipart_strings;
+                }
             else if (r == "spacesAroundL10NString")
                 {
                 rs |= i18n_check::review_style::check_l10n_has_surrounding_spaces;
@@ -389,6 +393,10 @@ int main(int argc, char* argv[])
             else if (r == "excessiveNonL10NContent")
                 {
                 rs = rs & ~i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
+                }
+            else if (r == "multipartString")
+                {
+                rs = rs & ~i18n_check::review_style::check_multipart_strings;
                 }
             else if (r == "spacesAroundL10NString")
                 {
