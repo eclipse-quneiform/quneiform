@@ -155,7 +155,7 @@ namespace i18n_check
                     if (m_context_comment_active && !isQtTransComment)
                         {
                         // in case there are multiple lines of '//' comments,
-                        // then clear those now to maintain our contex comment active state
+                        // then clear those now to maintain our context comment active state
                         while (std::next(cppText) < endSentinel && *cppText == L'/' &&
                                *std::next(cppText) == L'/')
                             {
