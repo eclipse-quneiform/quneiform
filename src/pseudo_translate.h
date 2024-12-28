@@ -44,7 +44,9 @@ namespace i18n_check
         /// @brief European (accented) characters.
         european_characters,
         /// @brief Fills with 'X'es
-        Xx_es
+        Xx_es,
+        /// @brief Cherokee characters
+        cherokee
         };
 
     /** @brief Class to pseudo-translate a file.*/
@@ -92,6 +94,7 @@ namespace i18n_check
 
       private:
         static const std::map<wchar_t, wchar_t> m_euro_char_map;
+        static const std::map<wchar_t, wchar_t> m_cherokee_char_map;
         pseudo_translation_method m_trans_type{ pseudo_translation_method::all_caps };
         bool m_add_surrounding_brackets{ false };
         int8_t m_width_change{ 40 };

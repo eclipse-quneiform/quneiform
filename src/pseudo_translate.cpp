@@ -34,6 +34,25 @@ namespace i18n_check
         { L'8', L'\u0223' }, { L'9', L'\u277E' }
     };
 
+    const std::map<wchar_t, wchar_t> pseudo_translater::m_cherokee_char_map = {
+        { L'a', L'\u13F9' }, { L'A', L'\u13AA' }, { L'b', L'\u13CF' }, { L'B', L'\u13F4' },
+        { L'c', L'\u13E3' }, { L'C', L'\u13E3' }, { L'd', L'\u13E7' }, { L'D', L'\u13A0' },
+        { L'e', L'\u13CB' }, { L'E', L'\u13AC' }, { L'f', L'\u13B8' }, { L'F', L'\u13C5' },
+        { L'g', L'\u13FD' }, { L'G', L'\u13C0' }, { L'h', L'\u13C2' }, { L'H', L'\u13BB' },
+        { L'i', L'\u13A5' }, { L'I', L'\u13C6' }, { L'j', L'\u13D7' }, { L'J', L'\u13AB' },
+        { L'k', L'\u13E6' }, { L'K', L'\u13E6' }, { L'l', L'\u13DD' }, { L'L', L'\u13DE' },
+        { L'm', L'\u13B7' }, { L'M', L'\u13B7' }, { L'n', L'\u13F2' }, { L'N', L'\u13F2' },
+        { L'o', L'\u00F6' }, { L'O', L'\u13BE' }, { L'p', L'\u13AE' }, { L'P', L'\u13E2' },
+        { L'q', L'\u13E1' }, { L'Q', L'\u13A4' }, { L'r', L'\u13B1' }, { L'R', L'\u13A1' },
+        { L's', L'\u13A6' }, { L'S', L'\u13A6' }, { L't', L'\u13BF' }, { L'T', L'\u13A2' },
+        { L'u', L'\u13E0' }, { L'U', L'\u13EC' }, { L'v', L'\u13E4' }, { L'V', L'\u13D9' },
+        { L'w', L'\u13C7' }, { L'W', L'\u13B3' }, { L'x', L'\u13DC' }, { L'X', L'\u13DC' },
+        { L'y', L'\u13BD' }, { L'Y', L'\u13A9' }, { L'z', L'\u13B9' }, { L'Z', L'\u13B9' },
+        { L'0', L'\uFF10' }, { L'1', L'\uFF11' }, { L'2', L'\uFF12' }, { L'3', L'\uFF13' },
+        { L'4', L'\u13CE' }, { L'5', L'\uFF15' }, { L'6', L'\uFF16' }, { L'7', L'\uFF17' },
+        { L'8', L'\uFF18' }, { L'9', L'\u13EE' }
+    };
+
     //------------------------------------------------
     void pseudo_translater::translate_po_file(std::wstring& poFileText) const
         {
@@ -368,6 +387,18 @@ namespace i18n_check
                     {
                     const auto charPos = m_euro_char_map.find(msg[i]);
                     if (charPos != m_euro_char_map.cend())
+                        {
+                        appendChar(charPos->second);
+                        }
+                    else
+                        {
+                        appendChar(msg[i]);
+                        }
+                    }
+                else if (m_trans_type == pseudo_translation_method::cherokee)
+                    {
+                    const auto charPos = m_cherokee_char_map.find(msg[i]);
+                    if (charPos != m_cherokee_char_map.cend())
                         {
                         appendChar(charPos->second);
                         }
