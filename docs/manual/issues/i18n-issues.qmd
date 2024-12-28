@@ -32,7 +32,10 @@ Additionally, resource catalogs can also be [pseudo-translated](#resource-file-o
 When multiple strings are pieced together at runtime, this creates a concatenated string.
 Consider the following code sample:
 
-```{RCpp}
+```{Rcpp}
+#| include: true
+#| eval: false
+
 wxString TOO_DIFFICULT_DESCRIPTION =
         _(L"Text is too difficult to be classified to a specific grade level because "
            "it contains too many ");
