@@ -581,7 +581,7 @@ void NewProjectDialog::CreateControls()
                      wxGBPosition(currentRow++, 1), wxGBSpan{});
 
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
-                                    _(L"Translatable strings that are surrounded by spaces"),
+                                    _(L"Concatenated strings"),
                                     wxDefaultPosition, wxDefaultSize, 0,
                                     wxGenericValidator(&m_spacesAroundL10NString)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});

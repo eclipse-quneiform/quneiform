@@ -23,6 +23,10 @@ Embedded strings are strings that are hard coded in source code and not made ava
 
 It is recommended to expose these strings to translators via mechanisms such as *gettext* functions, string tables, \*.resx files, etc.
 
+In *Quneiform*, checking the option [**Strings not exposed for translation**](#source-code-options) will warn about any embedded strings in the source code.
+
+Additionally, resource catalogs can also be [pseudo-translated](#resource-file-options) to assist with finding UI strings that are not available to translators.
+
 ## Concatenated Strings {#sec-concatenated-strings}
 
 When multiple strings are pieced together at runtime, this creates a concatenated string.
@@ -30,8 +34,8 @@ Consider the following code sample:
 
 ```{RCpp}
 wxString TOO_DIFFICULT_DESCRIPTION =
-            _(L"Text is too difficult to be classified to a specific grade level because "
-              "it contains too many ");
+        _(L"Text is too difficult to be classified to a specific grade level because "
+           "it contains too many ");
 TOO_DIFFICULT_DESCRIPTION += fryGraph->GetScores().front().IsWordsHard() ?
                             _(L"high syllable words.") :
                             _(L"long sentences.");
@@ -43,6 +47,8 @@ Also, it fails to provide context to the translator as to what all is being comb
 Rather than seeing a single message, translators are faced with multiple string resources without knowing that they even relate to each other.
 
 In this example, the solution is to create two full (albeit lengthy) string resources for both variations of the possible message.
+
+Checking the option [**Concatenated strings**](#source-code-options) will warn about any possible concatenated strings.
 
 ## Multipart Strings {#sec-multipart-strings}
 
@@ -57,17 +63,45 @@ As it turns out, an application may be splitting this string into 10-character s
 
 ```{r}
 #| echo: false
-#| out-width: 100%
 #| fig-format: png
+#| fig-height: 2
+#| fig-width: 2
 #| fig-align: center
 library(DiagrammeR)
 
-DiagrammeR('
-  graph TB
-    A["“Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password&nbsp;&nbsp;Domain&nbsp;&nbsp;&nbsp;&nbsp;”"]-->B["“Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;”"]
-    A["“Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password&nbsp;&nbsp;Domain&nbsp;&nbsp;&nbsp;&nbsp;”"]-->C["“Password&nbsp;&nbsp;”"]
-    A["“Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password&nbsp;&nbsp;Domain&nbsp;&nbsp;&nbsp;&nbsp;”"]-->D["“Domain&nbsp;&nbsp;&nbsp;&nbsp;”"]
-')
+words_graph <-
+  create_graph() %>%
+  add_node(label = '“Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;”',
+           node_aes = node_aes(
+            shape = "rectangle",
+            fixedsize = F,
+            fontcolor = "black",
+            color = "steelblue",
+            fillcolor = "lightblue")) %>%
+  add_node(label  = '“Password&nbsp;&nbsp;”',
+           node_aes = node_aes(
+            shape = "rectangle",
+            fixedsize = F,
+            fontcolor = "black",
+            color = "steelblue",
+            fillcolor = "lightblue")) %>%
+  add_node(label = '“Domain&nbsp;&nbsp;&nbsp;&nbsp;”',
+           node_aes = node_aes(
+            shape = "rectangle",
+            fixedsize = F,
+            fontcolor = "black",
+            color = "steelblue",
+            fillcolor = "lightblue")) %>%
+  add_node(label = '“Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password&nbsp;&nbsp;Domain&nbsp;&nbsp;&nbsp;&nbsp;”',
+           node_aes = node_aes(
+            shape = "rectangle",
+            fixedsize = F,
+            color = "steelblue",
+            fontcolor = "black",
+            fillcolor = "orange"),
+           to = c(1:3))
+
+render_graph(words_graph)
 ```
 
 Then, it will use each of these sections as a separate resource.
@@ -84,3 +118,5 @@ At worst, the program will crash in situations where the full string is less tha
 
 It is preferred to use separate resources for each string.
 This ensures that the translations aren't constrained to arbitrary lengths and QA tools will be able to review the resources with ease.
+
+Checking the option [**Multipart strings (\"mega strings\")**](#source-code-options) will warn about any possible multipart strings.

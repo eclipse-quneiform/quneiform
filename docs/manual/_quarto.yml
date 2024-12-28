@@ -23,6 +23,9 @@ book:
   language: en
   chapters:
     - index.qmd
+    - part: "i18n & l10n Issues"
+      chapters:
+      - issues/i18n-issues.qmd
     - building.qmd
     - part: "Command-line Utility"
       chapters:
@@ -36,9 +39,6 @@ book:
       - gui/editing.qmd
       - gui/tools.qmd
       - gui/options.qmd
-    - part: "i18n & l10n Issues"
-      chapters:
-      - issues/i18n-issues.qmd
     - part: "Additional Features"
       chapters:
       - suppression.qmd

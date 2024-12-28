@@ -14,7 +14,7 @@ Folder and file paths being ignored must be absolute or relative to the folder b
 
 {{< pagebreak >}}
 
-## Source Code
+## Source Code {#source-code-options}
 
 The following options are available for C/C++ source files.
 
@@ -62,7 +62,7 @@ By adding a comment, this warning (along with any ambiguity warnings) will be re
 ::: {.optionssectiontitle data-latex=""}
 Run the following checks (*continued...*)
 :::
-**Translatable strings that are surrounded by spaces**: select this to check for translatable strings that start or begin with spaces.
+**Concatenated strings**: select this to check for translatable strings that start or begin with spaces.
 (This is limited to actual space characters, and does not include tabs or newlines.)
 
 These may be strings that are concatenated at runtime, which does not follow best i18n practices.
@@ -156,7 +156,7 @@ This will also include additional information in the **Analysis Log** window.
 
 {{< pagebreak >}}
 
-## Resource Files
+## Resource Files {#resource-file-options}
 
 The following options are available for resource files (i.e., \*.po and \*.rc).
 
