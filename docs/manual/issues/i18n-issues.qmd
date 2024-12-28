@@ -17,6 +17,33 @@ Internationalization (i18n) occurs during the development stage of software, whi
 I18N issues include any problems during this stage which will later affect either translation efforts or regional display issues for clients.
 This chapter will discuss these various issues and provide recommendations for how to detect and correct them using *Quneiform*.
 
+## Embedded Strings {#sec-embedded-strings}
+
+Embedded strings are strings that are hard coded in source code and not made available for translation.
+
+It is recommended to expose these strings to translators via mechanisms such as *gettext* functions, string tables, \*.resx files, etc.
+
+## Concatenated Strings {#sec-concatenated-strings}
+
+When multiple strings are pieced together at runtime, this creates a concatenated string.
+Consider the following code sample:
+
+```{RCpp}
+wxString TOO_DIFFICULT_DESCRIPTION =
+            _(L"Text is too difficult to be classified to a specific grade level because "
+              "it contains too many ");
+TOO_DIFFICULT_DESCRIPTION += fryGraph->GetScores().front().IsWordsHard() ?
+                            _(L"high syllable words.") :
+                            _(L"long sentences.");
+```
+
+Here, we see a string "...it contains too many " being concatenated with either "high syllable words." or "long sentences.".
+This is an issue because it assumes that translations will follow the same word ordering and grammar as the source language.
+Also, it fails to provide context to the translator as to what all is being combined into this message.
+Rather than seeing a single message, translators are faced with multiple string resources without knowing that they even relate to each other.
+
+In this example, the solution is to create two full (albeit lengthy) string resources for both variations of the possible message.
+
 ## Multipart Strings {#sec-multipart-strings}
 
 Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@madden:2019].

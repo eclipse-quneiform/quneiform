@@ -23,7 +23,7 @@ The following options are available for C/C++ source files.
 Run the following checks
 :::
 
-**Strings not exposed for translation**: select this to check for strings not exposed for translation.
+**Strings not exposed for translation**: select this to check for strings hard coded in source code that not exposed for translation (i.e., embedded strings).
 
 **Ignore strings assigned to variables named**: when finding strings not exposed for translation, strings can be ignored if assigned to variables from this list.
 For example, if a list of color names are assigned to a variable named `colorMode` that you wish to ignore, then add "colorMode" to this list.
@@ -33,6 +33,8 @@ You can enter variable names (e.g., "`colorMode`") or regular expressions (e.g.,
 Adding a new entry here for a project will also add it to the global settings.
 This will ensure that you don't have to re-enter these values for future projects.
 :::
+
+Refer to @sec-embedded-strings for an overview of this issue.
 
 **Translatable strings that shouldn\'t be**: select this to check for translatable strings that should not be (e.g., numbers, keywords, `printf()` commands).
 
@@ -71,6 +73,8 @@ piecing them together.
 An exception is made for strings that end with a colon followed by a space (": ").
 It is assumed that this part of tabular data being concatenated and will be ignored.
 :::
+
+Refer to @sec-concatenated-strings for an overview of this issue.
 
 **Multipart strings ("mega strings")**: select this to check for strings that appear to contain multiple parts that are being sliced into separate strings at runtime.
 
