@@ -23,6 +23,23 @@ namespace i18n_check
         {
         excluded_results excResults;
 
+        const auto combinePaths =
+            [](const std::filesystem::path& input, const std::filesystem::path& excludedSubDir)
+        {
+            // combine paths, adding a dir separator between them
+            if (std::filesystem::exists(input / excludedSubDir))
+                {
+                return input / excludedSubDir;
+                }
+            // ...or try combining without inserting a dir separator
+            else
+                {
+                std::filesystem::path newPath{ input };
+                newPath += excludedSubDir;
+                return newPath;
+                }
+        };
+
         for (const auto& excItem : excluded)
             {
             try
@@ -53,7 +70,7 @@ namespace i18n_check
                         }
                     }
                 // if not a full path, just a subdirectory path
-                else if (const auto relPath = std::filesystem::path{ inputFolder } / excItem;
+                else if (const auto relPath = combinePaths(inputFolder, excItem);
                          std::filesystem::exists(relPath))
                     {
                     if (std::filesystem::is_directory(relPath))
