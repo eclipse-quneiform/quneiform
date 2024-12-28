@@ -226,7 +226,12 @@ This is useful for legacy software where resource-loading routines are using the
 
 **Review fuzzy translations**: select this to review fuzzy translations. This should only be selected if you intend to review translations
 that still require approval and are likely unfinished.
+::::
 
+:::: {.optionssection data-latex=""}
+::: {.optionssectiontitle data-latex=""}
+Translation catalogs (*continued...*)
+:::
 **Pseudo-translation**
 
 While analyzing translation catalogs, copies of them can also be created and be pseudo-translated.
