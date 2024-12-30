@@ -1165,6 +1165,19 @@ namespace i18n_check
                 }
             }
 
+        if ((m_review_styles & check_l10n_concatenated_strings))
+            {
+            for (const auto& str : m_internal_strings)
+                {
+                // Hard coding a percent to a number at runtime should be avoided,
+                // as some locales put the % at the front of the string.
+                if (str.m_string == L"%")
+                    {
+                    m_localizable_strings_being_concatenated.push_back(str);
+                    }
+                }
+            }
+
         if (m_review_styles & check_malformed_strings)
             {
             const auto& classifyMalformedStrings = [this](const auto& strings)
@@ -1596,9 +1609,9 @@ namespace i18n_check
         if (str.m_usage.m_hasContext)
             {
             return false;
-                }
-        return is_string_faux_plural(str.m_string);
             }
+        return is_string_faux_plural(str.m_string);
+        }
 
     //--------------------------------------------------
     bool i18n_review::is_string_faux_plural(std::wstring_view str)
@@ -1876,9 +1889,9 @@ namespace i18n_check
                         string_info::usage_info(
                             string_info::usage_info::usage_type::function, functionName,
                             std::wstring{},
-                                                (is_i18n_with_context_function(functionName) ||
-                                                 (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
-                                                 m_context_comment_active)),
+                            (is_i18n_with_context_function(functionName) ||
+                             (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
+                             m_context_comment_active)),
                         m_file_name, get_line_and_column(currentTextPos - m_file_start));
 
                     assert(functionVarNamePos);
