@@ -401,6 +401,11 @@ namespace i18n_check
             { L"wsprintf", _WXTRANS_WSTR(L"Use std::swprintf() instead of wsprintf().") },
             { L"_stprintf", _WXTRANS_WSTR(L"Use std::swprintf() instead of _stprintf().") },
             { L"TCHAR", _WXTRANS_WSTR(L"Use wchar_t instead of TCHAR.") },
+            { L"_TCHAR", _WXTRANS_WSTR(L"Use wchar_t instead of _TCHAR.") },
+            { L"WCHAR", _WXTRANS_WSTR(L"Use wchar_t instead of WCHAR.") },
+            { L"_MBCS",
+              _WXTRANS_WSTR(L"Multibyte code should be replaced with Unicode ready code.") },
+            { L"SBCS", _WXTRANS_WSTR(L"ANSI code should be replaced with Unicode ready code.") },
             { L"PTCHAR", _WXTRANS_WSTR(L"Use wchar_t* instead of PTCHAR.") },
             { L"LPTSTR", _WXTRANS_WSTR(L"Use LPWSTR (or wchar_t*) instead of LPTSTR.") },
             { L"LPCTSTR", _WXTRANS_WSTR(L"Use LPCWSTR (or const wchar_t*) instead of LPCTSTR.") },
@@ -856,7 +861,7 @@ namespace i18n_check
             L"wxGetCommandOutput", L"SetKeyWords", L"AddDeveloper", L"AddDocWriter", L"AddArtist",
             L"AddTranslator", L"MarkerSetBackground", L"SetProperty", L"SetAppName",
             L"SetPrintToFile", L"GetAttribute", L"SetAuthor", L"GetPropertyAsSize",
-            L"GetPropertyAsInteger",
+            L"GetPropertyAsInteger", L"FoundSwitch",
             // Qt
             L"Q_ASSERT", L"Q_ASSERT_X", L"qSetMessagePattern", L"qmlRegisterUncreatableMetaObject",
             L"addShaderFromSourceCode", L"QStandardPaths::findExecutable", L"QDateTime::fromString",
@@ -1133,6 +1138,9 @@ namespace i18n_check
                 m_multipart_strings.push_back(str);
                 }
             if ((m_review_styles & check_pluaralization) && is_string_resource_faux_plural(str))
+                {
+                m_faux_plural_strings.push_back(str);
+                }
             if ((m_review_styles & check_l10n_contains_url) &&
                 (std::regex_search(str.m_string, results, m_url_email_regex) ||
                  std::regex_search(str.m_string, results, m_us_phone_number_regex) ||
@@ -1726,8 +1734,7 @@ namespace i18n_check
                                     const std::wstring& functionName,
                                     const std::wstring& variableType,
                                     const std::wstring& deprecatedMacroEncountered,
-                                    const size_t parameterPosition,
-                                    const bool isFollowedByComma)
+                                    const size_t parameterPosition, const bool isFollowedByComma)
         {
         if (deprecatedMacroEncountered.length() > 0 &&
             static_cast<bool>(m_review_styles & check_deprecated_macros))
@@ -1866,8 +1873,9 @@ namespace i18n_check
                     {
                     m_localizable_strings.emplace_back(
                         std::wstring(currentTextPos, quoteEnd - currentTextPos),
-                        string_info::usage_info(string_info::usage_info::usage_type::function,
-                                                functionName, std::wstring{},
+                        string_info::usage_info(
+                            string_info::usage_info::usage_type::function, functionName,
+                            std::wstring{},
                                                 (is_i18n_with_context_function(functionName) ||
                                                  (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
                                                  m_context_comment_active)),
