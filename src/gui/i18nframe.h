@@ -25,6 +25,7 @@
 #include "datamodel.h"
 #include "insert_translator_comment_dlg.h"
 #include "insert_transmacro_dlg.h"
+#include "insert_warning_suppression_dlg.h"
 #include "projectdlg.h"
 #include "string_info_dlg.h"
 #include <wx/aboutdlg.h>
@@ -72,6 +73,7 @@ class I18NFrame : public wxFrame
     void OnValueInfo([[maybe_unused]] wxCommandEvent&);
     void OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent&);
     void OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent&);
+    void OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent&);
     void OnInsertDTMacro([[maybe_unused]] wxCommandEvent&);
     void OnSaveMenu(wxRibbonButtonBarEvent& event);
     void OnRefresh([[maybe_unused]] wxCommandEvent&);

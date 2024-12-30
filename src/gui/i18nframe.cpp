@@ -338,8 +338,10 @@ void I18NFrame::InitControls()
             wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_BTNTEXT));
         }
 
-    tabstrip->InsertPage(0, m_editor, _("Edit"));
-    tabstrip->InsertPage(1, m_logWindow, _("Analysis Log"), false);
+    tabstrip->SetImages(
+        { wxArtProvider::GetBitmap(wxART_EDIT), wxArtProvider::GetBitmap(L"ID_LOG") });
+    tabstrip->InsertPage(0, m_editor, _("Edit"), true, 0);
+    tabstrip->InsertPage(1, m_logWindow, _("Analysis Log"), false, 1);
     tabstrip->SetMinSize(FromDIP(wxSize{ 200, 200 }));
 
     splitter->SplitHorizontally(m_resultsDataView, tabstrip,
@@ -465,6 +467,9 @@ void I18NFrame::InitControls()
     Bind(
         wxEVT_MENU, [this](wxCommandEvent& event) { OnInsertTGetTextMacro(event); },
         XRCID("ID_INSERT_GETTEXT"));
+    Bind(
+        wxEVT_MENU, [this](wxCommandEvent& event) { OnInsertWarningSuppression(event); },
+        XRCID("ID_SUPPRESS_WARNINGS"));
     Bind(
         wxEVT_MENU,
         [this]([[maybe_unused]] wxCommandEvent&)
@@ -781,10 +786,11 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
                         i18n_check::review_style::check_needing_context);
             excludeFlag(L"[urlInL10NString]", i18n_check::review_style::check_l10n_contains_url);
             excludeFlag(L"[multipartString]", i18n_check::review_style::check_multipart_strings);
+            excludeFlag(L"[pluralization]", i18n_check::review_style::check_pluaralization);
             excludeFlag(L"[excessiveNonL10NContent]",
                         i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
-            excludeFlag(L"[spacesAroundL10NString]",
-                        i18n_check::review_style::check_l10n_has_surrounding_spaces);
+            excludeFlag(L"[concatenatedStrings]",
+                        i18n_check::review_style::check_l10n_concatenated_strings);
             excludeFlag(L"[deprecatedMacro]", i18n_check::review_style::check_deprecated_macros);
             excludeFlag(L"[nonUTF8File]", i18n_check::review_style::check_utf8_encoded);
             excludeFlag(L"[UTF8FileWithBOM]", i18n_check::review_style::check_utf8_with_signature);
@@ -873,6 +879,13 @@ void I18NFrame::OnInsert(wxRibbonButtonBarEvent& event)
         new wxMenuItem(&menu, XRCID("ID_INSERT_DT"), _(L"Mark Selection as Non-translatable..."));
     menuItem->SetBitmap(
         wxArtProvider::GetBitmap(L"ID_INSERT_DT", wxART_OTHER, FromDIP(wxSize{ 16, 16 })));
+    menu.Append(menuItem);
+    menu.AppendSeparator();
+
+    menuItem = new wxMenuItem(&menu, XRCID("ID_SUPPRESS_WARNINGS"),
+                              _(L"Suppress Warnings for Selection..."));
+    menuItem->SetBitmap(
+        wxArtProvider::GetBitmap(L"ID_SUPPRESS_WARNINGS", wxART_OTHER, FromDIP(wxSize{ 16, 16 })));
     menu.Append(menuItem);
 
     event.PopupMenu(&menu);
@@ -1222,6 +1235,30 @@ void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent&)
         {
         m_editor->ReplaceSelection(encoded.str());
         }
+    }
+
+//------------------------------------------------------
+void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent&)
+    {
+    const wxString selText{ m_editor->GetSelectedText() };
+    if (selText.empty())
+        {
+        wxMessageBox(_(L"No selection found. Please select a string in the editor."),
+                     _(L"No Selection"));
+        return;
+        }
+
+    InsertWarningSuppressionDlg dlg(this, selText, wxID_ANY, _("Suppress Warnings for Selection"));
+    int linePos{ 0 };
+    [[maybe_unused]]
+    const wxString lineText = m_editor->GetCurLine(&linePos);
+    dlg.SetIndenting(linePos);
+    if (dlg.ShowModal() != wxID_OK)
+        {
+        return;
+        }
+
+    m_editor->ReplaceSelection(dlg.GetFormattedOutput());
     }
 
 //------------------------------------------------------

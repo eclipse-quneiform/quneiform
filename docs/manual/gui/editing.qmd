@@ -56,3 +56,11 @@ To mark a string as non-translatable, highlight the string in the editor and sel
 From the **Mark Selection as Non-translatable** dialog, options are available for which function to wrap the string in, along with providing an optional context and comment.
 These functions will mark the string as non-translatable and **Quneiform** will ignore them during an analysis.
 Additionally, these functions and comments decorating a string will inform developers that the string is not meant for translation and why.
+
+### Suppress Warnings for Selection {-}
+
+To suppress warnings for the selected block of code, highlight the string in the editor and select **Suppress Warnings for Selection...** from the `r keys("Insert")` button.
+From the **Suppress Warnings for Selection** dialog, options are available for which analysis program to suppress warnings from, along with which specific warnings to suppress (if relevant).
+After selecting the application to suppress and clicking `r keys("OK")`, the selected code in the editor will be wrapped in the appropriate suppression comments.
+
+Along with *Quneiform*, warning suppression comments are also available for other linting tools such as *Clang-format*, *Clang-tidy*, and *Cpp-check*.
