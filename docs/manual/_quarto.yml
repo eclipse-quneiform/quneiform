@@ -23,10 +23,10 @@ book:
   language: en
   chapters:
     - index.qmd
+    - building.qmd
     - part: "i18n & l10n Issues"
       chapters:
       - issues/i18n-issues.qmd
-    - building.qmd
     - part: "Command-line Utility"
       chapters:
       - command-line/options.qmd

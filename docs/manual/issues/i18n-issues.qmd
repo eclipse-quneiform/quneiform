@@ -20,7 +20,6 @@ This chapter will discuss these various issues and provide recommendations for h
 ## Embedded Strings {#sec-embedded-strings}
 
 Embedded strings are strings that are hard coded in source code and not made available for translation.
-
 It is recommended to expose these strings to translators via mechanisms such as *gettext* functions, string tables, \*.resx files, etc.
 
 In *Quneiform*, checking the option [**Strings not exposed for translation**](#source-code-options) will warn about any embedded strings in the source code.
@@ -66,12 +65,15 @@ For the former, it is preferred to have two (or more) separate resource strings;
 Some frameworks provide pluralization functions (`ngettext()`, `wxPLURAL()`) which can be used to provide separate strings for these variations.
 As an example:
 
-"%zu item(s)\n"
+"%zu item(s)"
 
 Here a number is being formatted into this message at runtime. It is better to pass singular and plural variations to a pluralizing function instead. For example:
 
 ```{Rcpp}
-wxPLURAL("%zu item\n","%zu item\n", items.size())
+#| include: true
+#| eval: false
+
+wxPLURAL("%zu item", "%zu item", items.size())
 ```
 
 For the latter, it is preferred to reword the string (removing the "(s)").
@@ -91,11 +93,11 @@ Checking the option [**Strings used for both singular and plural**](#source-code
 
 ## Exposed Internal Strings {#sec-exposed-internal}
 
-Strings that should not be translated should never be exposed to translators, even if context and translator comments are provided to warn about them.
-In other words, if it shouldn't be translated, then it shouldn't be in the translation resources.
+Strings that should not be translated should never be exposed to translators, even if context and translator comments are provided to warn them.
+In other words, if it shouldn't be translated, then it shouldn't be in the resources.
 
 This can include internal strings being used to build syntax (e.g., HTML code), GUIDs, filenames, font names, debug messages, etc.
-This can also include URLs and email addresses, unless translator need to provide different contact information (for a regional office, for example).
+This can also include URLs and email addresses, unless translators need to provide different contact information (for regional offices, for example).
 
 Checking the options [**Translatable strings that shouldn\'t be**](#source-code-options), **Translatable strings being used in debug functions**, and **Translatable strings that contain URLs, email addresses, or phone numbers** will help with detecting these issues.
 
@@ -105,7 +107,7 @@ Multipart strings (or "mega strings") are single string resources that are split
 
 For example, consider a resource string such as:
 
-`"Name      Password  Domain    "`
+"Name\ \ \ \ \ \ Password\ \ Domain\ \ \ \ "
 
 While this is one string, it contains suspicious looking blocks of spaces in between each word.
 As it turns out, an application may be splitting this string into 10-character sections at runtime:
@@ -166,6 +168,6 @@ If a translator doesn't format each segment of this string perfectly, then at be
 At worst, the program will crash in situations where the full string is less than 30 characters.
 
 It is preferred to use separate resources for each string.
-This ensures that the translations aren't constrained to arbitrary lengths and QA tools will be able to review the resources with ease.
+This ensures that the translations aren't constrained to arbitrary lengths and standard QA tools will be able to review the resources.
 
 Checking the option [**Multipart strings (\"mega strings\")**](#source-code-options) will warn about any possible multipart strings.
