@@ -143,8 +143,7 @@ loaded by your application for integration testing.
   urlInL10NString:         Check for translatable strings that contain URLs, email addresses, or phone numbers.
                            It is recommended to dynamically format these into the string so that
                            translators don't have to manage them.
-  spacesAroundL10NString:  Check for strings that start or end with spaces.
-                           These may be strings that are concatenated at runtime.
+  concatenatedStrings:     Check for strings that may be concatenated at runtime.
   L10NStringNeedsContext:  Check for possibly ambiguous strings that lack a translator comment.
   notL10NAvailable:        Check for strings not exposed for translation.
   deprecatedMacro:         Check for deprecated text macros (e.g., wxT()).
@@ -178,6 +177,8 @@ loaded by your application for integration testing.
   halfWidth:               Check for halfwidth Kanas, Hanguls, and punctuation in source and target strings.
   multipartString:         Check for strings that appear to contain multiple parts that are
                            being sliced at runtime.
+  pluralization:           Check for strings being used for both singular and plural that
+                           should be use different variations.
 
 --disable: Which checks to not perform. (Refer to options available above.)
            This will override any options passed to "--enable".

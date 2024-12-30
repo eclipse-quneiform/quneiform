@@ -108,11 +108,10 @@ namespace i18n_check
         /// @brief Check for font issues (e.g., Windows *.RC dialogs not using MS Shell Dlg
         ///     or using unusual font sizes).
         check_fonts = (static_cast<int64_t>(1) << 12),
-        /// @brief Check for localizable strings that begin or end with a space.
-        /// @details This may indicate that the string is being concatenated at runtime with
+        /// @brief Check for localizable strings that may be concatenated at runtime with
         ///     another value, rather than being format via a `printf` function.
         /// @note This only checks for the space character, not tabs or newlines.
-        check_l10n_has_surrounding_spaces = (static_cast<int64_t>(1) << 13),
+        check_l10n_concatenated_strings = (static_cast<int64_t>(1) << 13),
         /// @brief Check for ambiguous source strings that are lacking contextual information.
         check_needing_context = (static_cast<int64_t>(1) << 14),
         /// @brief Check for suspect usage of i18n functions.
@@ -123,8 +122,9 @@ namespace i18n_check
         /// @brief Check for strings that appear to contain multiple parts that are
         ///     being sliced at runtime.
         check_multipart_strings = (static_cast<int64_t>(1) << 17),
-        /// @private
-        i18n_reserved6 = (static_cast<int64_t>(1) << 18),
+        /// @brief Check for strings being used for both singular and plural that
+        ///     should be use different variations.
+        check_pluaralization = (static_cast<int64_t>(1) << 18),
         /// @private
         i18n_reserved7 = (static_cast<int64_t>(1) << 19),
         /// @private
@@ -153,7 +153,7 @@ namespace i18n_check
         check_unencoded_ext_ascii | check_printf_single_number | check_l10n_contains_url |
         check_number_assigned_to_id | check_duplicate_value_assigned_to_ids |
         check_malformed_strings | check_utf8_with_signature | check_fonts |
-        check_l10n_has_surrounding_spaces | check_needing_context | check_suspect_i18n_usage |
+        check_l10n_concatenated_strings | check_needing_context | check_suspect_i18n_usage |
         check_l10n_contains_excessive_nonl10n_content),
 
         /// @brief Check for mismatching printf commands between source strings and their
@@ -213,8 +213,8 @@ namespace i18n_check
         accelerator_issue,
         /// @brief Inconsistent trailing punctuation or newlines.
         consistency_issue,
-        /// @brief Localizable strings that begin or end with a space.
-        source_surrounding_spaces_issue,
+        /// @brief Localizable strings that may be getting concatenated at runtime.
+        concatenation_issue,
         /// @brief Ambiguous source string that is lacking contextual information.
         source_needing_context_issue,
         /// @brief Inconsistent numbers.
@@ -229,7 +229,10 @@ namespace i18n_check
         halfwidth,
         /// @brief Source strings that appears to contain multiple parts that are
         ///     being sliced at runtime.
-        multipart_string
+        multipart_string,
+        /// @brief Source strings being used for both singular and plural that
+        ///     should be use different variations.
+        pluralization
         };
 
     /// @brief File types that can be analyzed.
@@ -544,12 +547,12 @@ namespace i18n_check
             }
 
         /// @returns The strings that are being extracted as localizable,
-        ///     but are surrounded by spaces.
+        ///     but may be concatenated at runtime.
         [[nodiscard]]
         const std::vector<string_info>&
-        get_localizable_strings_with_surrounding_spaces() const noexcept
+        get_localizable_strings_being_concatenated() const noexcept
             {
-            return m_localizable_strings_with_surrounding_spaces;
+            return m_localizable_strings_being_concatenated;
             }
 
         /// @returns The strings that contain halfwidth characters.
@@ -564,6 +567,13 @@ namespace i18n_check
         const std::vector<string_info>& get_multipart_strings() const noexcept
             {
             return m_multipart_strings;
+            }
+
+        /// @returns The strings that are used for both singular and plural.
+        [[nodiscard]]
+        const std::vector<string_info>& get_faux_plural_strings() const noexcept
+            {
+            return m_faux_plural_strings;
             }
 
         /// @returns The strings that contain extended ASCII characters, but are not encoded.
@@ -957,6 +967,20 @@ namespace i18n_check
         [[nodiscard]]
         static bool is_string_multipart(std::wstring_view str);
 
+        /// @returns @c true if a string appears to be used for singular and plural variations.
+        /// @param str The string resource to review.
+        /// @note The full string resource info is needed (not just the string) because
+        ///     Qt's functions can take numeric argument that signals plural and will strip
+        ///     the "(s)" from the string for the singular form and string the parentheses around
+        ///     the "(s)" for the plural form.
+        [[nodiscard]]
+        static bool is_string_resource_faux_plural(const string_info& str);
+
+        /// @returns @c true if a string appears to be used for singular and plural variations.
+        /// @param str The string resource to review.
+        [[nodiscard]]
+        static bool is_string_faux_plural(std::wstring_view str);
+
         /** @brief Processes a quote after its positions and respective
                 function/variable assignment has been found.
             @param[in,out] currentTextPos The current position into the text buffer.\n
@@ -970,12 +994,14 @@ namespace i18n_check
             @param variableType If being assigned to a variable, the variable's type.
             @param deprecatedMacroEncountered If the quote is inside of a deprecated
                 macro, then name of this macro.
-            @param parameterPosition The string's position in the function call (if applicable).*/
+            @param parameterPosition The string's position in the function call (if applicable).
+            @param isFollowedByComma Whether the quote is followed by a comma.*/
         void process_quote(wchar_t* currentTextPos, const wchar_t* quoteEnd,
                            const wchar_t* functionVarNamePos, const std::wstring& variableName,
                            const std::wstring& functionName, const std::wstring& variableType,
                            const std::wstring& deprecatedMacroEncountered,
-                           const size_t parameterPosition);
+                           const size_t parameterPosition,
+                           const bool isFollowedByComma);
 
         /// @brief Determines whether a hard-coded string should actually be
         ///     exposed for translation or not.
@@ -983,14 +1009,6 @@ namespace i18n_check
         ///     otherwise, it will be considered an internal string.
         /// @param str The string to review.
         void classify_non_localizable_string(string_info str);
-
-        /// @returns Just the function name from a full function call, stripping
-        ///     off any class or namespace information.
-        /// @param str The string to extract the function name from.
-        /// @note This assumes that the functions trailing parentheses and template
-        ///     specifications have already been removed.
-        [[nodiscard]]
-        std::wstring_view extract_base_function(std::wstring_view str) const;
 
         /// @returns @c true if a function name is a translation extraction function.
         /// @param functionName The function name to review.
@@ -1003,8 +1021,7 @@ namespace i18n_check
             }
 
         /// @returns @c true if a function name is a translation extraction function that takes an
-        /// argument
-        ///     for providing a context for the source string.
+        ///     argument for providing a context for the source string.
         /// @param functionName The function name to review.
         [[nodiscard]]
         bool is_i18n_with_context_function(std::wstring_view functionName) const
@@ -1084,6 +1101,14 @@ namespace i18n_check
         /// @param functionName The name of the function to review.
         [[nodiscard]]
         bool is_diagnostic_function(const std::wstring& functionName) const;
+
+        /// @returns Just the function name from a full function call, stripping
+        ///     off any class or namespace information.
+        /// @param str The string to extract the function name from.
+        /// @note This assumes that the functions trailing parentheses and template
+        ///     specifications have already been removed.
+        [[nodiscard]]
+        static std::wstring_view extract_base_function(std::wstring_view str);
 
         /// @returns Whether @c wc is an allowable character for function/variable names.
         /// @param wc The character to review.
@@ -1237,10 +1262,11 @@ namespace i18n_check
         std::vector<string_info> m_localizable_strings_with_urls;
         std::vector<string_info> m_localizable_strings_ambiguous_needing_context;
         std::vector<string_info> m_localizable_strings_in_internal_call;
-        std::vector<string_info> m_localizable_strings_with_surrounding_spaces;
+        std::vector<string_info> m_localizable_strings_being_concatenated;
         std::vector<string_info> m_localizable_strings_with_halfwidths;
         std::vector<string_info> m_not_available_for_localization_strings;
         std::vector<string_info> m_multipart_strings;
+        std::vector<string_info> m_faux_plural_strings;
         std::vector<string_info> m_deprecated_macros;
         std::vector<string_info> m_unencoded_strings;
         std::vector<string_info> m_printf_single_numbers;

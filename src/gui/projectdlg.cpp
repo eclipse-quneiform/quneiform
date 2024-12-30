@@ -48,9 +48,13 @@ NewProjectDialog::NewProjectDialog(
                 {
                 m_transLongerThresholdLabel->Enable(evt.IsChecked());
                 }
-            if (m_transLongerThresholdtLabel != nullptr)
+            if (m_transLongerThresholdtMinLabel != nullptr)
                 {
-                m_transLongerThresholdtLabel->Enable(evt.IsChecked());
+                m_transLongerThresholdtMinLabel->Enable(evt.IsChecked());
+                }
+            if (m_transLongerThresholdtMaxLabel != nullptr)
+                {
+                m_transLongerThresholdtMaxLabel->Enable(evt.IsChecked());
                 }
             if (m_transLongerThresholdSlider != nullptr)
                 {
@@ -58,6 +62,13 @@ NewProjectDialog::NewProjectDialog(
                 }
         },
         ID_CHECK_TRANS_LONGER_CHECK);
+    Bind(
+        wxEVT_CHECKBOX,
+        [this]([[maybe_unused]] wxCommandEvent&)
+        {
+        UpdateEmbeddedStringsOptions();
+        },
+        ID_CHECK_STRINGS_NOT_AVAILABLE);
     Bind(
         wxEVT_CHOICE, [this]([[maybe_unused]] wxCommandEvent&) { UpdatePseudoTransOptions(); },
         ID_PSEUDO_METHODS);
@@ -70,6 +81,16 @@ NewProjectDialog::NewProjectDialog(
     Bind(
         wxEVT_SLIDER, [this]([[maybe_unused]] wxCommandEvent&) { UpdatePseudoTransOptions(); },
         ID_PSEUDO_WIDTH_SLIDER);
+    }
+
+//-------------------------------------------------------------
+void NewProjectDialog::UpdateEmbeddedStringsOptions()
+    {
+    TransferDataFromWindow();
+    if (m_ignoredVarsList != nullptr)
+        {
+        m_ignoredVarsList->Enable(m_notL10NAvailable);
+        }
     }
 
 //-------------------------------------------------------------
@@ -98,9 +119,13 @@ void NewProjectDialog::UpdatePseudoTransOptions()
         {
         m_pseudoSliderLabel->Enable(m_pseudoTranslationMethod != 0);
         }
-    if (m_pseudoSliderPercentLabel != nullptr)
+    if (m_pseudoSliderPercentMinLabel != nullptr)
         {
-        m_pseudoSliderPercentLabel->Enable(m_pseudoTranslationMethod != 0);
+        m_pseudoSliderPercentMinLabel->Enable(m_pseudoTranslationMethod != 0);
+        }
+    if (m_pseudoSliderPercentMaxLabel != nullptr)
+        {
+        m_pseudoSliderPercentMaxLabel->Enable(m_pseudoTranslationMethod != 0);
         }
     if (m_previewSizer != nullptr)
         {
@@ -140,10 +165,11 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     m_needsContext = (m_options & i18n_check::review_style::check_needing_context);
     m_urlInL10NString = (m_options & i18n_check::review_style::check_l10n_contains_url);
     m_multipartString = (m_options & i18n_check::review_style::check_multipart_strings);
+    m_pluralization = (m_options & i18n_check::review_style::check_pluaralization);
     m_excessiveNonTranslatableContentInL10NString =
         (m_options & i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
-    m_spacesAroundL10NString =
-        (m_options & i18n_check::review_style::check_l10n_has_surrounding_spaces);
+    m_concatenatedStrings =
+        (m_options & i18n_check::review_style::check_l10n_concatenated_strings);
     m_deprecatedMacro = (m_options & i18n_check::review_style::check_deprecated_macros);
     m_nonUTF8File = (m_options & i18n_check::review_style::check_utf8_encoded);
     m_UTF8FileWithBOM = (m_options & i18n_check::review_style::check_utf8_with_signature);
@@ -161,15 +187,20 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
 
     TransferDataToWindow();
 
+    UpdateEmbeddedStringsOptions();
     UpdatePseudoTransOptions();
 
     if (m_transLongerThresholdLabel != nullptr)
         {
         m_transLongerThresholdLabel->Enable(m_lengthInconsistency);
         }
-    if (m_transLongerThresholdtLabel != nullptr)
+    if (m_transLongerThresholdtMinLabel != nullptr)
         {
-        m_transLongerThresholdtLabel->Enable(m_lengthInconsistency);
+        m_transLongerThresholdtMinLabel->Enable(m_lengthInconsistency);
+        }
+    if (m_transLongerThresholdtMaxLabel != nullptr)
+        {
+        m_transLongerThresholdtMaxLabel->Enable(m_lengthInconsistency);
         }
     if (m_transLongerThresholdSlider != nullptr)
         {
@@ -248,9 +279,13 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
         {
         m_options |= i18n_check::review_style::check_multipart_strings;
         }
-    if (m_spacesAroundL10NString)
+    if (m_pluralization)
         {
-        m_options |= i18n_check::review_style::check_l10n_has_surrounding_spaces;
+        m_options |= i18n_check::review_style::check_pluaralization;
+        }
+    if (m_concatenatedStrings)
+        {
+        m_options |= i18n_check::review_style::check_l10n_concatenated_strings;
         }
     if (m_deprecatedMacro)
         {
@@ -424,6 +459,7 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
     MinCppVersion(options.m_minCppVersion);
     TransferDataToWindow();
 
+    UpdateEmbeddedStringsOptions();
     UpdatePseudoTransOptions();
     }
 
@@ -532,7 +568,7 @@ void NewProjectDialog::CreateControls()
         wxGridBagSizer* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
         size_t currentRow{ 0 };
 
-        gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
+        gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), ID_CHECK_STRINGS_NOT_AVAILABLE,
                                     _(L"Strings not exposed for translation"), wxDefaultPosition,
                                     wxDefaultSize, 0, wxGenericValidator(&m_notL10NAvailable)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});
@@ -583,9 +619,9 @@ void NewProjectDialog::CreateControls()
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
                                     _(L"Concatenated strings"),
                                     wxDefaultPosition, wxDefaultSize, 0,
-                                    wxGenericValidator(&m_spacesAroundL10NString)),
+                                    wxGenericValidator(&m_concatenatedStrings)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});
-        gbSizer->Add(buildCodeLabel(L"spacesAroundL10NString", checkOptionsSizer->GetStaticBox()),
+        gbSizer->Add(buildCodeLabel(L"concatenatedStrings", checkOptionsSizer->GetStaticBox()),
                      wxGBPosition(currentRow++, 1), wxGBSpan{});
         
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
@@ -594,6 +630,14 @@ void NewProjectDialog::CreateControls()
                                     wxGenericValidator(&m_multipartString)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});
         gbSizer->Add(buildCodeLabel(L"multipartString", checkOptionsSizer->GetStaticBox()),
+                     wxGBPosition(currentRow++, 1), wxGBSpan{});
+
+        gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
+                                    _(L"Strings used for both singular and plural"),
+                                    wxDefaultPosition, wxDefaultSize, 0,
+                                    wxGenericValidator(&m_pluralization)),
+                     wxGBPosition(currentRow, 0), wxGBSpan{});
+        gbSizer->Add(buildCodeLabel(L"pluralization", checkOptionsSizer->GetStaticBox()),
                      wxGBPosition(currentRow++, 1), wxGBSpan{});
 
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
@@ -732,7 +776,7 @@ void NewProjectDialog::CreateControls()
 
             gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
                                         _(L"Check for inconsistent casing, separators, "
-                                          "or trailing punctuation, spaces, or newlines"),
+                                          "trailing punctuation, spaces, or newlines"),
                                         wxDefaultPosition, wxDefaultSize, 0,
                                         wxGenericValidator(&m_transConsistency)),
                          wxGBPosition(currentRow, 0), wxGBSpan{});
@@ -764,25 +808,44 @@ void NewProjectDialog::CreateControls()
 
             wxBoxSizer* transLongerThresholdSizer = new wxBoxSizer(wxHORIZONTAL);
             m_transLongerThresholdLabel = new wxStaticText(
-                poOptionsSizer->GetStaticBox(), wxID_STATIC, _(L"Translation length threshold:"),
+                poOptionsSizer->GetStaticBox(), wxID_STATIC, _(L"How much translations can expand:"),
                 wxDefaultPosition, wxDefaultSize);
             m_transLongerThresholdSlider = new wxSlider(
                 poOptionsSizer->GetStaticBox(), ID_PSEUDO_WIDTH_SLIDER,
                 m_maxTranslationLongerThreshold, 0, 1000, wxDefaultPosition, wxDefaultSize,
-                wxSL_HORIZONTAL | wxSL_MIN_MAX_LABELS | wxSL_VALUE_LABEL,
+                wxSL_HORIZONTAL | wxSL_VALUE_LABEL,
                 wxGenericValidator(&m_maxTranslationLongerThreshold));
             m_transLongerThresholdSlider->SetPageSize(25);
             m_transLongerThresholdSlider->SetTickFreq(25);
-            m_transLongerThresholdtLabel =
-                new wxStaticText(poOptionsSizer->GetStaticBox(), wxID_STATIC, L"%",
+            m_transLongerThresholdtMinLabel =
+                new wxStaticText(poOptionsSizer->GetStaticBox(), wxID_STATIC,
+                                 wxString::Format(
+                                 // TRANSLATORS: number and then percent symbol
+                                 _("%s%%"),
+                                 wxNumberFormatter::ToString(
+                                         m_transLongerThresholdSlider->GetMin(), 0,
+                                         wxNumberFormatter::Style::Style_NoTrailingZeroes |
+                                             wxNumberFormatter::Style::Style_WithThousandsSep)),
+                                 wxDefaultPosition, wxDefaultSize);
+            m_transLongerThresholdtMaxLabel =
+                new wxStaticText(poOptionsSizer->GetStaticBox(), wxID_STATIC,
+                                 wxString::Format(
+                                 // TRANSLATORS: number and then percent symbol
+                                 _("%s%%"),
+                                 wxNumberFormatter::ToString(
+                                         m_transLongerThresholdSlider->GetMax(), 0,
+                                         wxNumberFormatter::Style::Style_NoTrailingZeroes |
+                                             wxNumberFormatter::Style::Style_WithThousandsSep)),
                                  wxDefaultPosition, wxDefaultSize);
             transLongerThresholdSizer->Add(m_transLongerThresholdLabel,
                                            wxSizerFlags{}.Left().CenterVertical().Border(
                                                wxLEFT, wxSizerFlags::GetDefaultBorder() * 3));
+            transLongerThresholdSizer->Add(m_transLongerThresholdtMinLabel,
+                                           wxSizerFlags{}.Border(wxLEFT).Left().Bottom());
             transLongerThresholdSizer->Add(m_transLongerThresholdSlider,
                                            wxSizerFlags{ 1 }.Expand().Border(wxLEFT));
-            transLongerThresholdSizer->Add(m_transLongerThresholdtLabel,
-                                           wxSizerFlags{}.Border(wxLEFT).Left().CenterVertical());
+            transLongerThresholdSizer->Add(m_transLongerThresholdtMaxLabel,
+                                           wxSizerFlags{}.Border(wxLEFT).Left().Bottom());
             gbSizer->Add(transLongerThresholdSizer, wxGBPosition(currentRow++, 0), wxGBSpan{ 1, 2 },
                          wxEXPAND);
 
@@ -842,20 +905,39 @@ void NewProjectDialog::CreateControls()
             m_pseudoIncreaseSlider =
                 new wxSlider(pseudoTransSizer->GetStaticBox(), ID_PSEUDO_WIDTH_SLIDER,
                              m_widthPseudoChange, -50, 100, wxDefaultPosition, wxDefaultSize,
-                             wxSL_HORIZONTAL | wxSL_MIN_MAX_LABELS | wxSL_VALUE_LABEL,
+                             wxSL_HORIZONTAL | wxSL_VALUE_LABEL,
                              wxGenericValidator(&m_widthPseudoChange));
             m_pseudoIncreaseSlider->SetPageSize(10);
             m_pseudoIncreaseSlider->SetTickFreq(10);
 
-            m_pseudoSliderPercentLabel =
-                new wxStaticText(pseudoTransSizer->GetStaticBox(), wxID_STATIC, L"%",
+            m_pseudoSliderPercentMinLabel =
+                new wxStaticText(pseudoTransSizer->GetStaticBox(), wxID_STATIC,
+                                 wxString::Format(
+                                 // TRANSLATORS: number and then percent symbol
+                                 _("%s%%"),
+                                 wxNumberFormatter::ToString(
+                                         m_pseudoIncreaseSlider->GetMin(), 0,
+                                         wxNumberFormatter::Style::Style_NoTrailingZeroes |
+                                             wxNumberFormatter::Style::Style_WithThousandsSep)),
+                                 wxDefaultPosition, wxDefaultSize);
+            m_pseudoSliderPercentMaxLabel =
+                new wxStaticText(pseudoTransSizer->GetStaticBox(), wxID_STATIC,
+                                 wxString::Format(
+                                 // TRANSLATORS: number and then percent symbol
+                                 _("%s%%"),
+                                 wxNumberFormatter::ToString(
+                                         m_pseudoIncreaseSlider->GetMax(), 0,
+                                         wxNumberFormatter::Style::Style_NoTrailingZeroes |
+                                             wxNumberFormatter::Style::Style_WithThousandsSep)),
                                  wxDefaultPosition, wxDefaultSize);
 
             pseudoWidthSizer->Add(m_pseudoSliderLabel, wxSizerFlags{}.Left().CenterVertical());
+            pseudoWidthSizer->Add(m_pseudoSliderPercentMinLabel,
+                                  wxSizerFlags{}.Border(wxLEFT).Left().Bottom());
             pseudoWidthSizer->Add(m_pseudoIncreaseSlider,
                                   wxSizerFlags{ 1 }.Expand().Border(wxLEFT));
-            pseudoWidthSizer->Add(m_pseudoSliderPercentLabel,
-                                  wxSizerFlags{}.Border(wxLEFT).Left().CenterVertical());
+            pseudoWidthSizer->Add(m_pseudoSliderPercentMaxLabel,
+                                  wxSizerFlags{}.Border(wxLEFT).Left().Bottom());
 
             pseudoTransSizer->Add(pseudoWidthSizer,
                                   wxSizerFlags{}.Expand().Border(wxLEFT | wxBOTTOM | wxRIGHT));
@@ -1034,5 +1116,6 @@ void NewProjectDialog::CreateControls()
     SetSizerAndFit(mainDlgSizer);
 
     TransferDataToWindow();
+    UpdateEmbeddedStringsOptions();
     UpdatePseudoTransOptions();
     }

@@ -410,8 +410,15 @@ namespace i18n_check
                 // if we found the end of the quote
                 if (end != nullptr && end < endSentinel)
                     {
+                    const wchar_t* nextChar = std::next(
+                        end, (isRawString ? get_raw_step_size(currentRawStringMarker) + 1 : 1));
+                    while (std::next(nextChar) < endSentinel && std::iswspace(*nextChar))
+                        {
+                        ++nextChar;
+                        }
                     process_quote(cppText, end, functionVarNamePos, variableName, functionName,
-                                  variableType, deprecatedMacroEncountered, parameterPosition);
+                                  variableType, deprecatedMacroEncountered, parameterPosition,
+                                  *nextChar == L',');
                     cppText = std::next(
                         end, (isRawString ? get_raw_step_size(currentRawStringMarker) + 1 : 1));
                     if (cppText >= endSentinel)

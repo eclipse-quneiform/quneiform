@@ -29,6 +29,7 @@
 #include <wx/filename.h>
 #include <wx/gbsizer.h>
 #include <wx/listbook.h>
+#include <wx/numformatter.h>
 #include <wx/slider.h>
 #include <wx/spinctrl.h>
 #include <wx/statline.h>
@@ -276,6 +277,7 @@ class NewProjectDialog final : public wxDialog
         OnHelpClicked(cmd);
         }
 
+    void UpdateEmbeddedStringsOptions();
     void UpdatePseudoTransOptions();
 
     constexpr static int ID_FOLDER_BROWSE_BUTTON = wxID_HIGHEST;
@@ -288,6 +290,7 @@ class NewProjectDialog final : public wxDialog
     constexpr static int ID_PSEUDO_TRACK_IDS_CHECK = wxID_HIGHEST + 7;
     constexpr static int ID_PSEUDO_WIDTH_SLIDER = wxID_HIGHEST + 8;
     constexpr static int ID_CHECK_TRANS_LONGER_CHECK = wxID_HIGHEST + 9;
+    constexpr static int ID_CHECK_STRINGS_NOT_AVAILABLE = wxID_HIGHEST + 10;
 
     bool m_showFileOptions{ true };
 
@@ -308,8 +311,9 @@ class NewProjectDialog final : public wxDialog
     bool m_needsContext{ false };
     bool m_urlInL10NString{ true };
     bool m_multipartString{ false };
+    bool m_pluralization{ false };
     bool m_excessiveNonTranslatableContentInL10NString{ false };
-    bool m_spacesAroundL10NString{ false };
+    bool m_concatenatedStrings{ false };
     bool m_deprecatedMacro{ true };
     bool m_printfSingleNumber{ true };
     bool m_malformedString{ true };
@@ -343,12 +347,14 @@ class NewProjectDialog final : public wxDialog
     int64_t m_options{ i18n_check::review_style::no_checks };
 
     wxStaticText* m_transLongerThresholdLabel{ nullptr };
-    wxStaticText* m_transLongerThresholdtLabel{ nullptr };
+    wxStaticText* m_transLongerThresholdtMinLabel{ nullptr };
+    wxStaticText* m_transLongerThresholdtMaxLabel{ nullptr };
     wxSlider* m_transLongerThresholdSlider{ nullptr };
     wxCheckBox* m_pseudoSurroundingBracketsCheckbox{ nullptr };
     wxCheckBox* m_pseudoTrackCheckbox{ nullptr };
     wxStaticText* m_pseudoSliderLabel{ nullptr };
-    wxStaticText* m_pseudoSliderPercentLabel{ nullptr };
+    wxStaticText* m_pseudoSliderPercentMinLabel{ nullptr };
+    wxStaticText* m_pseudoSliderPercentMaxLabel{ nullptr };
     wxSlider* m_pseudoIncreaseSlider{ nullptr };
     wxEditableListBox* m_exclusionList{ nullptr };
     wxEditableListBox* m_ignoredVarsList{ nullptr };

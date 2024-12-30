@@ -176,15 +176,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
                  node->m_warningId == L"[numberInconsistency]" ||
                  node->m_warningId == L"[lengthInconsistency]" ||
                  node->m_warningId == L"[transInconsistency]" ||
-                 node->m_warningId == L"[halfWidth]" ||
-                 node->m_warningId == L"[suspectL10NString]" ||
-                 node->m_warningId == L"[suspectL10NUsage]" ||
-                 node->m_warningId == L"[suspectI18NUsage]" ||
-                 node->m_warningId == L"[L10NStringNeedsContext]" ||
-                 node->m_warningId == L"[urlInL10NString]" ||
-                 node->m_warningId == L"[excessiveNonL10NContent]" ||
-                 node->m_warningId == L"[spacesAroundL10NString]" ||
-                 node->m_warningId == L"[notL10NAvailable]")
+                 node->m_warningId == L"[halfWidth]")
             {
             bmps = wxArtProvider::GetBitmapBundle(L"ID_TRANSLATIONS", wxART_OTHER);
             }
@@ -192,6 +184,15 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
                  node->m_warningId == L"[printfSingleNumber]" ||
                  node->m_warningId == L"[dupValAssignedToIds]" ||
                  node->m_warningId == L"[numberAssignedToId]" ||
+                 node->m_warningId == L"[L10NStringNeedsContext]" ||
+                 node->m_warningId == L"[urlInL10NString]" ||
+                 node->m_warningId == L"[excessiveNonL10NContent]" ||
+                 node->m_warningId == L"[concatenatedStrings]" ||
+                 node->m_warningId == L"[notL10NAvailable]" ||
+                 node->m_warningId == L"[suspectL10NString]" ||
+                 node->m_warningId == L"[suspectL10NUsage]" ||
+                 node->m_warningId == L"[pluralization]" ||
+                 node->m_warningId == L"[suspectI18NUsage]" ||
                  node->m_warningId == L"[malformedString]")
             {
             bmps = wxArtProvider::GetBitmapBundle(L"ID_CODE", wxART_OTHER);

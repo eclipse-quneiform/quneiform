@@ -53,7 +53,7 @@ class InsertTransMacroDlg final : public wxDialog
         @param parent The parent window.
         @param stringToFormat The original string to wrap in a function call.
         @param id The window ID.
-        @param caption The title of the export dialog.
+        @param caption The title of the dialog.
         @param macroType Which type of macro to insert.
         @param pos The screen position of the window.
         @param size The window size.

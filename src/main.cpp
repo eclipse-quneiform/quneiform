@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
          "allI18N, allL10N, allCodeFormatting, suspectL10NString, suspectL10NUsage, suspectI18NUsage, "
          "urlInL10NString, notL10NAvailable, deprecatedMacro, nonUTF8File, transInconsistency, "
          "numberInconsistency, lengthInconsistency, L10NStringNeedsContext, UTF8FileWithBOM, "
-         "unencodedExtASCII, printfSingleNumber, spacesAroundL10NString, excessiveNonL10NContent,"
+         "unencodedExtASCII, pluralization, printfSingleNumber, concatenatedStrings, excessiveNonL10NContent,"
          "numberAssignedToId, dupValAssignedToIds, malformedString, fontIssue, printfMismatch, "
          "acceleratorMismatch, trailingSpaces, tabs, wideLine, commentMissingSpace)",
          cxxopts::value<std::vector<std::string>>())
@@ -254,9 +254,13 @@ int main(int argc, char* argv[])
                 {
                 rs |= i18n_check::review_style::check_multipart_strings;
                 }
-            else if (r == "spacesAroundL10NString")
+            else if (r == "pluralization")
                 {
-                rs |= i18n_check::review_style::check_l10n_has_surrounding_spaces;
+                rs |= i18n_check::review_style::check_pluaralization;
+                }
+            else if (r == "concatenatedStrings")
+                {
+                rs |= i18n_check::review_style::check_l10n_concatenated_strings;
                 }
             else if (r == "notL10NAvailable")
                 {
@@ -398,9 +402,13 @@ int main(int argc, char* argv[])
                 {
                 rs = rs & ~i18n_check::review_style::check_multipart_strings;
                 }
-            else if (r == "spacesAroundL10NString")
+            else if (r == "pluralization")
                 {
-                rs = rs & ~i18n_check::review_style::check_l10n_has_surrounding_spaces;
+                rs = rs & ~i18n_check::review_style::check_pluaralization;
+                }
+            else if (r == "concatenatedStrings")
+                {
+                rs = rs & ~i18n_check::review_style::check_l10n_concatenated_strings;
                 }
             else if (r == "notL10NAvailable")
                 {

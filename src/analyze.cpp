@@ -389,11 +389,12 @@ namespace i18n_check
                                                                    L"")
                 << ((m_cpp->get_style() & check_l10n_contains_url) ? L"urlInL10NString\n" : L"")
                 << ((m_cpp->get_style() & check_multipart_strings) ? L"multipartString\n" : L"")
+                << ((m_cpp->get_style() & check_pluaralization) ? L"pluralization\n" : L"")
                 << ((m_cpp->get_style() & check_l10n_contains_excessive_nonl10n_content) ?
                         L"excessiveNonL10NContent\n" :
                         L"")
-                << ((m_cpp->get_style() & check_l10n_has_surrounding_spaces) ?
-                        L"spacesAroundL10NString\n" :
+                << ((m_cpp->get_style() & check_l10n_concatenated_strings) ?
+                        L"concatenatedStrings\n" :
                         L"")
                 << ((m_cpp->get_style() & check_not_available_for_l10n) ? L"notL10NAvailable\n" :
                                                                           L"")
@@ -471,14 +472,13 @@ namespace i18n_check
                    << L"\"\t[excessiveNonL10NContent]\n";
             }
 
-        for (const auto& val : m_rc->get_localizable_strings_with_surrounding_spaces())
+        for (const auto& val : m_rc->get_localizable_strings_being_concatenated())
             {
             report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"String available for translation that is surrounded by spaces. "
-                        "This string may be getting concatenated at runtime instead of using a "
-                        "formatting function.")
-                   << L"\"\t[spacesAroundL10NString]\n";
+                   << _(L"String available for translation that may be getting concatenated "
+                         "at runtime with other content.")
+                   << L"\"\t[concatenatedStrings]\n";
             }
 
         for (const auto& val : m_rc->get_multipart_strings())
@@ -489,6 +489,16 @@ namespace i18n_check
                         "being sliced at runtime. Consider splitting each section into "
                         "a separate resource.")
                    << L"\"\t[multipartString]\n";
+            }
+
+        for (const auto& val : m_rc->get_faux_plural_strings())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"The same string is used for singular and plural situations. "
+                         "Consider using a pluralizing function (if available) or "
+                         "reword the message.")
+                   << L"\"\t[pluralization]\n";
             }
 
         for (const auto& val : m_rc->get_localizable_strings_with_halfwidths())
@@ -552,14 +562,13 @@ namespace i18n_check
                            << _(L"String available for translation that is possibly malformed.")
                            << "\"\t[malformedString]\n";
                     }
-                else if (issue.first == translation_issue::source_surrounding_spaces_issue)
+                else if (issue.first == translation_issue::concatenation_issue)
                     {
                     report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
                            << issue.second << L"\"\t\""
-                           << _(L"String available for translation that is surrounded by spaces. "
-                                "This string may be getting concatenated at runtime instead of "
-                                "using a formatting function.")
-                           << "\"\t[spacesAroundL10NString]\n";
+                           << _(L"String available for translation that may be getting concatenated "
+                                 "at runtime with other content.")
+                           << "\"\t[concatenatedStrings]\n";
                     }
                 else if (issue.first == translation_issue::source_needing_context_issue)
                     {
@@ -577,6 +586,15 @@ namespace i18n_check
                                 "being sliced at runtime. Consider splitting each section into "
                                 "a separate resource.")
                            << "\"\t[multipartString]\n";
+                    }
+                else if (issue.first == translation_issue::pluralization)
+                    {
+                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                           << issue.second << L"\"\t\""
+                           << _(L"The same string is used for singular and plural situations. "
+                                 "Consider using a pluralizing function (if available) or "
+                                  "reword the message.")
+                           << "\"\t[pluralization]\n";
                     }
                 else if (issue.first == translation_issue::accelerator_issue)
                     {
@@ -707,14 +725,13 @@ namespace i18n_check
                 report << L"\t\"[L10NStringNeedsContext]\n";
                 }
 
-            for (const auto& val : sourceParser->get_localizable_strings_with_surrounding_spaces())
+            for (const auto& val : sourceParser->get_localizable_strings_being_concatenated())
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"String available for translation that is surrounded by spaces. "
-                            "This string may be getting concatenated at runtime instead of "
-                            "using a formatting function.");
-                report << L"\"\t[spacesAroundL10NString]\n";
+                report << _(L"String available for translation that may be getting concatenated "
+                             "at runtime with other content.");
+                report << L"\"\t[concatenatedStrings]\n";
                 }
 
             for (const auto& val : sourceParser->get_multipart_strings())
@@ -725,6 +742,16 @@ namespace i18n_check
                             "being sliced at runtime. Consider splitting each section into "
                             "a separate resource.");
                 report << L"\"\t[multipartString]\n";
+                }
+
+            for (const auto& val : sourceParser->get_faux_plural_strings())
+                {
+                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
+                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
+                report << _(L"The same string is used for singular and plural situations. "
+                             "Consider using a pluralizing function (if available) or "
+                             "reword the message.");
+                report << L"\"\t[pluralization]\n";
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_with_halfwidths())

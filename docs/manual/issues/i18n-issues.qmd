@@ -53,6 +53,52 @@ In this example, the solution is to create two full (albeit lengthy) string reso
 
 Checking the option [**Concatenated strings**](#source-code-options) will warn about any possible concatenated strings.
 
+## Pluralization {#sec-pluralization}
+
+The same message being used for both singular and plural situations presents issues because grammar issues between the source and target languages.
+
+These type of strings are generally used in two situations:
+
+- When a quantity is dynamically formatted into the message.
+- When a quantity is not known and the message is simply conveying that one or more items can be involved.
+
+For the former, it is preferred to have two (or more) separate resource strings; one for singular and one (or more) for plural variations.
+Some frameworks provide pluralization functions (`ngettext()`, `wxPLURAL()`) which can be used to provide separate strings for these variations.
+As an example:
+
+"%zu item(s)\n"
+
+Here a number is being formatted into this message at runtime. It is better to pass singular and plural variations to a pluralizing function instead. For example:
+
+```{Rcpp}
+wxPLURAL("%zu item\n","%zu item\n", items.size())
+```
+
+For the latter, it is preferred to reword the string (removing the "(s)").
+As an example:
+
+"Variable(s) must be selected for the '%s' list."
+
+This could be reworded to:
+
+"At least one variable must be selected for the '%s' list."
+
+or
+
+"Variables must be selected for the '%s' list."
+
+Checking the option [**Strings used for both singular and plural**](#source-code-options) will warn about this issue.
+
+## Exposed Internal Strings {#sec-exposed-internal}
+
+Strings that should not be translated should never be exposed to translators, even if context and translator comments are provided to warn about them.
+In other words, if it shouldn't be translated, then it shouldn't be in the translation resources.
+
+This can include internal strings being used to build syntax (e.g., HTML code), GUIDs, filenames, font names, debug messages, etc.
+This can also include URLs and email addresses, unless translator need to provide different contact information (for a regional office, for example).
+
+Checking the options [**Translatable strings that shouldn\'t be**](#source-code-options), **Translatable strings being used in debug functions**, and **Translatable strings that contain URLs, email addresses, or phone numbers** will help with detecting these issues.
+
 ## Multipart Strings {#sec-multipart-strings}
 
 Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@madden:2019].

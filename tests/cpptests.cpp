@@ -12,6 +12,37 @@ using namespace i18n_check;
 using namespace Catch::Matchers;
 
 // clang-format off
+TEST_CASE("Pluarl", "[cpp][i18n]")
+    {
+    SECTION("tr")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_pluaralization);
+        const wchar_t* code = LR"(var = tr("%n message(s) saved");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_faux_plural_strings().size() == 1);
+        }
+    SECTION("tr ignore")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_pluaralization);
+        const wchar_t* code = LR"(var = tr("%n message(s) saved", "", total);)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_faux_plural_strings().empty());
+        }
+    SECTION("Plural")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_pluaralization);
+        const wchar_t* code = LR"(var = _("%n message(s) saved");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_faux_plural_strings().size() == 1);
+        }
+    }
+
 TEST_CASE("Snake case words", "[cpp][i18n]")
     {
     SECTION("user_level_permission")
@@ -21,7 +52,7 @@ TEST_CASE("Snake case words", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = "user_level_permission";)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_internal_strings().size() == 1);
+        CHECK(cpp.get_internal_strings().size() == 1);
         }
     SECTION("__HIGH_SCORE__")
         {
@@ -30,7 +61,7 @@ TEST_CASE("Snake case words", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = "__HIGH_SCORE__";)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_internal_strings().size() == 1);
+        CHECK(cpp.get_internal_strings().size() == 1);
         }
     SECTION("__HIGH_SCORE__")
         {
@@ -39,7 +70,7 @@ TEST_CASE("Snake case words", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = "Config_File_Path";)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_internal_strings().size() == 1);
+        CHECK(cpp.get_internal_strings().size() == 1);
         }
     SECTION("P_rinter")
         {
@@ -48,8 +79,8 @@ TEST_CASE("Snake case words", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = "P_rinter";)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_internal_strings().size() == 0);
-        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cpp.get_internal_strings().size() == 0);
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
         }
     }
 
@@ -69,7 +100,7 @@ str.LoadString(ID);
         )";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 2);
+        CHECK(cpp.get_suspect_i18n_usuage().size() == 2);
         }
     }
 
@@ -91,7 +122,7 @@ TEST_CASE("<<", "[cpp][i18n]")
         const wchar_t* code = LR"(qCDebug(KDE_LOG) << "Rendered image")";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_internal_strings().size() == 1);
+        CHECK(cpp.get_internal_strings().size() == 1);
         }
 
     SECTION("<< empty params")
@@ -149,7 +180,7 @@ TEST_CASE("Place holders", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = _(L"XXXXXX -X.XXXXX, +X.XXXXX");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_unsafe_localizable_strings().size() == 1);
+        CHECK(cpp.get_unsafe_localizable_strings().size() == 1);
         }
 
     SECTION("Serial numbers")
@@ -203,7 +234,7 @@ TEST_CASE("Version Info", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = _(L"ClientTest v1.2");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_unsafe_localizable_strings().size() == 1);
+        CHECK(cpp.get_unsafe_localizable_strings().size() == 1);
         }
     }
 
@@ -215,7 +246,7 @@ TEST_CASE("Raw Strings", "[cpp][i18n]")
         const wchar_t* code = LR"(auto var = _(L"pVal->Dosomething();");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_unsafe_localizable_strings().size() == 1);
+        CHECK(cpp.get_unsafe_localizable_strings().size() == 1);
         }
     SECTION("Raw Strings")
         {
@@ -224,7 +255,7 @@ TEST_CASE("Raw Strings", "[cpp][i18n]")
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
-        REQUIRE(cpp.get_not_available_for_localization_strings()[0].m_string == std::wstring{ L"Hello \"world!\"" });
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == std::wstring{ L"Hello \"world!\"" });
         }
     }
 

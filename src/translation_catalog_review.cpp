@@ -103,19 +103,19 @@ namespace i18n_check
                         catEntry.second.m_source_plural);
                     }
                 }
-            if (static_cast<bool>(m_review_styles & check_l10n_has_surrounding_spaces))
+            if (static_cast<bool>(m_review_styles & check_l10n_concatenated_strings))
                 {
                 if (has_surrounding_spaces(catEntry.second.m_source))
                     {
                     catEntry.second.m_issues.emplace_back(
-                        translation_issue::source_surrounding_spaces_issue,
+                        translation_issue::concatenation_issue,
                         catEntry.second.m_source);
                     }
                 if (!catEntry.second.m_source_plural.empty() &&
                     has_surrounding_spaces(catEntry.second.m_source_plural))
                     {
                     catEntry.second.m_issues.emplace_back(
-                        translation_issue::source_surrounding_spaces_issue,
+                        translation_issue::concatenation_issue,
                         catEntry.second.m_source_plural);
                     }
                 }
@@ -133,6 +133,14 @@ namespace i18n_check
                 if (is_string_multipart(catEntry.second.m_source))
                     {
                     catEntry.second.m_issues.emplace_back(translation_issue::multipart_string,
+                                                          catEntry.second.m_source);
+                    }
+                }
+            if (static_cast<bool>(m_review_styles & check_pluaralization))
+                {
+                if (is_string_faux_plural(catEntry.second.m_source))
+                    {
+                    catEntry.second.m_issues.emplace_back(translation_issue::pluralization,
                                                           catEntry.second.m_source);
                     }
                 }

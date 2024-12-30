@@ -32,7 +32,7 @@ This warning is emitted when the option **Check for ambiguous strings that lack 
 
 ### Encode Extended ASCII Characters {-}
 
-To fix warnings about extended ASCII characters needing to be encoded, select the text in the editor which contains these characters.
+To fix warnings about extended ASCII characters needing to be encoded, highlight the text in the editor which contains these characters.
 Next, click the `r keys("Insert")` button on the ribbon and select **Encode Extended ASCII Characters...**.
 You will then be prompted about how the selection will be re-encoded.
 Click `r keys("OK")` and the selection will be replaced with the re-encoded content.
@@ -46,13 +46,13 @@ This warning is emitted when the option **Unencoded extended ASCII characters** 
 
 ### Make Selection Translatable {-}
 
-To make a string translatable, select the string in the editor and select **Make Selection Translatable...** from the `r keys("Insert")` button.
+To make a string translatable, highlight the string in the editor and select **Make Selection Translatable...** from the `r keys("Insert")` button.
 From the **Make Selection Translatable** dialog, options are available for choosing which translation function to use, along with providing a domain or context (if applicable).
 The translation marking functions available are compatible with *gettext*, *wxWidgets*, *Qt*, and *KDE*.
 
 ### Mark Selection as Non-translatable {-}
 
-To mark a string as non-translatable, select the string in the editor and select **Mark Selection as Non-translatable...** from the `r keys("Insert")` button.
+To mark a string as non-translatable, highlight the string in the editor and select **Mark Selection as Non-translatable...** from the `r keys("Insert")` button.
 From the **Mark Selection as Non-translatable** dialog, options are available for which function to wrap the string in, along with providing an optional context and comment.
 These functions will mark the string as non-translatable and **Quneiform** will ignore them during an analysis.
 Additionally, these functions and comments decorating a string will inform developers that the string is not meant for translation and why.

@@ -25,13 +25,11 @@ do not have to manage them.
 
 Check for translatable strings that contain large blocks on non-translatable content.
 
-- `spacesAroundL10NString`
+- `concatenatedStrings`
 
-Check for strings that start or end with spaces. (This is limited to actual space characters, and does not include tabs or newlines.)
-
-These may be strings that are concatenated at runtime, which does not follow best i18n practices.
-It is recommended to format separate values into a single string via a `printf` formatting function, rather than
-piecing them together.
+Check for strings that may be concatenated at runtime, which does not follow best i18n practices.
+This is generally accomplished by detecting strings that have leading or trailing spaces.
+(This is limited to actual space characters, and does not include tabs or newlines.)
 
 ::: {.notesection data-latex=""}
 An exception is made for strings ending with ": "; here, it is assumed that this is formatting tabular data, rather than
@@ -180,6 +178,12 @@ This is performed on *gettext* \*.po files.
 - `multipartString`
 
 Check for strings that appear to contain multiple parts that are being sliced at runtime.
+
+This is performed on *gettext* \*.po files.
+
+- `pluralization`
+
+Check for strings being used for both singular and plural that should be use different variations.
 
 This is performed on *gettext* \*.po files.
 

@@ -38,6 +38,8 @@ Refer to @sec-embedded-strings for an overview of this issue.
 
 **Translatable strings that shouldn\'t be**: select this to check for translatable strings that should not be (e.g., numbers, keywords, `printf()` commands).
 
+Refer to @sec-exposed-internal for an overview of this issue.
+
 **Translatable strings being used in debug functions**: select this to check for translatable strings being used in internal contexts (e.g., debugging and console functions).
 
 **Translatable strings that contain URLs, email addresses, or phone numbers**: select this to check for translatable strings that contain URLs, email addresses, or phone numbers.
@@ -81,6 +83,10 @@ Refer to @sec-concatenated-strings for an overview of this issue.
 Refer to @sec-multipart-strings for an overview of this issue.
 
 This check should be ran when modernizing legacy software.
+
+**Strings used for both singular and plural**: select this to check for strings being used for both singular and plural variations.
+
+Refer to @sec-pluralization for an overview of this issue.
 
 **Suspect i18n function usage**: select this to check for suspect usage of i18n functions.
 
@@ -177,7 +183,7 @@ Questionable commands such as "*% s*" (space is only meant for numeric formattin
 **Check for inconsistent keyboard accelerators**: select this to check for mismatching keyboard accelerators between source and translation strings.
 This is performed by checking that both strings contain one '&' followed by an alphanumeric character.
 
-**Check for inconsistent casing, separators, or trailing punctuation, spaces, or newlines**: select this to check for the following between source and translation strings:
+**Check for inconsistent casing, separators, trailing punctuation, spaces, or newlines**: select this to check for the following between source and translation strings:
 
 - Mismatching trailing punctuation, spaces, or newlines,
 - The source string starting with an uppercase letter and the translation starting with a lowercase letter.
@@ -217,7 +223,7 @@ Including this check can be useful when updating translations for legacy applica
 **Check for suspect translation lengths**: select this to check for translations that are suspiciously longer than their source strings.
 
 The default is 400%, meaning that a translation can be four times longer than the source string before emitting a warning.
-This value can be changed by adjustsing the **Translation length threshold** slider.
+This value can be changed by adjustsing the **How much translations can expand** slider.
 
 ::: {.tipsection data-latex=""}
 Setting this to 0% will instruct the program to warn if any translation exceeds the length of its source string by even one character.

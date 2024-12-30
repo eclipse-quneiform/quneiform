@@ -774,6 +774,8 @@ namespace i18n_check
             L"_WXTRANS_WSTR"
         };
 
+        // note that tr (in Qt) takes an optional disambiguation argument, but because its
+        // optional we don't include it in this list
         m_localization_with_context_functions = { _DT(L"translate"),
                                                   L"i18nc",
                                                   L"i18ncp",
@@ -827,7 +829,7 @@ namespace i18n_check
             L"wxString::Format", L"string.Format"
         };
 
-        // Debugging & system call functions that should never have
+        // Debugging, system call, and other internal functions that should never have
         // their string parameters translated. This can also include resource
         // loading functions that take a string ID.
         m_internal_functions = {
@@ -1130,6 +1132,7 @@ namespace i18n_check
                 {
                 m_multipart_strings.push_back(str);
                 }
+            if ((m_review_styles & check_pluaralization) && is_string_resource_faux_plural(str))
             if ((m_review_styles & check_l10n_contains_url) &&
                 (std::regex_search(str.m_string, results, m_url_email_regex) ||
                  std::regex_search(str.m_string, results, m_us_phone_number_regex) ||
@@ -1142,10 +1145,10 @@ namespace i18n_check
                 {
                 m_localizable_strings_ambiguous_needing_context.push_back(str);
                 }
-            if ((m_review_styles & check_l10n_has_surrounding_spaces) &&
-                has_surrounding_spaces(str.m_string))
+            if ((m_review_styles & check_l10n_concatenated_strings) &&
+                (has_surrounding_spaces(str.m_string) || str.m_string == L"%"))
                 {
-                m_localizable_strings_with_surrounding_spaces.push_back(str);
+                m_localizable_strings_being_concatenated.push_back(str);
                 }
             if ((m_review_styles & check_halfwidth) &&
                 !load_matches(str.m_string, m_halfwidth_range_regex).empty())
@@ -1249,7 +1252,7 @@ namespace i18n_check
         }
 
     //--------------------------------------------------
-    std::wstring_view i18n_review::extract_base_function(std::wstring_view str) const
+    std::wstring_view i18n_review::extract_base_function(std::wstring_view str)
         {
         if (str.empty() || !is_valid_name_char(str.back()))
             {
@@ -1577,6 +1580,26 @@ namespace i18n_check
         }
 
     //--------------------------------------------------
+    bool i18n_review::is_string_resource_faux_plural(const string_info& str)
+        {
+        // Qt functions (and possibly other frameworks) dynamically detect "(s")
+        // and make separate strings if you provide a number in its context arguments,
+        // so we will ignore anything with a context here.
+        if (str.m_usage.m_hasContext)
+            {
+            return false;
+                }
+        return is_string_faux_plural(str.m_string);
+            }
+
+    //--------------------------------------------------
+    bool i18n_review::is_string_faux_plural(std::wstring_view str)
+        {
+        static const std::wregex multiFauxPlurals{ LR"(\b\(s\))" };
+        return load_matches(str, multiFauxPlurals).size() > 0;
+        }
+
+    //--------------------------------------------------
     bool i18n_review::is_string_multipart(std::wstring_view str)
         {
         static const std::wregex multiConsecSpaces{ LR"(([ ]{2,}|\\t|\b\|\b))" };
@@ -1703,7 +1726,8 @@ namespace i18n_check
                                     const std::wstring& functionName,
                                     const std::wstring& variableType,
                                     const std::wstring& deprecatedMacroEncountered,
-                                    const size_t parameterPosition)
+                                    const size_t parameterPosition,
+                                    const bool isFollowedByComma)
         {
         if (deprecatedMacroEncountered.length() > 0 &&
             static_cast<bool>(m_review_styles & check_deprecated_macros))
@@ -1773,7 +1797,7 @@ namespace i18n_check
                     if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage) &&
                         contextLength > 32 &&
                         // although these are called context parameters,
-                        // they really comments in // practice
+                        // they really are comments in practice
                         !functionName.starts_with(L"i18n") && !functionName.starts_with(L"ki18n"))
                         {
                         m_suspect_i18n_usage.emplace_back(
@@ -1783,12 +1807,12 @@ namespace i18n_check
                                 string_info::usage_info::usage_type::function,
 #ifdef wxVERSION_NUMBER
                                 wxString::Format(
-                                    _(L"Context string is considerable long. Are the context and "
+                                    _(L"Context string is considerably long. Are the context and "
                                       "string arguments to %s possibly transposed?"),
                                     functionName)
                                     .wc_str(),
 #else
-                                L"Context string is considerable long. Are the context and string "
+                                L"Context string is considerably long. Are the context and string "
                                 "arguments possibly transposed?",
 #endif
                                 std::wstring{}, true),
@@ -1845,6 +1869,7 @@ namespace i18n_check
                         string_info::usage_info(string_info::usage_info::usage_type::function,
                                                 functionName, std::wstring{},
                                                 (is_i18n_with_context_function(functionName) ||
+                                                 (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
                                                  m_context_comment_active)),
                         m_file_name, get_line_and_column(currentTextPos - m_file_start));
 
@@ -2088,9 +2113,10 @@ namespace i18n_check
         m_localizable_strings_with_urls.clear();
         m_localizable_strings_ambiguous_needing_context.clear();
         m_localizable_strings_in_internal_call.clear();
-        m_localizable_strings_with_surrounding_spaces.clear();
+        m_localizable_strings_being_concatenated.clear();
         m_localizable_strings_with_halfwidths.clear();
         m_multipart_strings.clear();
+        m_faux_plural_strings.clear();
         m_not_available_for_localization_strings.clear();
         m_marked_as_non_localizable_strings.clear();
         m_internal_strings.clear();

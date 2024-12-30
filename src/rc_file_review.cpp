@@ -156,10 +156,22 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
-                if ((m_review_styles & check_l10n_has_surrounding_spaces) &&
+                if (m_review_styles & check_pluaralization &&
+                    is_string_faux_plural(tableEntry.second))
+                    {
+                    m_faux_plural_strings.emplace_back(
+                        tableEntry.second,
+                        string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                                std::wstring{}, std::wstring{}),
+                        m_file_name,
+                        std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
+                                       std::wstring::npos));
+                    }
+
+                if ((m_review_styles & check_l10n_concatenated_strings) &&
                     has_surrounding_spaces(tableEntry.second))
                     {
-                    m_localizable_strings_with_surrounding_spaces.emplace_back(
+                    m_localizable_strings_being_concatenated.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
                                                 std::wstring{}, std::wstring{}),
