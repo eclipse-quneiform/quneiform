@@ -477,7 +477,7 @@ namespace i18n_check
             report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                    << _(L"String available for translation that may be getting concatenated "
-                         "at runtime with other content.")
+                        "at runtime with other content.")
                    << L"\"\t[concatenatedStrings]\n";
             }
 
@@ -496,8 +496,8 @@ namespace i18n_check
             report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                    << _(L"The same string is used for singular and plural situations. "
-                         "Consider using a pluralizing function (if available) or "
-                         "reword the message.")
+                        "Consider using a pluralizing function (if available) or "
+                        "reword the message.")
                    << L"\"\t[pluralization]\n";
             }
 
@@ -564,11 +564,12 @@ namespace i18n_check
                     }
                 else if (issue.first == translation_issue::concatenation_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"String available for translation that may be getting concatenated "
-                                 "at runtime with other content.")
-                           << "\"\t[concatenatedStrings]\n";
+                    report
+                        << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                        << issue.second << L"\"\t\""
+                        << _(L"String available for translation that may be getting concatenated "
+                             "at runtime with other content.")
+                        << "\"\t[concatenatedStrings]\n";
                     }
                 else if (issue.first == translation_issue::source_needing_context_issue)
                     {
@@ -592,8 +593,8 @@ namespace i18n_check
                     report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
                            << issue.second << L"\"\t\""
                            << _(L"The same string is used for singular and plural situations. "
-                                 "Consider using a pluralizing function (if available) or "
-                                  "reword the message.")
+                                "Consider using a pluralizing function (if available) or "
+                                "reword the message.")
                            << "\"\t[pluralization]\n";
                     }
                 else if (issue.first == translation_issue::accelerator_issue)
@@ -730,7 +731,7 @@ namespace i18n_check
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
                 report << _(L"String available for translation that may be getting concatenated "
-                             "at runtime with other content.");
+                            "at runtime with other content.");
                 report << L"\"\t[concatenatedStrings]\n";
                 }
 
@@ -749,8 +750,8 @@ namespace i18n_check
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
                 report << _(L"The same string is used for singular and plural situations. "
-                             "Consider using a pluralizing function (if available) or "
-                             "reword the message.");
+                            "Consider using a pluralizing function (if available) or "
+                            "reword the message.");
                 report << L"\"\t[pluralization]\n";
                 }
 
