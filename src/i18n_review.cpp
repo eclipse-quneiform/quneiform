@@ -1643,7 +1643,7 @@ namespace i18n_check
     //--------------------------------------------------
     bool i18n_review::is_string_multipart(std::wstring_view str)
         {
-        static const std::wregex multiConsecSpaces{ LR"(([ ]{2,}|\\t|\b\|\b))" };
+        static const std::wregex multiConsecSpaces{ LR"(([ ]{2,}|\\t))" };
         return load_matches(str, multiConsecSpaces).size() > 2;
         }
 
