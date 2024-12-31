@@ -1255,7 +1255,7 @@ namespace i18n_check
             if (is_verbose() && !m_wx_info.m_wxlocale_initialized)
                 {
                 m_wx_info.m_app_init_info.m_usage.m_value =
-                    _WXTRANS_WSTR(L"wxLocale::Init() should be called from your OnInit() "
+                    _WXTRANS_WSTR(L"A wxLocale object should be constructed from your OnInit() "
                                   "function if you rely on C runtime functions to be localized.");
                 m_suspect_i18n_usage.push_back(m_wx_info.m_app_init_info);
                 }

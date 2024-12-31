@@ -52,7 +52,7 @@ namespace i18n_check
             {
             m_wx_info.m_wxuilocale_initialized = true;
             }
-        if (cppBuffer.find(L"wxLocale::Init()") != std::wstring::npos)
+        if (cppBuffer.find(L"wxLocale") != std::wstring::npos)
             {
             m_wx_info.m_wxlocale_initialized = true;
             }
