@@ -358,7 +358,9 @@ void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
     wxDirDialog dirDlg(this, _(L"Select Folder to Analyze"));
-    dirDlg.SetPath(m_filePath);
+    const wxFileName fn{ m_filePath };
+    // wxFileName::IsDir doesn't work under Unix, so look at the extension to see if it a dir
+    dirDlg.SetPath(fn.GetExt().empty() ? m_filePath : fn.GetPath());
     if (dirDlg.ShowModal() != wxID_OK)
         {
         return;
@@ -372,7 +374,8 @@ void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent&)
 void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
-    wxFileDialog dialog(this, _(L"Select Files to Analyze"), wxString{}, wxString{},
+    const wxFileName fn{ m_filePath };
+    wxFileDialog dialog(this, _(L"Select Files to Analyze"), (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
                         _(L"All Supported Files|*.cpp;*.c;*.h;*.hpp;*.po;*.pot;*.rc|"
                           "Source Files (*.cpp; *.c; *.h; *.hpp)|*.cpp;*.c;*.h;*.hpp|"
                           "gettext Catalogs (*.po; *.pot)|*.po;*.pot|"
@@ -394,6 +397,8 @@ void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEve
     TransferDataFromWindow();
     wxDirDialog dirDlg(this, _(L"Select Subfolders to Ignore"), wxString{},
                        wxDD_DEFAULT_STYLE | wxDD_MULTIPLE | wxDD_DIR_MUST_EXIST);
+    const wxFileName fn{ m_filePath };
+    dirDlg.SetPath(fn.GetExt().empty() ? m_filePath : fn.GetPath());
     if (dirDlg.ShowModal() != wxID_OK)
         {
         return;
@@ -412,7 +417,8 @@ void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEve
 void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
-    wxFileDialog dialog(this, _(L"Select Files to Ignore"), wxString{}, wxString{},
+    const wxFileName fn{ m_filePath };
+    wxFileDialog dialog(this, _(L"Select Files to Ignore"), (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
                         _(L"All Files (*.*)|*.*"),
                         wxFD_OPEN | wxFD_MULTIPLE | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
     if (dialog.ShowModal() != wxID_OK)
