@@ -375,7 +375,8 @@ void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
     const wxFileName fn{ m_filePath };
-    wxFileDialog dialog(this, _(L"Select Files to Analyze"), (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
+    wxFileDialog dialog(this, _(L"Select Files to Analyze"),
+                        (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
                         _(L"All Supported Files|*.cpp;*.c;*.h;*.hpp;*.po;*.pot;*.rc|"
                           "Source Files (*.cpp; *.c; *.h; *.hpp)|*.cpp;*.c;*.h;*.hpp|"
                           "gettext Catalogs (*.po; *.pot)|*.po;*.pot|"
@@ -418,7 +419,8 @@ void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent
     {
     TransferDataFromWindow();
     const wxFileName fn{ m_filePath };
-    wxFileDialog dialog(this, _(L"Select Files to Ignore"), (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
+    wxFileDialog dialog(this, _(L"Select Files to Ignore"),
+                        (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
                         _(L"All Files (*.*)|*.*"),
                         wxFD_OPEN | wxFD_MULTIPLE | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
     if (dialog.ShowModal() != wxID_OK)

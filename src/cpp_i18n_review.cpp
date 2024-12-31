@@ -34,6 +34,29 @@ namespace i18n_check
         const wchar_t* const endSentinel =
             std::next(cppText, static_cast<ptrdiff_t>(srcText.length()));
 
+        if (m_wx_info.m_app_init_info.m_file_name.empty())
+            {
+            const size_t foundImplAppPos = cppBuffer.find(L"wxIMPLEMENT_APP");
+            const size_t foundPos = cppBuffer.find(L"::OnInit()");
+            if (foundImplAppPos != std::wstring::npos && foundPos != std::wstring::npos)
+                {
+                m_wx_info.m_app_init_info = string_info{
+                    std::wstring{},
+                    string_info::usage_info(string_info::usage_info::usage_type::function,
+                                            L"OnInit()", std::wstring{}),
+                    m_file_name, get_line_and_column(foundPos)
+                };
+                }
+            }
+        if (cppBuffer.find(L"wxUILocale::UseDefault()") != std::wstring::npos)
+            {
+            m_wx_info.m_wxuilocale_initialized = true;
+            }
+        if (cppBuffer.find(L"wxLocale::Init()") != std::wstring::npos)
+            {
+            m_wx_info.m_wxlocale_initialized = true;
+            }
+
         while (cppText != nullptr && std::next(cppText) < endSentinel && *cppText != 0)
             {
             while (std::next(cppText) < endSentinel && *cppText == L' ')

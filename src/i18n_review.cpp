@@ -290,7 +290,7 @@ namespace i18n_check
     };
 
     //--------------------------------------------------
-    i18n_review::i18n_review(const bool verbose)
+    i18n_review::i18n_review(const bool verbose) : m_verbose(verbose)
         {
         m_deprecated_string_macros = {
             { L"wxT", _WXTRANS_WSTR(L"wxT() macro can be removed.") },
@@ -1241,6 +1241,26 @@ namespace i18n_check
             classifyPrintfIntStrings(m_localizable_strings_in_internal_call);
             }
 
+        // if this is wxWidgets code, see if they initialized the locale framework
+        if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage) &&
+            !m_wx_info.m_app_init_info.m_file_name.empty())
+            {
+            if (!m_wx_info.m_wxuilocale_initialized)
+                {
+                m_wx_info.m_app_init_info.m_usage.m_value =
+                    _WXTRANS_WSTR(L"wxUILocale::UseDefault() should be called "
+                                  "from your OnInit() function.");
+                m_suspect_i18n_usage.push_back(m_wx_info.m_app_init_info);
+                }
+            if (is_verbose() && !m_wx_info.m_wxlocale_initialized)
+                {
+                m_wx_info.m_app_init_info.m_usage.m_value =
+                    _WXTRANS_WSTR(L"wxLocale::Init() should be called from your OnInit() "
+                                  "function if you rely on C runtime functions to be localized.");
+                m_suspect_i18n_usage.push_back(m_wx_info.m_app_init_info);
+                }
+            }
+
         // log any parsing errors
         run_diagnostics();
         }
@@ -2047,6 +2067,7 @@ namespace i18n_check
             variableType != L"static_cast" && variableType != L"StyleInfo" &&
             variableType != L"Utf8CharBuffer" && variableType != L"rgbRecord" &&
             variableType != L"LPCTSTR" && variableType != L"CDialog" &&
+            variableType != L"string_view" && variableType != L"wstring_view" &&
             variableType != L"LanguageInfo" && variableType != L"MessageParameters")
             {
             log_message(variableType, L"New variable type detected.", quotePosition);
@@ -2153,6 +2174,8 @@ namespace i18n_check
         m_wide_lines.clear();
         m_comments_missing_space.clear();
         m_suspect_i18n_usage.clear();
+
+        m_wx_info = wx_project_info{};
         }
 
     //--------------------------------------------------

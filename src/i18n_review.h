@@ -374,6 +374,13 @@ namespace i18n_check
             size_t m_column{ 0 };
             };
 
+        struct wx_project_info
+            {
+            string_info m_app_init_info;
+            bool m_wxuilocale_initialized{ false };
+            bool m_wxlocale_initialized{ false };
+            };
+
         /// @brief Messages logged during a review.
         struct parse_messages
             {
@@ -549,8 +556,7 @@ namespace i18n_check
         /// @returns The strings that are being extracted as localizable,
         ///     but may be concatenated at runtime.
         [[nodiscard]]
-        const std::vector<string_info>&
-        get_localizable_strings_being_concatenated() const noexcept
+        const std::vector<string_info>& get_localizable_strings_being_concatenated() const noexcept
             {
             return m_localizable_strings_being_concatenated;
             }
@@ -692,7 +698,7 @@ namespace i18n_check
         ///     large number of files.
         void reserve(const size_t fileCount);
         /** @brief Clears all results from the previous parsing.
-            @note This does not reset functions and variable patterns that you have added
+            @note This does not reset functions and variable patterns that you have been added
                 to the parser; it will only reset the results from the last parsing operation.*/
         void clear_results() noexcept;
 
@@ -1000,8 +1006,7 @@ namespace i18n_check
                            const wchar_t* functionVarNamePos, const std::wstring& variableName,
                            const std::wstring& functionName, const std::wstring& variableType,
                            const std::wstring& deprecatedMacroEncountered,
-                           const size_t parameterPosition,
-                           const bool isFollowedByComma);
+                           const size_t parameterPosition, const bool isFollowedByComma);
 
         /// @brief Determines whether a hard-coded string should actually be
         ///     exposed for translation or not.
@@ -1278,6 +1283,8 @@ namespace i18n_check
         std::vector<string_info> m_wide_lines;
         std::vector<string_info> m_comments_missing_space;
         std::vector<string_info> m_suspect_i18n_usage;
+
+        wx_project_info m_wx_info;
 
         bool m_context_comment_active{ false };
 
