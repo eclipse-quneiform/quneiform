@@ -41,10 +41,10 @@ namespace i18n_check
         none,
         /// @brief Uppercase all letters.
         all_caps,
-        /// @brief European (accented) characters.
-        european_characters,
         /// @brief Fills with 'X'es
         Xx_es,
+        /// @brief European (accented) characters.
+        european_characters,
         /// @brief Cherokee characters
         cherokee
         };

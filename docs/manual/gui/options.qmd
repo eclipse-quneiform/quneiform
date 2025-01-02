@@ -254,18 +254,18 @@ This option specifies how to generate pseudo-translations.
 
 **UPPERCASE**: translations will be uppercased variations of the source strings.
 
-**European**: letters and numbers from the source string will be replaced with accented variations from European alphabets.
-The translation will be clearly different, but still generally readable.
-
 **Fill with \'X\'es**: letters from the source string will be replaced with either \'x\' or \'X\' (matching the original casing).
 This will produce the most altered appearance for the pseudo-translations.
 
 During integration testing, these pseudo-translations will be easier to spot, but will make navigating the UI more difficult.
 This is recommended for the quickest way to interactively find UI elements that are not being made available for translation.
 
+**European**: letters and numbers from the source string will be replaced with accented variations from European alphabets.
+The translation will be clearly different, but still generally readable.
+
 **Cherokee**: letters and numbers from the source string will be replaced with Cherokee characters.
 (Some numbers will be replaced with full-width numbers when a similiar looking Cherokee character isn't available.)
-Like **European**, the translation will be clearly different, but somewhat readable.
+Like **European**, translations will be clearly different, but somewhat readable.
 ::::
 
 **Add surrounding brackets**: select this option to add brackets around the pseudo-translations.

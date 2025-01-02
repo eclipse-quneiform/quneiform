@@ -870,8 +870,8 @@ void NewProjectDialog::CreateControls()
                 /* TRANSLATORS: Only in uppercase to show what uppercase looks like.
                    Translation should be uppercased also (when possible).*/
                 _(L"UPPERCASE"));
-            pseudoOptions.Add(_(L"European"));
             pseudoOptions.Add(_(L"Fill with 'X'es"));
+            pseudoOptions.Add(_(L"European"));
             pseudoOptions.Add(_(L"Cherokee"));
             pseudoTransMethodSizer->Add(
                 new wxChoice(pseudoTransSizer->GetStaticBox(), ID_PSEUDO_METHODS, wxDefaultPosition,
