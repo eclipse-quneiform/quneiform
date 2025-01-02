@@ -28,7 +28,7 @@
 /// @brief Class for reviewing a Microsoft Windows resource file (*.RC).
 namespace i18n_check
     {
-    /** @brief Class to extract and review localizable/nonlocalizable text from C++ source code.*/
+    /** @brief Class to extract and review content from a Window resource file.*/
     class rc_file_review : public i18n_review
         {
       public:
@@ -36,9 +36,9 @@ namespace i18n_check
         /// @param verbose @c true to include verbose warnings.
         explicit rc_file_review(const bool verbose) : i18n_review(verbose) {}
 
-        /** @brief Main interface for extracting resource text from C++ source code.
+        /** @brief Main interface for extracting resources from a Window resource file.
             @param rcFileText The RC file's text to analyze.
-            @param fileName The (optional) name of source file being analyzed.*/
+            @param fileName The (optional) name of file being analyzed.*/
         void operator()(const std::wstring_view rcFileText,
                         const std::filesystem::path& fileName) final;
 
@@ -54,6 +54,14 @@ namespace i18n_check
         const std::vector<string_info>& get_non_system_dialog_fonts() const noexcept
             {
             return m_nonSystemFontNames;
+            }
+
+        /// @brief Clears the results.
+        void clear_results() final
+            {
+            i18n_review::clear_results();
+            m_badFontSizes.clear();
+            m_nonSystemFontNames.clear();
             }
 
       private:

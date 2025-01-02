@@ -700,7 +700,7 @@ namespace i18n_check
         /** @brief Clears all results from the previous parsing.
             @note This does not reset functions and variable patterns that you have been added
                 to the parser; it will only reset the results from the last parsing operation.*/
-        void clear_results() noexcept;
+        virtual void clear_results();
 
         /// @returns A list of errors (usually the regex engine having issues parsing something)
         ///     encountered while parsing the file.
