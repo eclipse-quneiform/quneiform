@@ -1154,7 +1154,8 @@ namespace i18n_check
                 m_localizable_strings_ambiguous_needing_context.push_back(str);
                 }
             if ((m_review_styles & check_l10n_concatenated_strings) &&
-                (has_surrounding_spaces(str.m_string) || str.m_string == L"%"))
+                (has_surrounding_spaces(str.m_string) || str.m_string == L"%" ||
+                 str.m_string == L"$"))
                 {
                 m_localizable_strings_being_concatenated.push_back(str);
                 }
@@ -1171,7 +1172,9 @@ namespace i18n_check
                 {
                 // Hard coding a percent to a number at runtime should be avoided,
                 // as some locales put the % at the front of the string.
-                if (str.m_string == L"%")
+                // Same with a dollar sign, where it is probably a currency string
+                // being pieced together.
+                if (str.m_string == L"%" || str.m_string == L"$")
                     {
                     m_localizable_strings_being_concatenated.push_back(str);
                     }
@@ -2893,11 +2896,11 @@ namespace i18n_check
                     // position will need to be zero-indexed
                     long position = std::wcstol(matches[1].str().c_str(), nullptr, 10) - 1;
                     const auto [insertionPos, inserted] = positionalCommands.insert(
-                        std::make_pair(position, L"%" + matches[2].str()));
+                        std::make_pair(position, std::format(L"%{}", matches[2].str())));
                     // if positional argument is used more than once, make sure they are consistent
                     if (!inserted)
                         {
-                        if (insertionPos->second != L"%" + matches[2].str())
+                        if (insertionPos->second != std::format(L"%{}", matches[2].str()))
                             {
 #ifdef wxVERSION_NUMBER
                             errorInfo =
