@@ -21,6 +21,7 @@
 #include "donttranslate.h"
 #include "i18n_string_util.h"
 #include <filesystem>
+#include <format>
 #include <map>
 #include <optional>
 #include <set>
@@ -246,6 +247,8 @@ namespace i18n_check
         po,
         /// @brief C# source files.
         cs,
+        /// @brief macOS info.plist manifest files.
+        infoplist,
         /// @brief Unknown type.
         unknown
         };

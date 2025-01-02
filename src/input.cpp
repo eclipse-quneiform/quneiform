@@ -154,6 +154,7 @@ namespace i18n_check
                         }
                     if (p.exists() && p.is_regular_file() && !inExcludedPath &&
                         (ext.compare(std::filesystem::path(L".rc")) == 0 ||
+                         ext.compare(std::filesystem::path(L".plist")) == 0 ||
                          ext.compare(std::filesystem::path(L".c")) == 0 ||
                          ext.compare(std::filesystem::path(L".cs")) == 0 ||
                          ext.compare(std::filesystem::path(L".cpp")) == 0 ||

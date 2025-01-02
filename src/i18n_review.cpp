@@ -2148,7 +2148,7 @@ namespace i18n_check
         }
 
     //--------------------------------------------------
-    void i18n_review::clear_results() noexcept
+    void i18n_review::clear_results()
         {
         m_localizable_strings.clear();
         m_localizable_strings_with_unlocalizable_content.clear();

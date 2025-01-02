@@ -1512,12 +1512,15 @@ void I18NFrame::Process()
     rc.set_style(static_cast<i18n_check::review_style>(m_activeProjectOptions.m_options));
     rc.allow_translating_punctuation_only_strings(
         m_activeProjectOptions.m_allowTranslatingPunctuationOnlyStrings);
+
     i18n_check::po_file_review po(m_activeProjectOptions.m_verbose);
     po.set_style(static_cast<i18n_check::review_style>(m_activeProjectOptions.m_options));
     po.review_fuzzy_translations(m_activeProjectOptions.m_fuzzyTranslations);
     po.set_translation_length_threshold(m_activeProjectOptions.m_maxTranslationLongerThreshold);
 
-    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp);
+    i18n_check::info_plist_file_review infoPlist(m_activeProjectOptions.m_verbose);
+
+    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist);
 
     if (m_activeProjectOptions.m_pseudoTranslationMethod !=
         i18n_check::pseudo_translation_method::none)

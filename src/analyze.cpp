@@ -226,6 +226,7 @@ namespace i18n_check
         m_filesThatContainUTF8Signature.clear();
         m_cpp->clear_results();
         m_rc->clear_results();
+        m_plist->clear_results();
         m_po->clear_results();
         m_csharp->clear_results();
 
@@ -256,6 +257,10 @@ namespace i18n_check
                         {
                         (*m_rc)(fileUtf8Text, file);
                         }
+                    else if (fileType == file_review_type::infoplist)
+                        {
+                        (*m_plist)(fileUtf8Text, file);
+                        }
                     else if (fileType == file_review_type::po)
                         {
                         (*m_po)(fileUtf8Text, file);
@@ -283,6 +288,10 @@ namespace i18n_check
                     if (fileType == file_review_type::rc)
                         {
                         (*m_rc)(fileUtf16Text, file);
+                        }
+                    else if (fileType == file_review_type::infoplist)
+                        {
+                        (*m_plist)(fileUtf16Text, file);
                         }
                     else if (fileType == file_review_type::po)
                         {
@@ -329,6 +338,10 @@ namespace i18n_check
                     if (fileType == file_review_type::rc)
                         {
                         (*m_rc)(str, file);
+                        }
+                    else if (fileType == file_review_type::infoplist)
+                        {
+                        (*m_plist)(str, file);
                         }
                     else if (fileType == file_review_type::po)
                         {
@@ -524,6 +537,18 @@ namespace i18n_check
             report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                    << replaceSpecialSpaces(val.m_usage.m_value) << L"\"\t[fontIssue]\n";
+            }
+
+        // macOS manifest files
+        for (const auto& val : m_plist->get_missing_localization_bundles())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"No languages included in macOS Info.plist file. "
+                        "This file should have a CFBundleLocalizations section with "
+                        "an array of strings under it; otherwise, no translations will be loaded "
+                        "at runtime.")
+                   << L"\"\t[suspectI18NUsage]\n";
             }
 
         // gettext catalogs
