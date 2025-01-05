@@ -1771,6 +1771,16 @@ namespace i18n_check
         if (nonObviousCommands >= 3 || (nonObviousCommands >= 2 && str.length() < 16) ||
             (nonObviousCommands >= 1 && str.length() < 10))
             {
+            if (printfCmds.size() == 2)
+                {
+                std::wstring filteredStr{ str };
+                i18n_string_util::remove_printf_commands(filteredStr);
+                // although this meets the critia, "%d of %d" is probably self explanatory
+                if (filteredStr == _DT(L" of "))
+                    {
+                    return false;
+                    }
+                }
             return true;
             }
 
@@ -1781,6 +1791,25 @@ namespace i18n_check
                                  (posCmds.size() - colonAndPrintfs.size());
         if (nonObviousCommands >= 3 || (nonObviousCommands >= 2 && str.length() < 16) ||
             (nonObviousCommands >= 1 && str.length() < 10))
+            {
+            if (posCmds.size() == 2)
+                {
+                std::wstring filteredStr{ str };
+                i18n_string_util::remove_positional_commands(filteredStr);
+                // although this meets the critia, "%1 of %2" is probably self explanatory
+                if (filteredStr == _DT(L" of "))
+                    {
+                    return false;
+                    }
+                }
+            return true;
+            }
+
+        // more than one abbreviaion in string makes it difficult to understand
+        // for a translator (or anyone, really)
+        static const std::wregex abbreviationRegex{ LR"([[:alpha:]]\. [a-z])" };
+        const auto abbrevs = load_matches(str, abbreviationRegex);
+        if (abbrevs.size() > 1)
             {
             return true;
             }
@@ -1886,24 +1915,6 @@ namespace i18n_check
                                 std::wstring{}, true),
                             m_file_name, get_line_and_column(currentTextPos - m_file_start));
                         }
-                    }
-                else if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage) &&
-                         functionName == L"wxGetTranslation" && parameterPosition == 0)
-                    {
-                    m_suspect_i18n_usage.emplace_back(
-                        functionName,
-                        string_info::usage_info(
-                            string_info::usage_info::usage_type::function,
-#ifdef wxVERSION_NUMBER
-                            _(L"First argument to wxGetTranslation() should not "
-                              "be a literal string. Prefer using _() for literal strings.")
-                                .wc_str(),
-#else
-                            L"First argument to wxGetTranslation() should not "
-                            "be a literal string. Prefer using _() for literal strings.",
-#endif
-                            std::wstring{}, true),
-                        m_file_name, get_line_and_column(currentTextPos - m_file_start));
                     }
                 else if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage) &&
                          (functionName == L"QT_TRID_NOOP" || functionName == L"QT_TRID_N_NOOP" ||
