@@ -113,6 +113,7 @@ A string will be considered ambiguous if:
 - A single word in all caps.
 - A single word with multiple punctuation marks embedded in it.
 - It contains placeholder text (e.g., "###").
+- It contains more than one abbreviation. (Abbreviations should be avoided, or at least the full words should be shown in a translator comment.)
 - A short string with a `printf` or positional argument (e.g., "%2").
 - A longer string with multiple `printf` or positional arguments.
 
