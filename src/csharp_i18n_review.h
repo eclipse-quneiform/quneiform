@@ -29,7 +29,7 @@ namespace i18n_check
       public:
         /// @brief Constructor.
         /// @param verbose @c true to include verbose warnings.
-        csharp_i18n_review(const bool verbose) : cpp_i18n_review(verbose)
+        explicit csharp_i18n_review(const bool verbose) : cpp_i18n_review(verbose)
             {
             m_collapse_double_quotes = true;
             }
