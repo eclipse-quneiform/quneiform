@@ -137,12 +137,8 @@ namespace i18n_check
             if (out.is_open())
                 {
                 out.write(utfBuffer.c_str(), utfBuffer.size());
-#if CHECK_GCC_VERSION(12, 2, 1)
                 m_logReport.append(_WXTRANS_WSTR(L"\nPseudo-translation catalog generated at: "))
                     .append(filePath.wstring());
-#else
-                m_logReport.append(_WXTRANS_WSTR(L"\nPseudo-translation catalog generated"));
-#endif
                 }
         };
 

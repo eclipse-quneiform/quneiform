@@ -12,6 +12,12 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(quneiform)
 
+if(CMAKE_COMPILER_IS_GNUCC)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.2.1")
+    message(FATAL_ERROR "Insufficient GCC version")
+  endif()
+endif()
+
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 

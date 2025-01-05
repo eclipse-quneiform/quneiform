@@ -169,12 +169,8 @@ namespace i18n_check
                         p.path().filename().compare(L"catch.hpp") != 0 &&
                         p.path().filename().compare(L"catch_amalgamated.cpp") != 0 &&
                         p.path().filename().compare(L"catch_amalgamated.hpp") != 0 &&
-                    // ignore pseudo-translated message catalogs what we previously generated
-#if CHECK_GCC_VERSION(12, 2, 1)
+                        // ignore pseudo-translated message catalogs what we previously generated
                         !p.path().filename().wstring().starts_with(L"pseudo_"))
-#else
-                        !p.path().filename().string().starts_with("pseudo_"))
-#endif
                         {
                         filesToAnalyze.push_back(p.path());
                         }

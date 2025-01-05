@@ -9,6 +9,7 @@
 
 # Declare the minimum required CMake version
 cmake_minimum_required(VERSION 3.25)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -55,6 +56,12 @@ set(PROGRAM_AUTHOR "Blake Madden")
 set(PROGRAM_COMMENTS "Internationalization & localization analysis system")
 set(PROGRAM_RDNS_IDENTIFIER "org.quneiform.quneiform")
 set(PROGRAM_LICENSE "BSD-3-Clause")
+
+if(CMAKE_COMPILER_IS_GNUCC)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.2.1")
+    message(FATAL_ERROR "Insufficient GCC version")
+  endif()
+endif()
 
 # Build a displayable version string that only includes the necessary parts
 set(FULL_DISPLAY_VERSION ${quneiform_VERSION_MAJOR})

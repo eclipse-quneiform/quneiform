@@ -1564,11 +1564,7 @@ void I18NFrame::Process()
                                         file.empty() ?
                                             _(L"Processing...") :
                                             wxString::Format(_(L"Pseudo-translating %s..."),
-#if CHECK_GCC_VERSION(12, 2, 1)
                                                              file.filename().wstring())))
-#else
-                                                             file.filename().string())))
-#endif
                     {
                     return false;
                     }
@@ -1615,11 +1611,7 @@ void I18NFrame::Process()
             if (!progressDlg.Update(currentFileIndex,
                                     file.empty() ? _(L"Processing...") :
                                                    wxString::Format(_(L"Reviewing %s..."),
-#if CHECK_GCC_VERSION(12, 2, 1)
                                                                     file.filename().wstring())))
-#else
-                                                                    file.filename().string())))
-#endif
                 {
                 return false;
                 }

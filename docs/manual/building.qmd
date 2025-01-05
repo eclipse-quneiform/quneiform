@@ -4,6 +4,8 @@
 
 *Cmake* scripts are included for building both the command-line and GUI (graphical user interface) versions. *Cmake* 3.25 or higher is required.
 
+If compiling with GCC, GCC 12.2.1 or higher is required.
+
 For the GUI version, [wxWidgets](https://github.com/wxWidgets/wxWidgets) 3.3 or higher is required.
 
 ## Command-line Utility
