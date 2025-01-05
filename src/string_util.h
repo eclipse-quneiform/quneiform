@@ -808,10 +808,7 @@ namespace string_util
             {
             return nullptr;
             }
-        if (openSymbol.length() == 0 || closeSymbol.length() == 0)
-            {
-            return nullptr;
-            }
+
         long openStack{ 0 };
         while (stringToSearch.length())
             {
