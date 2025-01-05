@@ -2281,6 +2281,11 @@ namespace i18n_check
                 }
             }
         string_util::trim(strToReview);
+        // something like "%d%%" should be translatable
+        if (strToReview == L"%%")
+            {
+            return std::make_pair(false, strToReview.length());
+            }
 
         try
             {

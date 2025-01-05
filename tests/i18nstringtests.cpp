@@ -81,6 +81,7 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK_FALSE(reviewer.is_untranslatable_string(L"100%", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"{n}%", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"%d%", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"%d%%", false).first);
     // HTML anchors
     CHECK(reviewer.is_untranslatable_string(L"#something", false).first);
     CHECK(reviewer.is_untranslatable_string(L"#Something-else", false).first);
