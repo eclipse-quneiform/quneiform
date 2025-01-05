@@ -126,8 +126,10 @@ namespace i18n_check
         /// @brief Check for strings being used for both singular and plural that
         ///     should be use different variations.
         check_pluaralization = (static_cast<int64_t>(1) << 18),
-        /// @private
-        i18n_reserved7 = (static_cast<int64_t>(1) << 19),
+        /// @brief Check for strings with an article (e.g., the, a) in front of a
+        ///     formatting placeholder.\n
+        ///     Also checks for pronouns being used as individual strings.
+        check_articles_proceeding_placeholder = (static_cast<int64_t>(1) << 19),
         /// @private
         i18n_reserved8 = (static_cast<int64_t>(1) << 20),
         /// @private
@@ -233,7 +235,11 @@ namespace i18n_check
         multipart_string,
         /// @brief Source strings being used for both singular and plural that
         ///     should be use different variations.
-        pluralization
+        pluralization,
+        /// @brief Check for strings with an article (e.g., the, a) in front of a
+        ///     formatting placeholder.\n
+        ///     Also checks for pronouns being used as individual strings.
+        article_issue
         };
 
     /// @brief File types that can be analyzed.
@@ -585,6 +591,13 @@ namespace i18n_check
             return m_faux_plural_strings;
             }
 
+        /// @returns The strings that contain articles proceeding dynamic placeholders.
+        [[nodiscard]]
+        const std::vector<string_info>& get_article_issue_strings() const noexcept
+            {
+            return m_article_issue_strings;
+            }
+
         /// @returns The strings that contain extended ASCII characters, but are not encoded.
         [[nodiscard]]
         const std::vector<string_info>& get_unencoded_ext_ascii_strings() const noexcept
@@ -912,6 +925,22 @@ namespace i18n_check
         static std::vector<std::wstring> load_matches(std::wstring_view resource,
                                                       const std::wregex& regEx);
 
+        /// @returns @c true if a string could be confusing for translators if
+        ///     no context is provided.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_string_ambiguous(std::wstring_view str);
+
+        /// @returns @c true if a string contains an article in front of dynamic content.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_string_article_issue(std::wstring_view str);
+
+        /// @returns @c true if a string is a pronoun.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_string_pronoun(std::wstring_view str);
+
       protected:
         /// @returns @c true if the next word in @c commentBlock is a suppression command,
         ///     along with the position of the end of the suppressed block of code.
@@ -961,12 +990,6 @@ namespace i18n_check
                 }
             return false;
             }
-
-        /// @returns @c true if a string could be confusing for translators if
-        ///     no context is provided.
-        /// @param str The string to review.
-        [[nodiscard]]
-        static bool is_string_ambiguous(std::wstring_view str);
 
         /// @returns @c true if a string appears to contain sections that are being sliced at
         ///     runtime. This is deduced from looking at embedded tabs, pipes (between words),
@@ -1275,6 +1298,7 @@ namespace i18n_check
         std::vector<string_info> m_not_available_for_localization_strings;
         std::vector<string_info> m_multipart_strings;
         std::vector<string_info> m_faux_plural_strings;
+        std::vector<string_info> m_article_issue_strings;
         std::vector<string_info> m_deprecated_macros;
         std::vector<string_info> m_unencoded_strings;
         std::vector<string_info> m_printf_single_numbers;

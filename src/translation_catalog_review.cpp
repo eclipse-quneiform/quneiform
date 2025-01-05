@@ -107,16 +107,14 @@ namespace i18n_check
                 {
                 if (has_surrounding_spaces(catEntry.second.m_source))
                     {
-                    catEntry.second.m_issues.emplace_back(
-                        translation_issue::concatenation_issue,
-                        catEntry.second.m_source);
+                    catEntry.second.m_issues.emplace_back(translation_issue::concatenation_issue,
+                                                          catEntry.second.m_source);
                     }
                 if (!catEntry.second.m_source_plural.empty() &&
                     has_surrounding_spaces(catEntry.second.m_source_plural))
                     {
-                    catEntry.second.m_issues.emplace_back(
-                        translation_issue::concatenation_issue,
-                        catEntry.second.m_source_plural);
+                    catEntry.second.m_issues.emplace_back(translation_issue::concatenation_issue,
+                                                          catEntry.second.m_source_plural);
                     }
                 }
             if (static_cast<bool>(m_review_styles & check_needing_context))
@@ -141,6 +139,15 @@ namespace i18n_check
                 if (is_string_faux_plural(catEntry.second.m_source))
                     {
                     catEntry.second.m_issues.emplace_back(translation_issue::pluralization,
+                                                          catEntry.second.m_source);
+                    }
+                }
+            if (static_cast<bool>(m_review_styles & check_articles_proceeding_placeholder))
+                {
+                if (is_string_article_issue(catEntry.second.m_source) ||
+                    is_string_pronoun(catEntry.second.m_source))
+                    {
+                    catEntry.second.m_issues.emplace_back(translation_issue::article_issue,
                                                           catEntry.second.m_source);
                     }
                 }

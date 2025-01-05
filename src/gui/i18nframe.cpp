@@ -787,6 +787,8 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
             excludeFlag(L"[urlInL10NString]", i18n_check::review_style::check_l10n_contains_url);
             excludeFlag(L"[multipartString]", i18n_check::review_style::check_multipart_strings);
             excludeFlag(L"[pluralization]", i18n_check::review_style::check_pluaralization);
+            excludeFlag(L"[articleOrPronoun]",
+                        i18n_check::review_style::check_articles_proceeding_placeholder);
             excludeFlag(L"[excessiveNonL10NContent]",
                         i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
             excludeFlag(L"[concatenatedStrings]",

@@ -186,6 +186,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
                  node->m_warningId == L"[numberAssignedToId]" ||
                  node->m_warningId == L"[L10NStringNeedsContext]" ||
                  node->m_warningId == L"[urlInL10NString]" ||
+                 node->m_warningId == L"[articleOrPronoun]" ||
                  node->m_warningId == L"[excessiveNonL10NContent]" ||
                  node->m_warningId == L"[concatenatedStrings]" ||
                  node->m_warningId == L"[notL10NAvailable]" ||

@@ -168,6 +168,19 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
+                if (m_review_styles & check_articles_proceeding_placeholder &&
+                    (is_string_article_issue(tableEntry.second) ||
+                     is_string_pronoun(tableEntry.second)))
+                    {
+                    m_article_issue_strings.emplace_back(
+                        tableEntry.second,
+                        string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                                std::wstring{}, std::wstring{}),
+                        m_file_name,
+                        std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
+                                       std::wstring::npos));
+                    }
+
                 if ((m_review_styles & check_l10n_concatenated_strings) &&
                     has_surrounding_spaces(tableEntry.second))
                     {

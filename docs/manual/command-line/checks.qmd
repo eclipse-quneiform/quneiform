@@ -179,13 +179,14 @@ This is performed on *gettext* \*.po files.
 
 Check for strings that appear to contain multiple parts that are being sliced at runtime.
 
-This is performed on *gettext* \*.po files.
-
 - `pluralization`
 
 Check for strings being used for both singular and plural that should be use different variations.
 
-This is performed on *gettext* \*.po files.
+- `articleOrPronoun`
+
+Check for strings with an article (e.g., "the," "a") in front of a formatting placeholder.
+Also checks for pronouns being used as individual strings.
 
 - `lengthInconsistency`
 

@@ -1141,6 +1141,11 @@ namespace i18n_check
                 {
                 m_faux_plural_strings.push_back(str);
                 }
+            if ((m_review_styles & check_articles_proceeding_placeholder) &&
+                (is_string_article_issue(str.m_string) || is_string_pronoun(str.m_string)))
+                {
+                m_article_issue_strings.push_back(str);
+                }
             if ((m_review_styles & check_l10n_contains_url) &&
                 (std::regex_search(str.m_string, results, m_url_email_regex) ||
                  std::regex_search(str.m_string, results, m_us_phone_number_regex) ||
@@ -1648,6 +1653,26 @@ namespace i18n_check
         {
         static const std::wregex multiConsecSpaces{ LR"(([ ]{2,}|\\t))" };
         return load_matches(str, multiConsecSpaces).size() > 2;
+        }
+
+    //--------------------------------------------------
+    bool i18n_review::is_string_pronoun(std::wstring_view str)
+        {
+        static const std::wregex pronouns{ LR"(^\s*(he|she|him|her|they)\s*$)",
+                                           std::regex_constants::icase };
+
+        return std::regex_match(str.cbegin(), str.cend(), pronouns);
+        }
+
+    //--------------------------------------------------
+    bool i18n_review::is_string_article_issue(std::wstring_view str)
+        {
+        // assuming % or { is a dynamic placeholder may yield false positives,
+        // but them proceeding an article when not a placeholder would be very rare
+        static const std::wregex articleAndPlaceholderRegex{ LR"(\b(a|an|the)\s+[%{])",
+                                                             std::regex_constants::icase };
+
+        return (load_matches(str, articleAndPlaceholderRegex).size() > 0);
         }
 
     //--------------------------------------------------
@@ -2162,6 +2187,7 @@ namespace i18n_check
         m_localizable_strings_with_halfwidths.clear();
         m_multipart_strings.clear();
         m_faux_plural_strings.clear();
+        m_article_issue_strings.clear();
         m_not_available_for_localization_strings.clear();
         m_marked_as_non_localizable_strings.clear();
         m_internal_strings.clear();

@@ -88,17 +88,22 @@ This check should be ran when modernizing legacy software.
 
 Refer to @sec-pluralization for an overview of this issue.
 
-**Suspect i18n function usage**: select this to check for suspect usage of i18n functions.
+**Articles/pronouns mixed with dynamic content**: select this to check for strings with an article (e.g., "the," "a") in front of a formatting placeholder.
+Additionally, this will check for pronouns being used as individual strings.
+
+Refer to @sec-articles and @sec-pronouns for an overview of this issue.
+
+**Suspect i18n usage**: select this to check for suspect usage of i18n functions and project settings.
 
 This will check for issues such as:
 
-- String literals being passed as the string argument to `wxGetTranslation()`.\
-  (This is incorrect, as this function is meant for variables instead of string literals.)
 - Usage of the Win32 function `::LoadString()`.\
   It is recommended to use other functions (e.g., `CString::LoadString()`) that are not limited to fixed buffer sizes; otherwise, translated strings may become truncated.
 - Context arguments passed to l10n functions (e.g., `tr()`) that are longer than 32 characters.\
   This may indicate that the context and translatable string arguments are reversed.
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
+- macOS Info.plist files not including any `CFBundleLocalizations` keys.\
+  Without these keys, translations will not be loaded by the application at runtime.
 
 **Check for ambiguous strings that lack a translator comment**: select this to check for possibly ambiguous strings that lack a translator comment.
 *gettext*- and *Qt*-style comments are searched for, which includes formats such as "// TRANSLATORS: " and "//:".
@@ -106,7 +111,7 @@ This will check for issues such as:
 A string will be considered ambiguous if:
 
 - A single word in all caps.
-- A single word with multiple punctuation marks embedded in it
+- A single word with multiple punctuation marks embedded in it.
 - It contains placeholder text (e.g., "###").
 - A short string with a `printf` or positional argument (e.g., "%2").
 - A longer string with multiple `printf` or positional arguments.

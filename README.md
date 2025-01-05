@@ -22,6 +22,7 @@ Refer to the [manual](docs/manual/book/quneiform.pdf) for full documentation.
 - C code
 - C++ code ('98 and modern C++)
 - Windows resource files (\*.rc)
+- macOS application Info.plist files
 
 Static analysis and pseudo-translation are available for:
 
@@ -79,8 +80,10 @@ The command line and GUI versions provide the following checks:
 - Font issues in Windows resource files:
   - Dialogs not using "MS Shell Dlg" or "MS Shell Dlg 2."
   - Dialogs with non-standard font sizes.
+- Info.plist files not including any `CFBundleLocalizations` keys.
 
 Code formatting and other issues can also be checked for, such as:
+
 - Trailing spaces at the end of a line.
 - Tabs (instead of spaces).
 - Lines longer than 120 characters.
@@ -179,6 +182,9 @@ loaded by your application for integration testing.
                            being sliced at runtime.
   pluralization:           Check for strings being used for both singular and plural that
                            should be use different variations.
+  articleOrPronoun:        Check for strings with an article (e.g., the, a) in front of a
+                           formatting placeholder.
+                           Also checks for pronouns being used as individual strings.
 
 --disable: Which checks to not perform. (Refer to options available above.)
            This will override any options passed to "--enable".

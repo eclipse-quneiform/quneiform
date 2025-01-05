@@ -32,8 +32,8 @@ int main(int argc, char* argv[])
         ("enable",
          "Which checks to perform (any combination of: "
          "allI18N, allL10N, allCodeFormatting, suspectL10NString, suspectL10NUsage, suspectI18NUsage, "
-         "urlInL10NString, notL10NAvailable, deprecatedMacro, nonUTF8File, transInconsistency, "
-         "numberInconsistency, lengthInconsistency, L10NStringNeedsContext, UTF8FileWithBOM, "
+         "urlInL10NString, notL10NAvailable, deprecatedMacro, nonUTF8File, transInconsistency, articleOrPronoun"
+         "numberInconsistency, multipartString, lengthInconsistency, L10NStringNeedsContext, UTF8FileWithBOM, "
          "unencodedExtASCII, pluralization, printfSingleNumber, concatenatedStrings, excessiveNonL10NContent,"
          "numberAssignedToId, dupValAssignedToIds, malformedString, fontIssue, printfMismatch, "
          "acceleratorMismatch, trailingSpaces, tabs, wideLine, commentMissingSpace)",
@@ -260,6 +260,10 @@ int main(int argc, char* argv[])
                 {
                 rs |= i18n_check::review_style::check_pluaralization;
                 }
+            else if (r == "articleOrPronoun")
+                {
+                rs |= i18n_check::review_style::check_articles_proceeding_placeholder;
+                }
             else if (r == "concatenatedStrings")
                 {
                 rs |= i18n_check::review_style::check_l10n_concatenated_strings;
@@ -407,6 +411,10 @@ int main(int argc, char* argv[])
             else if (r == "pluralization")
                 {
                 rs = rs & ~i18n_check::review_style::check_pluaralization;
+                }
+            else if (r == "articleOrPronoun")
+                {
+                rs = rs & ~i18n_check::review_style::check_articles_proceeding_placeholder;
                 }
             else if (r == "concatenatedStrings")
                 {

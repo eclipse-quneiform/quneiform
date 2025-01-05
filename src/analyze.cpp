@@ -160,11 +160,7 @@ namespace i18n_check
             const file_review_type fileType = get_file_type(file);
 
             std::filesystem::path outPath = std::filesystem::path{ file };
-#if CHECK_GCC_VERSION(12, 2, 1)
             outPath.replace_filename(L"pseudo_" + outPath.filename().wstring());
-#else
-            outPath.replace_filename("pseudo_" + outPath.filename().string());
-#endif
 
             // change copy of PO template files to PO files
             if (outPath.extension().compare(L".pot") == 0)
@@ -311,11 +307,7 @@ namespace i18n_check
 #ifdef wxVERSION_NUMBER
                     const std::wstring str = [&file]()
                     {
-    #if CHECK_GCC_VERSION(12, 2, 1)
                         wxFile ifs(file.wstring());
-    #else
-                        wxFile ifs(file.string());
-    #endif
                         wxString fileContents;
                         if (ifs.IsOpened())
                             {
@@ -399,6 +391,7 @@ namespace i18n_check
                 << ((m_cpp->get_style() & check_l10n_contains_url) ? L"urlInL10NString\n" : L"")
                 << ((m_cpp->get_style() & check_multipart_strings) ? L"multipartString\n" : L"")
                 << ((m_cpp->get_style() & check_pluaralization) ? L"pluralization\n" : L"")
+                << ((m_cpp->get_style() & check_articles_proceeding_placeholder) ? L"articleOrPronoun\n" : L"")
                 << ((m_cpp->get_style() & check_l10n_contains_excessive_nonl10n_content) ?
                         L"excessiveNonL10NContent\n" :
                         L"")
@@ -510,6 +503,17 @@ namespace i18n_check
                    << L"\"\t[pluralization]\n";
             }
 
+        for (const auto& val : m_rc->get_article_issue_strings())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"An article is proceeding dynamic content, or a pronoun is being "
+                         "formatted into a larger message. It is recommended to create "
+                         "multiple versions of this string for all possible contexts instead "
+                         "of using dynamic placeholders.")
+                   << L"\"\t[articleOrPronoun]\n";
+            }
+
         for (const auto& val : m_rc->get_localizable_strings_with_halfwidths())
             {
             report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
@@ -608,6 +612,16 @@ namespace i18n_check
                                 "being sliced at runtime. Consider splitting each section into "
                                 "a separate resource.")
                            << "\"\t[multipartString]\n";
+                    }
+                else if (issue.first == translation_issue::article_issue)
+                    {
+                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                           << issue.second << L"\"\t\""
+                           << _(L"An article is proceeding dynamic content, or a pronoun is being "
+                                 "formatted into a larger message. It is recommended to create "
+                                 "multiple versions of this string for all possible contexts instead "
+                                 "of using dynamic placeholders.")
+                           << "\"\t[articleOrPronoun]\n";
                     }
                 else if (issue.first == translation_issue::pluralization)
                     {
@@ -774,6 +788,17 @@ namespace i18n_check
                             "Consider using a pluralizing function (if available) or "
                             "reword the message.");
                 report << L"\"\t[pluralization]\n";
+                }
+
+            for (const auto& val : sourceParser->get_article_issue_strings())
+                {
+                report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                    << _(L"An article is proceeding dynamic content, or a pronoun is being "
+                          "formatted into a larger message. It is recommended to create "
+                          "multiple versions of this string for all possible contexts instead "
+                          "of using dynamic placeholders.")
+                    << L"\"\t[articleOrPronoun]\n";
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_with_halfwidths())

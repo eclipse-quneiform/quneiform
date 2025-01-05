@@ -113,8 +113,6 @@ namespace i18n_string_util
             true : (ch == 0xFE57) ? // small
             true : (ch == 0x00A1) ? // inverted
             true : (ch == 0xFF01) ? // fullwidth
-            true : (ch == 0xFE57) ? // small
-            true : (ch == 0xFE15) ? // presentation
             true : false;
         // clang-format on
         }
@@ -207,6 +205,22 @@ namespace i18n_string_util
         try
             {
             str = std::regex_replace(str, printfRegex, L"$1");
+            return;
+            }
+        catch (...)
+            {
+            return;
+            }
+        }
+
+    /// @brief Removes positional commands in @c str (in-place).
+    /// @param str The string to have positional commands removed from.
+    inline void remove_positional_commands(std::wstring& str)
+        {
+        static const std::wregex posRegex{ LR"([%](n|[L]?[0-9]+|Ln))" };
+        try
+            {
+            str = std::regex_replace(str, posRegex, L"");
             return;
             }
         catch (...)

@@ -162,6 +162,7 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     m_urlInL10NString = (m_options & i18n_check::review_style::check_l10n_contains_url);
     m_multipartString = (m_options & i18n_check::review_style::check_multipart_strings);
     m_pluralization = (m_options & i18n_check::review_style::check_pluaralization);
+    m_articles = (m_options & i18n_check::review_style::check_articles_proceeding_placeholder);
     m_excessiveNonTranslatableContentInL10NString =
         (m_options & i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
     m_concatenatedStrings = (m_options & i18n_check::review_style::check_l10n_concatenated_strings);
@@ -277,6 +278,10 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
     if (m_pluralization)
         {
         m_options |= i18n_check::review_style::check_pluaralization;
+        }
+    if (m_articles)
+        {
+        m_options |= i18n_check::review_style::check_articles_proceeding_placeholder;
         }
     if (m_concatenatedStrings)
         {
@@ -644,8 +649,16 @@ void NewProjectDialog::CreateControls()
                      wxGBPosition(currentRow++, 1), wxGBSpan{});
 
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
-                                    _(L"Suspect i18n function usage"), wxDefaultPosition,
-                                    wxDefaultSize, 0, wxGenericValidator(&m_suspectI18NUsage)),
+                                    _(L"Articles/pronouns mixed with dynamic content"),
+                                    wxDefaultPosition, wxDefaultSize, 0,
+                                    wxGenericValidator(&m_articles)),
+                     wxGBPosition(currentRow, 0), wxGBSpan{});
+        gbSizer->Add(buildCodeLabel(L"articleOrPronoun", checkOptionsSizer->GetStaticBox()),
+                     wxGBPosition(currentRow++, 1), wxGBSpan{});
+
+        gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
+                                    _(L"Suspect i18n usage"), wxDefaultPosition, wxDefaultSize, 0,
+                                    wxGenericValidator(&m_suspectI18NUsage)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});
         gbSizer->Add(buildCodeLabel(L"suspectI18NUsage", checkOptionsSizer->GetStaticBox()),
                      wxGBPosition(currentRow++, 1), wxGBSpan{});

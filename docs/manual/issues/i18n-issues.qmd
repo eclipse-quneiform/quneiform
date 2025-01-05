@@ -52,6 +52,50 @@ In this example, the solution is to create two full (albeit lengthy) string reso
 
 Checking the option [**Concatenated strings**](#source-code-options) will warn about any possible concatenated strings.
 
+## Articles and Dynamic Content {#sec-articles}
+
+An article (e.g., "an", "the") proceeding dynamic content in a string presents grammatical issues for translators.
+For example, consider this string:
+
+"Find the {}"
+
+In the above example, the "{}" placeholder is probably being used in multiple contexts.
+The issue with this is that many languages have multiple articles that change based on the noun they relate to [@{celek:2019}21].
+In the case of German, translating "the" as "die," "der," or "das" is bound to be incorrect for some of the instances where this string is used.
+
+This can even be an issue for English. For example, with this resource:
+
+"A %s is required"
+
+"A" will be grammatically incorrect if "%s" is replaced with a word starting with a vowel sound.
+
+It is better to have multiple string resources, one for each noun variation, rather than relying on placeholders.
+This ensures grammatically correct translations, as well as removing ambiguity for the translators.
+
+## Pronouns and Dynamic Content {#sec-pronouns}
+
+Strings that consist only of a pronoun (e.g., "him," "she") will present grammatical problems if being formatted into larger messages.
+It is recommended to use multiple string resources with each pronoun variation instead replacing placeholders with these values.
+Another option is to use gender-neautral language instead of relying on a list of dynamic pronouns.
+
+As an example, assume we have these string resources:
+
+"her"
+"him"
+"them"
+
+And we have another message which dynamically replaces "%s" with one of the above values:
+
+"Provide %s the reset link"
+
+First, we should remove all three of the pronoun strings.
+Then we can provide three versions of this message, replacing the "%s" with each of the pronouns.
+This will ensure that translators will have full control over how to translate the message when the gender changes.
+
+Another option is to replace the message with gender-neautral language:
+
+"Provide **the user** the reset link"
+
 ## Pluralization {#sec-pluralization}
 
 The same message being used for both singular and plural situations presents issues because grammar issues between the source and target languages.
@@ -103,7 +147,7 @@ Checking the options [**Translatable strings that shouldn\'t be**](#source-code-
 
 ## Multipart Strings {#sec-multipart-strings}
 
-Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@madden:2019].
+Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@{madden:2019}65-66].
 
 For example, consider a resource string such as:
 

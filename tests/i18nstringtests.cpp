@@ -15,6 +15,58 @@ using namespace i18n_check;
 using namespace Catch::Matchers;
 
 // clang-format off
+TEST_CASE("Articles", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review reviewer{ false };
+    SECTION("Printf")
+        {
+        CHECK(reviewer.is_string_article_issue(L"Find the %d"));
+        }
+    SECTION("Modern formattings")
+        {
+        CHECK(reviewer.is_string_article_issue(L"Find the {0}"));
+        }
+    SECTION("Positionals")
+        {
+        CHECK(reviewer.is_string_article_issue(L"Find the %1"));
+        }
+    }
+
+TEST_CASE("Pronouns", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review reviewer{ false };
+    SECTION("English")
+        {
+        CHECK(reviewer.is_string_pronoun(L"HE"));
+        CHECK(reviewer.is_string_pronoun(L" she"));
+        CHECK(reviewer.is_string_pronoun(L"they  "));
+        }
+    }
+
+TEST_CASE("Ambiguous", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review reviewer{ false };
+    SECTION("Abbreviations")
+        {
+        CHECK(reviewer.is_string_ambiguous(L"Std. dev. and corr. matr"));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"business.com and company.org."));
+        }
+    SECTION("Printf")
+        {
+        CHECK(reviewer.is_string_ambiguous(L"%s is not a %d"));
+        // although meets critia, this is generally self explanatory
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"%d of %lu"));
+        }
+    SECTION("Positionals")
+        {
+        std::wstring str{ L"%1 of %2" };
+        i18n_string_util::remove_positional_commands(str);
+        CHECK(str ==  std::wstring{ L" of " });
+        CHECK(reviewer.is_string_ambiguous(L"%1 is not a %2"));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"%1 of %2"));
+        }
+    }
+
 TEST_CASE("untranslatable", "[i18nreview]")
     {
     i18n_check::cpp_i18n_review reviewer{ false };
