@@ -67,7 +67,7 @@ This can even be an issue for English. For example, with this resource:
 
 "A %s is required"
 
-"A" will be grammatically incorrect if "%s" is replaced with a word starting with a vowel sound.
+'A' will be grammatically incorrect if "%s" is replaced with a word starting with a vowel sound.
 
 It is better to have multiple string resources, one for each noun variation, rather than relying on placeholders.
 This ensures grammatically correct translations, as well as removing ambiguity for the translators.
@@ -76,23 +76,27 @@ This ensures grammatically correct translations, as well as removing ambiguity f
 
 Strings that consist only of a pronoun (e.g., "him," "she") will present grammatical problems if being formatted into larger messages.
 It is recommended to use multiple string resources with each pronoun variation instead replacing placeholders with these values.
-Another option is to use gender-neautral language instead of relying on a list of dynamic pronouns.
+Another option is to use gender-neutral language instead of relying on a list of dynamic pronouns [@{perezsaenz}33].
 
 As an example, assume we have these string resources:
 
 "her"
+
 "him"
+
 "them"
 
-And we have another message which dynamically replaces "%s" with one of the above values:
+And we have another message:
 
 "Provide %s the reset link"
+
+which dynamically replaces "%s" with one of the above values.
 
 First, we should remove all three of the pronoun strings.
 Then we can provide three versions of this message, replacing the "%s" with each of the pronouns.
 This will ensure that translators will have full control over how to translate the message when the gender changes.
 
-Another option is to replace the message with gender-neautral language:
+Another option is to replace the message with gender-neutral language:
 
 "Provide **the user** the reset link"
 
