@@ -2272,6 +2272,7 @@ namespace i18n_check
         i18n_string_util::remove_printf_commands(strToReview);
         i18n_string_util::remove_escaped_unicode_values(strToReview);
         string_util::trim(strToReview);
+        bool allPunctOrSpaces{ true };
         // strip control characters (these wreak havoc with the regex parser)
         for (auto& chr : strToReview)
             {
@@ -2279,10 +2280,14 @@ namespace i18n_check
                 {
                 chr = L' ';
                 }
+            if (allPunctOrSpaces && !std::iswdigit(chr) && !std::iswpunct(chr))
+                {
+                allPunctOrSpaces = false;
+                }
             }
         string_util::trim(strToReview);
         // something like "%d%%" should be translatable
-        if (strToReview == L"%%")
+        if (allPunctOrSpaces && strToReview.find(L"%%") != std::wstring::npos)
             {
             return std::make_pair(false, strToReview.length());
             }
