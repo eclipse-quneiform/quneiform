@@ -827,10 +827,14 @@ namespace i18n_check
                     report << _(L"Localizable string being assigned to non-user facing variable: ")
                            << val.m_usage.m_value << L"\"\t";
                     }
-                else
+                else if (!val.m_usage.m_value.empty())
                     {
                     report << _(L"Localizable string being assigned to: ") << val.m_usage.m_value
                            << L"\"\t";
+                    }
+                else
+                    {
+                    report << _(L"Localizable string being used within non-user element.") << L"\"\t";
                     }
                 report << L"[suspectL10NUsage]\n";
                 }
@@ -851,10 +855,14 @@ namespace i18n_check
                     report << _(L"String not available for translation assigned to variable: ")
                            << val.m_usage.m_value << L"\"\t";
                     }
-                else
+                else if (!val.m_usage.m_value.empty())
                     {
                     report << _(L"String not available for translation assigned to: ")
                            << val.m_usage.m_value << L"\"\t";
+                    }
+                else
+                    {
+                    report << _(L"String not available for translation.") << L"\"\t";
                     }
                 report << L"[notL10NAvailable]\n";
                 }
