@@ -251,11 +251,19 @@ TEST_CASE("Raw Strings", "[cpp][i18n]")
     SECTION("Raw Strings")
         {
         cpp_i18n_review cpp(false);
-        const wchar_t* code = L"auto var = LR\"(Hello \"world!\")\");";
+        const wchar_t* code = L"auto var = LR\"(Hello \"world!\")\";";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == std::wstring{ L"Hello \"world!\"" });
+        }
+    SECTION("Raw String in Multiple Arguments")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = L"auto var = _DT(LR\"(Hello \"world!\")\", DT::NoExplaination, L\"Some Comment\");";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         }
     }
 

@@ -419,6 +419,18 @@ namespace i18n_check
                     process_quote(cppText, end, functionVarNamePos, variableName, functionName,
                                   variableType, deprecatedMacroEncountered, parameterPosition,
                                   *nextChar == L',');
+                    // closing quote was just cleared; now, clear the opening one
+                    if (isRawString && std::prev(cppText, 2) >= m_file_start &&
+                        *std::prev(cppText) == L'(' && *std::prev(cppText, 2) == L'\"')
+                        {
+                        *std::prev(cppText, 2) = L' ';
+                        *std::prev(cppText) = L' ';
+                        }
+                    else if (std::prev(cppText) >= m_file_start &&
+                             *std::prev(cppText) == L'\"')
+                        {
+                        *std::prev(cppText) = L' ';
+                        }
                     cppText = std::next(
                         end, (isRawString ? get_raw_step_size(currentRawStringMarker) + 1 : 1));
                     if (cppText >= endSentinel)
