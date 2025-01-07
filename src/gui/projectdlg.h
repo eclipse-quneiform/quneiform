@@ -40,10 +40,14 @@
 #include <wx/valtext.h>
 #include <wx/wx.h>
 
+/// @brief Which additional pages to show on the dialog when shown.
 enum EditorPageOptions
     {
+    /// @brief No extra pages.
     NoExtraPages = 0,
+    /// @brief Input file/folder page.
     FilePage = (static_cast<int64_t>(1) << 0),
+    /// @brief Editor page.
     EditorPage = (static_cast<int64_t>(1) << 1)
     };
 
