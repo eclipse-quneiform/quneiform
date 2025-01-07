@@ -693,7 +693,7 @@ void I18NFrame::InitControls()
                                 }
                             // wxFile::ReadAll may actually fail if loading ANSI files as UTF-8
                             // (usually the default under Linux), but returns true with no content.
-                            // So if the read text is emtpy, try loading it with the Scintilla
+                            // So if the read text is empty, try loading it with the Scintilla
                             // control which will import it as best as it can.
                             // From there, we will only show it as read-only and warn about
                             // it in the log window.
