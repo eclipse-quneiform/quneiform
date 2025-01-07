@@ -40,6 +40,13 @@
 #include <wx/valtext.h>
 #include <wx/wx.h>
 
+enum EditorPageOptions
+    {
+    NoExtraPages = 0,
+    FilePage = (static_cast<int64_t>(1) << 0),
+    EditorPage = (static_cast<int64_t>(1) << 1)
+    };
+
 /** @brief Prompt for selecting a folder,
         a file filter for files to select from it,
         and whether the search should be recursive.*/
@@ -50,13 +57,13 @@ class NewProjectDialog final : public wxDialog
         @param parent The parent window.
         @param id The window ID.
         @param caption The title of the export dialog.
-        @param showFileOptions Whether to show the file and folder selection entries.
+        @param EditorPageOptions Which extra pages to show.
         @param pos The screen position of the window.
         @param size The window size.
         @param style The window style (i.e., decorations and flags).*/
     explicit NewProjectDialog(wxWindow* parent, wxWindowID id = wxID_ANY,
                               const wxString& caption = _(L"New Project"),
-                              const bool showFileOptions = true,
+                              const EditorPageOptions extraPages = NoExtraPages,
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN |
@@ -89,6 +96,17 @@ class NewProjectDialog final : public wxDialog
         options.m_minWordsForClassifyingUnavailableString =
             MinWordsForClassifyingUnavailableString();
         options.m_minCppVersion = MinCppVersion();
+
+        for (const auto& encoding : m_fontEncodings)
+            {
+            if (encoding.second == m_fallbackEncodingStr)
+                {
+                m_fallbackEncoding = encoding.first;
+                break;
+                }
+            }
+
+        options.m_fallbackEncoding = m_fallbackEncoding;
         return options;
         }
 
@@ -292,7 +310,7 @@ class NewProjectDialog final : public wxDialog
     constexpr static int ID_CHECK_TRANS_LONGER_CHECK = wxID_HIGHEST + 9;
     constexpr static int ID_CHECK_STRINGS_NOT_AVAILABLE = wxID_HIGHEST + 10;
 
-    bool m_showFileOptions{ true };
+    EditorPageOptions m_extraPages{ NoExtraPages };
 
     wxString m_filePath;
     wxArrayString m_excludedPaths;
@@ -346,6 +364,11 @@ class NewProjectDialog final : public wxDialog
     bool m_commentMissingSpace{ true };
     // checks
     int64_t m_options{ i18n_check::review_style::no_checks };
+
+    // editor options
+    std::map<int, wxString> m_fontEncodings;
+    int m_fallbackEncoding{ wxFONTENCODING_SYSTEM };
+    wxString m_fallbackEncodingStr{ _(L"System Default") };
 
     wxStaticText* m_transLongerThresholdLabel{ nullptr };
     wxStaticText* m_transLongerThresholdtMinLabel{ nullptr };

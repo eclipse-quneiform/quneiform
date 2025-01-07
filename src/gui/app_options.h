@@ -20,6 +20,7 @@
 
 #include "../i18n_review.h"
 #include "../pseudo_translate.h"
+#include <wx/font.h>
 #include <wx/wx.h>
 #include <wx/xml/xml.h>
 #include <wx/xrc/xmlres.h>
@@ -62,6 +63,8 @@ struct I18NOptions
     bool m_windowMaximized{ false };
     wxSize m_windowSize{ 1200, 1000 };
     int m_editorHeight{ 200 };
+
+    int m_fallbackEncoding{ wxFONTENCODING_SYSTEM };
     };
 
     /** @}*/

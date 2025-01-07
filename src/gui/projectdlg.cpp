@@ -16,13 +16,107 @@
 //-------------------------------------------------------------
 NewProjectDialog::NewProjectDialog(
     wxWindow* parent, wxWindowID id /*= wxID_ANY*/, const wxString& caption /*= _(L"New Project")*/,
-    const bool showFileOptions /*= true*/, const wxPoint& pos /*= wxDefaultPosition*/,
-    const wxSize& size /*= wxDefaultSize*/,
+    const EditorPageOptions extraPages /*= NoExtraPages*/,
+    const wxPoint& pos /*= wxDefaultPosition*/, const wxSize& size /*= wxDefaultSize*/,
     long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
-    : m_showFileOptions(showFileOptions)
+    : m_extraPages(extraPages)
     {
     SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
+
+    m_fontEncodings = {
+        { wxFONTENCODING_SYSTEM, _(L"System Default") },
+        { wxFONTENCODING_ISO8859_6, _(L"Arabic") },
+        { wxFONTENCODING_MACARABIC, _(L"Arabic (Mac)") },
+        { wxFONTENCODING_CP1256, _(L"Arabic (Windows)") },
+        { wxFONTENCODING_MACARABICEXT, _(L"Arabic extended (Mac)") },
+        { wxFONTENCODING_MACARMENIAN, _(L"Armenian (Mac)") },
+        { wxFONTENCODING_ISO8859_4, _(L"Baltic (Latin 4)") },
+        { wxFONTENCODING_ISO8859_13, _(L"Baltic (Latin 7)") },
+        { wxFONTENCODING_CP1257, _(L"Baltic (Windows)") },
+        { wxFONTENCODING_MACBENGALI, _(L"Bengali (Mac)") },
+        { wxFONTENCODING_MACBURMESE, _(L"Burmese (Mac)") },
+        { wxFONTENCODING_MACCELTIC, _(L"Celtic (Mac)") },
+        { wxFONTENCODING_ISO8859_2, _(L"Central and East European (Latin 2)") },
+        { wxFONTENCODING_CP1250, _(L"Central European (Windows)") },
+        { wxFONTENCODING_MACCROATIAN, _(L"Croatian (Mac)") },
+        { wxFONTENCODING_ISO8859_5, _(L"Cyrillic") },
+        { wxFONTENCODING_MACCYRILLIC, _(L"Cyrillic (Mac)") },
+        { wxFONTENCODING_CP855, _(L"Cyrillic (primarily Russian)") },
+        { wxFONTENCODING_CP1251, _(L"Cyrillic (Windows)") },
+        { wxFONTENCODING_MACDEVANAGARI, _(L"Devanagari (Mac)") },
+        { wxFONTENCODING_MACDINGBATS, _(L"Dingbats (Mac)") },
+        { wxFONTENCODING_ISO8859_3, _(L"Esperanto (Latin 3)") },
+        { wxFONTENCODING_MACETHIOPIC, _(L"Ethiopic (Mac)") },
+        { wxFONTENCODING_EUC_JP, _(L"Extended Unix Codepage for Japanese") },
+        { wxFONTENCODING_MACGAELIC, _(L"Gaelic (Mac)") },
+        { wxFONTENCODING_MACGEORGIAN, _(L"Georgian (Mac)") },
+        { wxFONTENCODING_ISO8859_7, _(L"Greek") },
+        { wxFONTENCODING_MACGREEK, _(L"Greek (Mac)") },
+        { wxFONTENCODING_CP1253, _(L"Greek (Windows) (8859-7)") },
+        { wxFONTENCODING_MACGUJARATI, _(L"Gujarati (Mac)") },
+        { wxFONTENCODING_MACGURMUKHI, _(L"Gurmukhi (Mac)") },
+        { wxFONTENCODING_ISO8859_8, _(L"Hebrew") },
+        { wxFONTENCODING_MACHEBREW, _(L"Hebrew (Mac)") },
+        { wxFONTENCODING_CP1255, _(L"Hebrew (Windows)") },
+        { wxFONTENCODING_MACICELANDIC, _(L"Icelandic (Mac)") },
+        { wxFONTENCODING_ISO2022_JP, _(L"ISO-2022-JP JIS encoding") },
+        { wxFONTENCODING_MACJAPANESE, _(L"Japanese (Mac)") },
+        { wxFONTENCODING_CP932, _(L"Japanese (Shift-JIS)") },
+        { wxFONTENCODING_SHIFT_JIS, _(L"Japanese Shift JIS") },
+        { wxFONTENCODING_MACKANNADA, _(L"Kannada (Mac)") },
+        { wxFONTENCODING_MACKHMER, _(L"Khmer (Mac)") },
+        { wxFONTENCODING_KOI8, _(L"KOI8 Russian") },
+        { wxFONTENCODING_KOI8_U, _(L"KOI8 Ukrainian") },
+        { wxFONTENCODING_EUC_KR, _(L"Korean") },
+        { wxFONTENCODING_JOHAB, _(L"Korean (Johab)") },
+        { wxFONTENCODING_CP1361, _(L"Korean (Johab) (Windows)") },
+        { wxFONTENCODING_MACKOREAN, _(L"Korean (Mac)") },
+        { wxFONTENCODING_CP949, _(L"Korean (Unified Hangul Code)") },
+        { wxFONTENCODING_MACLAOTIAN, _(L"Laotian (Mac)") },
+        { wxFONTENCODING_CP1252, _(L"Latin 1; Western European (Windows)") },
+        { wxFONTENCODING_CP852, _(L"Latin 2; Central European (DOS)") },
+        { wxFONTENCODING_MACCENTRALEUR, _(L"Latin 2; Central European (Mac)") },
+        { wxFONTENCODING_ISO8859_14, _(L"Latin 8") },
+        { wxFONTENCODING_ISO8859_15, _(L"Latin 9 (Latin 0, includes Euro symbol)") },
+        { wxFONTENCODING_MACMALAJALAM, _(L"Malajalam (Mac)") },
+        { wxFONTENCODING_MACMONGOLIAN, _(L"Mongolian (Mac)") },
+        { wxFONTENCODING_CP850, _(L"Multilingual Latin 1; Western European (DOS)") },
+        { wxFONTENCODING_MACORIYA, _(L"Oriya (Mac)") },
+        { wxFONTENCODING_MACROMAN, _(L"Roman; Western European (Mac)") },
+        { wxFONTENCODING_MACROMANIAN, _(L"Romanian (Mac)") },
+        { wxFONTENCODING_CP866, _(L"Russian; Cyrillic (DOS)") },
+        { wxFONTENCODING_GB2312, _(L"Simplified Chinese") },
+        { wxFONTENCODING_MACCHINESESIMP, _(L"Simplified Chinese (GB 2312, Mac)") },
+        { wxFONTENCODING_CP936, _(L"Simplified Chinese (GB2312)") },
+        { wxFONTENCODING_MACSINHALESE, _(L"Sinhalese (Mac)") },
+        { wxFONTENCODING_MACSYMBOL, _(L"Symbol (Mac)") },
+        { wxFONTENCODING_MACTAMIL, _(L"Tamil (Mac)") },
+        { wxFONTENCODING_MACTELUGU, _(L"Telugu (Mac)") },
+        { wxFONTENCODING_ISO8859_11, _(L"Thai") },
+        { wxFONTENCODING_MACTHAI, _(L"Thai (Mac)") },
+        { wxFONTENCODING_CP874, _(L"Thai (Windows)") },
+        { wxFONTENCODING_MACTIBETAN, _(L"Tibetan (Mac)") },
+        { wxFONTENCODING_BIG5, _(L"Traditional Chinese") },
+        { wxFONTENCODING_MACCHINESETRAD, _(L"Traditional Chinese (Big5, Mac)") },
+        { wxFONTENCODING_CP950, _(L"Traditional Chinese (Big5)") },
+        { wxFONTENCODING_ISO8859_9, _(L"Turkish (Latin 5)") },
+        { wxFONTENCODING_MACTURKISH, _(L"Turkish (Mac)") },
+        { wxFONTENCODING_CP1254, _(L"Turkish (Windows)") },
+        { wxFONTENCODING_CP437, _(L"United States (DOS)") },
+        { wxFONTENCODING_UTF16, _(L"UTF-16") },
+        { wxFONTENCODING_UTF16BE, _(L"UTF-16 Big Endian Unicode encoding") },
+        { wxFONTENCODING_UTF16LE, _(L"UTF-16 Little Endian Unicode encoding") },
+        { wxFONTENCODING_UTF32, _(L"UTF-32") },
+        { wxFONTENCODING_UTF32BE, _(L"UTF-32 Big Endian Unicode encoding") },
+        { wxFONTENCODING_UTF32LE, _(L"UTF-32 Little Endian Unicode encoding") },
+        { wxFONTENCODING_UTF7, _(L"UTF-7 Unicode encoding") },
+        { wxFONTENCODING_UTF8, _(L"UTF-8 Unicode encoding") },
+        { wxFONTENCODING_VIETNAMESE, _(L"Vietnamese") },
+        { wxFONTENCODING_MACVIATNAMESE, _(L"Vietnamese (Mac)") },
+        { wxFONTENCODING_CP1258, _(L"Vietnamese (Windows)") },
+        { wxFONTENCODING_ISO8859_1, _(L"Western European (Latin 1) ") }
+    };
 
     CreateControls();
     Centre();
@@ -209,8 +303,9 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
 
-    if (m_showFileOptions && (m_filePath.empty() || (!wxFileName::DirExists(m_filePath) &&
-                                                     !wxFileName::FileExists(m_filePath))))
+    if (static_cast<bool>(m_extraPages & FilePage) &&
+        (m_filePath.empty() ||
+         (!wxFileName::DirExists(m_filePath) && !wxFileName::FileExists(m_filePath))))
         {
         wxMessageBox(_(L"Please select a valid file folder."), _(L"Invalid Input"),
                      wxICON_EXCLAMATION | wxOK, this);
@@ -466,6 +561,14 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
         m_exclusionList->SetStrings(m_excludedPaths);
         }
     MinCppVersion(options.m_minCppVersion);
+    // editor options
+    m_fallbackEncoding = options.m_fallbackEncoding;
+    const auto foundEncoding = m_fontEncodings.find(m_fallbackEncoding);
+    if (foundEncoding != m_fontEncodings.cend())
+        {
+        m_fallbackEncodingStr = foundEncoding->second;
+        }
+
     TransferDataToWindow();
 
     UpdateEmbeddedStringsOptions();
@@ -500,12 +603,45 @@ void NewProjectDialog::CreateControls()
     images.push_back(wxArtProvider::GetBitmapBundle(L"ID_CODE", wxART_OTHER, imageSize));
     images.push_back(wxArtProvider::GetBitmapBundle(L"ID_TRANSLATIONS", wxART_OTHER, imageSize));
     images.push_back(wxArtProvider::GetBitmapBundle(L"ID_CHECK", wxART_OTHER, imageSize));
+    images.push_back(wxArtProvider::GetBitmapBundle(wxART_EDIT, wxART_OTHER, imageSize));
     listBook->SetImages(images);
 
     wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
+    // editor options
+    if (static_cast<bool>(m_extraPages & EditorPage))
+        {
+        wxPanel* editorPage =
+            new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+
+        wxArrayString encodings;
+        for (const auto& encoding : m_fontEncodings)
+            {
+            encodings.Add(encoding.second);
+            }
+        encodings.Sort();
+
+        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+
+        wxBoxSizer* encodingSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        encodingSizer->Add(new wxStaticText(editorPage, wxID_STATIC, _(L"Fallback encoding:"),
+                                            wxDefaultPosition, wxDefaultSize),
+                           wxSizerFlags{}.CenterVertical().Border());
+
+        wxChoice* encodingRadioBox =
+            new wxChoice(editorPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, encodings, 0,
+                         wxGenericValidator(&m_fallbackEncodingStr));
+        encodingSizer->Add(encodingRadioBox, wxSizerFlags{}.Border(wxLEFT).Left());
+
+        mainSizer->Add(encodingSizer, wxSizerFlags{}.Expand().Border());
+
+        editorPage->SetSizer(mainSizer);
+        listBook->AddPage(editorPage, _(L"Editor"), false, 4);
+        }
+
     // input options
-    if (m_showFileOptions)
+    if (static_cast<bool>(m_extraPages & FilePage))
         {
         wxPanel* inputPage =
             new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
@@ -758,7 +894,8 @@ void NewProjectDialog::CreateControls()
                        wxSizerFlags{}.Border().Left());
 
         generalSettingsPage->SetSizer(mainSizer);
-        listBook->AddPage(generalSettingsPage, _(L"Source Code"), !m_showFileOptions, 1);
+        listBook->AddPage(generalSettingsPage, _(L"Source Code"),
+                          !(static_cast<bool>(m_extraPages & FilePage)), 1);
         }
 
         // resource files

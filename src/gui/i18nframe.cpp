@@ -606,107 +606,151 @@ void I18NFrame::InitControls()
                  m_resultsDataView->PopupMenu(&menu);
                  }
          });
-    Bind(wxEVT_DATAVIEW_SELECTION_CHANGED,
-         [this](wxDataViewEvent& event)
-         {
-             I18NResultsTreeModelNode* node =
-                 reinterpret_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
+    Bind(
+        wxEVT_DATAVIEW_SELECTION_CHANGED,
+        [this](wxDataViewEvent& event)
+        {
+            I18NResultsTreeModelNode* node =
+                reinterpret_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
 
-             if (node != nullptr)
-                 {
-                 // selecting file name root node
-                 if (node->m_fileName == node->m_warningId)
-                     {
-                     SaveSourceFileIfNeeded();
-                     m_activeSourceFile.clear();
-                     m_editor->SetText(wxString{});
-                     return;
-                     }
+            if (node != nullptr)
+                {
+                m_editor->SetEditable(true);
 
-                 // only prompt about saving if file is different
-                 if (m_activeSourceFile != node->m_fileName)
-                     {
-                     SaveSourceFileIfNeeded();
+                // selecting file name root node
+                if (node->m_fileName == node->m_warningId)
+                    {
+                    SaveSourceFileIfNeeded();
+                    m_activeSourceFile.clear();
+                    m_editor->SetValue(wxString{});
+                    return;
+                    }
 
-                     const wxString fileExt = wxFileName{ node->m_fileName }.GetExt();
+                // only prompt about saving if file is different
+                if (m_activeSourceFile != node->m_fileName)
+                    {
+                    SaveSourceFileIfNeeded();
 
-                     if (fileExt.CmpNoCase(L"cpp") == 0 || fileExt.CmpNoCase(L"c") == 0 ||
-                         fileExt.CmpNoCase(L"h") == 0 || fileExt.CmpNoCase(L"hpp") == 0)
-                         {
-                         m_editor->SetLexer(wxSTC_LEX_CPP);
-                         m_editor->SetKeyWords(
-                             0,
-                             (L"alignas alignof and_eq asm atomic_cancel atomic_commit "
-                              L"atomic_noexcept auto "
-                              "bitand bitor bool break case catch char char8_t char16_t char32_t "
-                              "class compl "
-                              "concept const consteval constexpr constinit const_cast continue "
-                              "co_await "
-                              "co_return co_yield decltype default delete do double dynamic_cast "
-                              "else enum "
-                              "explicit export extern false float for friend goto if inline int "
-                              "long mutable "
-                              "namespace new noexcept not not_eq nullptr operator or or_eq private "
-                              "protected "
-                              "public reflexpr register reinterpret_cast requires return short "
-                              "signed "
-                              "sizeof static static_assert static_cast struct switch synchronized "
-                              "template "
-                              "this thread_local throw true try typedef typeid typename "
-                              "union unsigned using virtual void volatile wchar_t while xor xor_eq "
-                              "final override import module"));
-                         }
-                     else if (fileExt.CmpNoCase(L"po") == 0)
-                         {
-                         m_editor->SetLexer(wxSTC_LEX_PO);
-                         m_editor->SetKeyWords(0, _DT(L"msgid msgstr msgid_plural"));
-                         }
-                     else
-                         {
-                         m_editor->SetLexer(wxSTC_LEX_NULL);
-                         m_editor->SetKeyWords(0, wxString{});
-                         }
+                    const wxString fileExt = wxFileName{ node->m_fileName }.GetExt();
 
-                     m_activeSourceFile = node->m_fileName;
-                     m_editor->LoadFile(node->m_fileName);
-                     }
+                    if (fileExt.CmpNoCase(L"cpp") == 0 || fileExt.CmpNoCase(L"c") == 0 ||
+                        fileExt.CmpNoCase(L"h") == 0 || fileExt.CmpNoCase(L"hpp") == 0)
+                        {
+                        m_editor->SetLexer(wxSTC_LEX_CPP);
+                        m_editor->SetKeyWords(
+                            0,
+                            (L"alignas alignof and_eq asm atomic_cancel atomic_commit "
+                             L"atomic_noexcept auto "
+                             "bitand bitor bool break case catch char char8_t char16_t char32_t "
+                             "class compl "
+                             "concept const consteval constexpr constinit const_cast continue "
+                             "co_await "
+                             "co_return co_yield decltype default delete do double dynamic_cast "
+                             "else enum "
+                             "explicit export extern false float for friend goto if inline int "
+                             "long mutable "
+                             "namespace new noexcept not not_eq nullptr operator or or_eq private "
+                             "protected "
+                             "public reflexpr register reinterpret_cast requires return short "
+                             "signed "
+                             "sizeof static static_assert static_cast struct switch synchronized "
+                             "template "
+                             "this thread_local throw true try typedef typeid typename "
+                             "union unsigned using virtual void volatile wchar_t while xor xor_eq "
+                             "final override import module"));
+                        }
+                    else if (fileExt.CmpNoCase(L"po") == 0)
+                        {
+                        m_editor->SetLexer(wxSTC_LEX_PO);
+                        m_editor->SetKeyWords(0, _DT(L"msgid msgstr msgid_plural"));
+                        }
+                    else
+                        {
+                        m_editor->SetLexer(wxSTC_LEX_NULL);
+                        m_editor->SetKeyWords(0, wxString{});
+                        }
 
-                 if (node->m_line != -1)
-                     {
-                     // if scrolling up, then step back up an extra line so that we can see it
-                     // after adding the annotation beneath it
-                     m_editor->GotoLine((m_editor->GetFirstVisibleLine() < node->m_line) ?
-                                            node->m_line :
-                                            node->m_line - 1);
-                     m_editor->AnnotationSetText(node->m_line - 1, node->m_explaination);
-                     m_editor->AnnotationSetStyle(node->m_line - 1, ERROR_ANNOTATION_STYLE);
+                    m_activeSourceFile = node->m_fileName;
 
-                     // Scintilla doesn't update the scroll width for annotations, even with
-                     // scroll width tracking on, so do it manually.
-                     const int width = m_editor->GetScrollWidth();
+                    bool startsWithBoM{ false };
+                    if (i18n_check::valid_utf8_file(node->m_fileName.wc_string(), startsWithBoM))
+                        {
+                        m_editor->LoadFile(node->m_fileName);
+                        }
+                    // an ASCII to UTF-16 conversion is needed
+                    else
+                        {
+                        wxFile fn{ node->m_fileName, wxFile::read };
+                        wxString fileText;
+                        if (fn.IsOpened() &&
+                            fn.ReadAll(&fileText,
+                                       wxCSConv{ static_cast<wxFontEncoding>(
+                                           wxGetApp().m_defaultOptions.m_fallbackEncoding) }))
+                            {
+                            if (!fileText.empty())
+                                {
+                                m_editor->SetValue(fileText);
+                                }
+                            // wxFile::ReadAll may actually fail if loading ANSI files as UTF-8
+                            // (usually the default under Linux), but returns true with no content.
+                            // So if the read text is emtpy, try loading it with the Scintilla
+                            // control which will import it as best as it can.
+                            // From there, we will only show it as read-only and warn about
+                            // it in the log window.
+                            else
+                                {
+                                m_editor->LoadFile(node->m_fileName);
+                                m_editor->SetEditable(false);
+                                m_logWindow->AppendText(wxString::Format(
+                                    _(L"\n%s: file contains characters that aren't compatible with "
+                                      "the current fallback encoding. Editor will be read only "
+                                      "for this document."),
+                                    node->m_fileName));
+                                }
+                            }
+                        else
+                            {
+                            m_editor->LoadFile(node->m_fileName);
+                            }
+                        }
+                    }
 
-                     // Take into account the fact that the annotation is shown indented, with
-                     // the same indent as the line it's attached to.
-                     // Also, add 3; this is just a hack to account for the width of the box, there
-                     // doesn't seem to be any way to get it directly from Scintilla.
-                     const int indent = m_editor->GetLineIndentation(node->m_line - 1) + FromDIP(3);
+                if (node->m_line != -1)
+                    {
+                    // if scrolling up, then step back up an extra line so that we can see it
+                    // after adding the annotation beneath it
+                    m_editor->GotoLine((m_editor->GetFirstVisibleLine() < node->m_line) ?
+                                           node->m_line :
+                                           node->m_line - 1);
+                    m_editor->AnnotationSetText(node->m_line - 1, node->m_explaination);
+                    m_editor->AnnotationSetStyle(node->m_line - 1, ERROR_ANNOTATION_STYLE);
 
-                     const int widthAnn = m_editor->TextWidth(
-                         ERROR_ANNOTATION_STYLE, node->m_explaination + wxString(indent, L' '));
+                    // Scintilla doesn't update the scroll width for annotations, even with
+                    // scroll width tracking on, so do it manually.
+                    const int width = m_editor->GetScrollWidth();
 
-                     if (widthAnn > width)
-                         {
-                         m_editor->SetScrollWidth(widthAnn);
-                         }
-                     }
-                 }
-             else
-                 {
-                 SaveSourceFileIfNeeded();
-                 m_activeSourceFile.clear();
-                 m_editor->SetText(wxString{});
-                 }
-         });
+                    // Take into account the fact that the annotation is shown indented, with
+                    // the same indent as the line it's attached to.
+                    // Also, add 3; this is just a hack to account for the width of the box, there
+                    // doesn't seem to be any way to get it directly from Scintilla.
+                    const int indent = m_editor->GetLineIndentation(node->m_line - 1) + FromDIP(3);
+
+                    const int widthAnn = m_editor->TextWidth(
+                        ERROR_ANNOTATION_STYLE, node->m_explaination + wxString(indent, L' '));
+
+                    if (widthAnn > width)
+                        {
+                        m_editor->SetScrollWidth(widthAnn);
+                        }
+                    }
+                }
+            else
+                {
+                SaveSourceFileIfNeeded();
+                m_activeSourceFile.clear();
+                m_editor->SetValue(wxString{});
+                }
+        });
     }
 
 //------------------------------------------------------
@@ -758,7 +802,7 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
 
             SaveSourceFileIfNeeded();
             m_activeSourceFile.clear();
-            m_editor->SetText(wxString{});
+            m_editor->SetValue(wxString{});
 
             // excludes a flag if the provided value matches the node's warning
             const auto excludeFlag = [this, &node](const wxString& value, const auto flag)
@@ -950,7 +994,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent&)
             {
             SaveSourceFileIfNeeded();
             m_activeSourceFile.clear();
-            m_editor->SetText(wxString{});
+            m_editor->SetValue(wxString{});
 
             // child node of file parent node is selected, so get its parent
             if (node->m_fileName != node->m_warningId)
@@ -981,7 +1025,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent&)
 //------------------------------------------------------
 void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent&)
     {
-    NewProjectDialog projDlg(this, wxID_ANY, _(L"Default Settings"), false);
+    NewProjectDialog projDlg(this, wxID_ANY, _(L"Default Settings"), EditorPage);
     projDlg.SetAllOptions(wxGetApp().m_defaultOptions);
 
     if (projDlg.ShowModal() == wxID_OK)
@@ -1080,7 +1124,8 @@ void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent&)
 
     NewProjectDialog projDlg(this, wxID_ANY,
                              wxString::Format(_("Edit Project - %s"),
-                                              wxFileName{ m_activeProjectFilePath }.GetFullName()));
+                                              wxFileName{ m_activeProjectFilePath }.GetFullName()),
+                             FilePage);
     projDlg.SetAllOptions(m_activeProjectOptions);
 
     if (projDlg.ShowModal() == wxID_OK)
@@ -1103,7 +1148,7 @@ void I18NFrame::OnNew([[maybe_unused]] wxCommandEvent&)
     {
     SaveProjectIfNeeded();
 
-    NewProjectDialog projDlg(this);
+    NewProjectDialog projDlg(this, wxID_ANY, _(L"New Project"), FilePage);
     projDlg.SetAllOptions(wxGetApp().m_defaultOptions);
 
     if (projDlg.ShowModal() == wxID_CANCEL)
@@ -1394,6 +1439,12 @@ void I18NFrame::SaveProjectIfNeeded()
 //------------------------------------------------------
 void I18NFrame::SaveSourceFileIfNeeded()
     {
+    // editor will be set to read-only if file was corrupted during loading.
+    if (m_editor->IsEditable())
+        {
+        return;
+        }
+
     const auto saveFile = [this]()
     {
         // Windows RC files are usually ANSI, so get the code page in them
@@ -1458,7 +1509,7 @@ void I18NFrame::Process()
     SaveSourceFileIfNeeded();
 
     m_activeSourceFile.clear();
-    m_editor->SetText(wxString{});
+    m_editor->SetValue(wxString{});
 
     std::filesystem::path inputFolder{ m_activeProjectOptions.m_filePath.wc_string() };
 

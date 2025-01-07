@@ -115,6 +115,9 @@ void I18NOptions::Save(const wxString& filePath)
     node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"editor-height");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, std::to_wstring(m_editorHeight)));
 
+    node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"fallback-encoding");
+    node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, std::to_wstring(m_fallbackEncoding)));
+
     if (!xmlDoc.Save(filePath))
         {
         wxMessageBox(_(L"Error saving project file."), _(L"Error"), wxOK | wxICON_EXCLAMATION);
@@ -267,6 +270,10 @@ void I18NOptions::Load(const wxString& filePath)
         else if (child->GetName() == L"editor-height")
             {
             child->GetNodeContent().ToInt(&m_editorHeight);
+            }
+        else if (child->GetName() == L"fallback-encoding")
+            {
+            child->GetNodeContent().ToInt(&m_fallbackEncoding);
             }
 
         child = child->GetNext();
