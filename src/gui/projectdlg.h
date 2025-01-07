@@ -61,7 +61,7 @@ class NewProjectDialog final : public wxDialog
         @param parent The parent window.
         @param id The window ID.
         @param caption The title of the export dialog.
-        @param EditorPageOptions Which extra pages to show.
+        @param extraPages Which extra pages to show.
         @param pos The screen position of the window.
         @param size The window size.
         @param style The window style (i.e., decorations and flags).*/
