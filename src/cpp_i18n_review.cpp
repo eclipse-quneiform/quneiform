@@ -497,7 +497,7 @@ namespace i18n_check
                             std::next(m_file_start, static_cast<ptrdiff_t>(previousNewLine)),
                             currentLineLength
                         };
-                        if (currentLine.find(L"R\"") == std::wstring::npos &&
+                        if (currentLine.find(L"LR") == std::wstring::npos &&
                             currentLine.find(L'|') == std::wstring::npos)
                             {
                             m_wide_lines.emplace_back(
