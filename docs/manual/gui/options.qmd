@@ -101,6 +101,7 @@ This will check for issues such as:
   It is recommended to use other functions (e.g., `CString::LoadString()`) that are not limited to fixed buffer sizes; otherwise, translated strings may become truncated.
 - Context arguments passed to l10n functions (e.g., `tr()`) that are longer than 32 characters.\
   This may indicate that the context and translatable string arguments are reversed.
+- String literals being passed to `_()`.
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
 - macOS Info.plist files not including any `CFBundleLocalizations` keys.\
   Without these keys, translations will not be loaded by the application at runtime.

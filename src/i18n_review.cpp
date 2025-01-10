@@ -1362,43 +1362,78 @@ namespace i18n_check
             return;
             }
 
-        const std::wregex loadStringRegEx{
-            LR"(([:]{2,2})?LoadString(A|W)?[(](\s*[a-zA-Z0-9_]+\s*,){3}\s*[a-zA-Z0-9_]+[)])"
-        };
-        auto currentTextBlock{ fileText };
-        std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
-        size_t currentBlockOffset{ 0 };
-        while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(), stPositions,
-                                 loadStringRegEx))
+        // ::LoadString() being called
             {
-            currentTextBlock = currentTextBlock.substr(stPositions.position());
-            currentBlockOffset += stPositions.position();
-            if (currentBlockOffset == 0 ||
-                !(i18n_string_util::is_alpha_7bit(fileText[currentBlockOffset - 1]) ||
-                  fileText[currentBlockOffset - 1] == L'.'))
+            const std::wregex loadStringRegEx{
+                LR"(([:]{2,2})?LoadString(A|W)?[(](\s*[a-zA-Z0-9_]+\s*,){3}\s*[a-zA-Z0-9_]+[)])"
+            };
+            auto currentTextBlock{ fileText };
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(), stPositions,
+                                    loadStringRegEx))
                 {
-                m_suspect_i18n_usage.push_back(string_info(
-                    std::wstring{ currentTextBlock.substr(0, stPositions.length()) },
-                    string_info::usage_info(string_info::usage_info::usage_type::function,
+                currentTextBlock = currentTextBlock.substr(stPositions.position());
+                currentBlockOffset += stPositions.position();
+                if (currentBlockOffset == 0 ||
+                    !(i18n_string_util::is_alpha_7bit(fileText[currentBlockOffset - 1]) ||
+                    fileText[currentBlockOffset - 1] == L'.'))
+                    {
+                    m_suspect_i18n_usage.push_back(string_info(
+                        std::wstring{ currentTextBlock.substr(0, stPositions.length()) },
+                        string_info::usage_info(string_info::usage_info::usage_type::function,
+                                                _(L"Prefer using CString::LoadString() (if using MFC) "
+                                                   "or a different framework's string "
+                                                   "loading function. Calling ::LoadString() requires a "
+                                                   "fixed-size buffer and may result "
+                                                   "in truncating translated strings.")
 #ifdef wxVERSION_NUMBER
-                                            _(L"Prefer using CString::LoadString() (if using MFC) "
-                                              "or a different framework's string "
-                                              "loading function. Calling ::LoadString() requires a "
-                                              "fixed-size buffer and may result "
-                                              "in truncating translated strings.")
-                                                .wc_str(),
+
+                                                .wc_string(),
 #else
-                                            L"Prefer using CString::LoadString() (if using MFC) or "
-                                            "a different framework's string "
-                                            "loading function. Calling ::LoadString() requires a "
-                                            "fixed-size buffer and may result "
-                                            "in truncating translated strings.",
+                                                ,
 #endif
-                                            std::wstring{}),
-                    fileName, get_line_and_column(currentBlockOffset, fileText.data())));
+                                                std::wstring{}),
+                        fileName, get_line_and_column(currentBlockOffset, fileText.data())));
+                    }
+                currentTextBlock = currentTextBlock.substr(stPositions.length());
+                currentBlockOffset += stPositions.length();
                 }
-            currentTextBlock = currentTextBlock.substr(stPositions.length());
-            currentBlockOffset += stPositions.length();
+            }
+
+        // _() not taking a literal string
+            {
+            const std::wregex l10nStringNonStringLiteralArgRegEx{
+                LR"(\b_\([\(\s]*([a-zA-Z0-9]+)([[:punct:]]))"
+            };
+            auto currentTextBlock{ fileText };
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(), stPositions,
+                                     l10nStringNonStringLiteralArgRegEx))
+                {
+                currentTextBlock = currentTextBlock.substr(stPositions.position());
+                currentBlockOffset += stPositions.position();
+                if (stPositions.size() >= 3 &&
+                    // only something like LR, L, u8, etc. can be in front of a quote
+                    stPositions[1].length() > 2 &&
+                    stPositions[2].str() != L"\"")
+                    {
+                    m_suspect_i18n_usage.push_back(string_info(
+                        stPositions[1].str(),
+                        string_info::usage_info(string_info::usage_info::usage_type::function,
+                                                _(L"Only string literals should be passed to _() function.")
+    #ifdef wxVERSION_NUMBER
+                                                .wc_string(),
+    #else
+                                                ,
+    #endif
+                                                std::wstring{}),
+                    fileName, get_line_and_column(currentBlockOffset, fileText.data())));
+                    }
+                currentTextBlock = currentTextBlock.substr(stPositions.length());
+                currentBlockOffset += stPositions.length();
+                }
             }
         }
 
@@ -1720,7 +1755,7 @@ namespace i18n_check
                 {
                 str.remove_prefix(1);
                 }
-            // some acronymys are self explanatory, so ignore them
+            // some acronyms are self explanatory, so ignore them
             if (common_acronyms.find(str) != common_acronyms.cend())
                 {
                 return false;
@@ -1775,7 +1810,7 @@ namespace i18n_check
                 {
                 std::wstring filteredStr{ str };
                 i18n_string_util::remove_printf_commands(filteredStr);
-                // although this meets the critia, "%d of %d" is probably self explanatory
+                // although this meets the criteria, "%d of %d" is probably self explanatory
                 if (filteredStr == _DT(L" of "))
                     {
                     return false;
@@ -1796,7 +1831,7 @@ namespace i18n_check
                 {
                 std::wstring filteredStr{ str };
                 i18n_string_util::remove_positional_commands(filteredStr);
-                // although this meets the critia, "%1 of %2" is probably self explanatory
+                // although this meets the criteria, "%1 of %2" is probably self explanatory
                 if (filteredStr == _DT(L" of "))
                     {
                     return false;
@@ -1805,7 +1840,7 @@ namespace i18n_check
             return true;
             }
 
-        // more than one abbreviaion in string makes it difficult to understand
+        // more than one abbreviation in string makes it difficult to understand
         // for a translator (or anyone, really)
         static const std::wregex abbreviationRegex{ LR"([[:alpha:]]\. [a-z])" };
         const auto abbrevs = load_matches(str, abbreviationRegex);
@@ -3083,7 +3118,7 @@ namespace i18n_check
         {
         std::vector<std::pair<size_t, std::wstring>> results;
 
-        // we need to do this multipass because a single regex command for all printf
+        // we need to do this multi-pass because a single regex command for all printf
         // commands is too complex and will cause the regex library to randomly throw exceptions
         std::wstring_view::const_iterator searchStart(resource.cbegin());
         std::match_results<std::wstring_view::const_iterator> res;
@@ -3177,7 +3212,7 @@ namespace i18n_check
         {
         std::vector<std::pair<size_t, size_t>> results;
 
-        // we need to do this multipass because a single regex command for all printf
+        // we need to do this multi-pass because a single regex command for all printf
         // commands is too complex and will cause the regex library to randomly throw exceptions
         std::wstring::const_iterator searchStart{ resource.cbegin() };
         std::wsmatch res;

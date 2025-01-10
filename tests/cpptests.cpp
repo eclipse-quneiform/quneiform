@@ -43,6 +43,47 @@ TEST_CASE("Pluarl", "[cpp][i18n]")
         }
     }
 
+TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
+    {
+    SECTION("_")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_suspect_i18n_usage);
+        const wchar_t* code = LR"(var = _(Format("Open %s", f)); );)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 1);
+        }
+    SECTION("_ Parens")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_suspect_i18n_usage);
+        const wchar_t* code = LR"(var = _((( (wxString::Format("Open %s", f)); );)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 1);
+        CHECK(cpp.get_suspect_i18n_usuage().at(0).m_string == std::wstring{ L"wxString" });
+        }
+    SECTION("_ Parents Correct")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_suspect_i18n_usage);
+        const wchar_t* code = LR"(var = _(( "Open %s", f)); );)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_suspect_i18n_usuage().size() == 0);
+        }
+     SECTION("Not _")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_suspect_i18n_usage);
+        const wchar_t* code = LR"(var = VALUE_(Format("Open %s", f)); );)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 0);
+        }
+    }
+
 TEST_CASE("Snake case words", "[cpp][i18n]")
     {
     SECTION("user_level_permission")
