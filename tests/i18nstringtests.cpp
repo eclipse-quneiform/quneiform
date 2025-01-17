@@ -65,6 +65,18 @@ TEST_CASE("Ambiguous", "[i18nreview]")
         CHECK(reviewer.is_string_ambiguous(L"%1 is not a %2"));
         CHECK_FALSE(reviewer.is_string_ambiguous(L"%1 of %2"));
         }
+    SECTION("Punctuation")
+        {
+        CHECK(reviewer.is_string_ambiguous(L"Z+X+S1-2"));
+        // not enough to be a problem
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"Redo\tCtrl+Shift+Z"));
+        }
+    SECTION("Acronyms")
+        {
+        CHECK(reviewer.is_string_ambiguous(L"FORWARD"));
+        // known abbreviations
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"URL:"));
+        }
     }
 
 TEST_CASE("untranslatable", "[i18nreview]")

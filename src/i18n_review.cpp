@@ -1736,6 +1736,10 @@ namespace i18n_check
                 str.remove_prefix(1);
                 str.remove_suffix(1);
                 }
+            if (str.ends_with(L':'))
+                {
+                str.remove_suffix(1);
+                }
             if (str.starts_with(LR"(\")") || str.starts_with(LR"(\')"))
                 {
                 str.remove_prefix(2);
