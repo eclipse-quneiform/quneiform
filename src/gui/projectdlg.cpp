@@ -608,38 +608,6 @@ void NewProjectDialog::CreateControls()
 
     wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
-    // editor options
-    if (static_cast<bool>(m_extraPages & EditorPage))
-        {
-        wxPanel* editorPage =
-            new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-
-        wxArrayString encodings;
-        for (const auto& encoding : m_fontEncodings)
-            {
-            encodings.Add(encoding.second);
-            }
-        encodings.Sort();
-
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-
-        wxBoxSizer* encodingSizer = new wxBoxSizer(wxHORIZONTAL);
-
-        encodingSizer->Add(new wxStaticText(editorPage, wxID_STATIC, _(L"Fallback encoding:"),
-                                            wxDefaultPosition, wxDefaultSize),
-                           wxSizerFlags{}.CenterVertical().Border());
-
-        wxChoice* encodingRadioBox =
-            new wxChoice(editorPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, encodings, 0,
-                         wxGenericValidator(&m_fallbackEncodingStr));
-        encodingSizer->Add(encodingRadioBox, wxSizerFlags{}.Border(wxLEFT).Left());
-
-        mainSizer->Add(encodingSizer, wxSizerFlags{}.Expand().Border());
-
-        editorPage->SetSizer(mainSizer);
-        listBook->AddPage(editorPage, _(L"Editor"), false, 4);
-        }
-
     // input options
     if (static_cast<bool>(m_extraPages & FilePage))
         {
@@ -1255,6 +1223,38 @@ void NewProjectDialog::CreateControls()
 
         extraChecksPage->SetSizer(mainSizer);
         listBook->AddPage(extraChecksPage, _(L"Additional Checks"), false, 3);
+        }
+
+    // editor options
+    if (static_cast<bool>(m_extraPages & EditorPage))
+        {
+        wxPanel* editorPage =
+            new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+
+        wxArrayString encodings;
+        for (const auto& encoding : m_fontEncodings)
+            {
+            encodings.Add(encoding.second);
+            }
+        encodings.Sort();
+
+        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+
+        wxBoxSizer* encodingSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        encodingSizer->Add(new wxStaticText(editorPage, wxID_STATIC, _(L"Fallback encoding:"),
+                                            wxDefaultPosition, wxDefaultSize),
+                           wxSizerFlags{}.CenterVertical().Border());
+
+        wxChoice* encodingRadioBox =
+            new wxChoice(editorPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, encodings, 0,
+                         wxGenericValidator(&m_fallbackEncodingStr));
+        encodingSizer->Add(encodingRadioBox, wxSizerFlags{}.Border(wxLEFT).Left());
+
+        mainSizer->Add(encodingSizer, wxSizerFlags{}.Expand().Border());
+
+        editorPage->SetSizer(mainSizer);
+        listBook->AddPage(editorPage, _(L"Editor"), false, 4);
         }
 
     mainDlgSizer->Add(listBook, wxSizerFlags{ 1 }.Expand().Border());
