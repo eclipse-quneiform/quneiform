@@ -182,6 +182,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
             }
         else if (node->m_warningId == L"[fontIssue]" || node->m_warningId == L"[deprecatedMacro]" ||
                  node->m_warningId == L"[printfSingleNumber]" ||
+                 node->m_warningId == L"[multipartString]" ||
                  node->m_warningId == L"[dupValAssignedToIds]" ||
                  node->m_warningId == L"[numberAssignedToId]" ||
                  node->m_warningId == L"[L10NStringNeedsContext]" ||
