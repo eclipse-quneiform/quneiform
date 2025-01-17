@@ -1714,8 +1714,8 @@ namespace i18n_check
     //--------------------------------------------------
     bool i18n_review::is_string_ambiguous(std::wstring_view str)
         {
-        static std::set<std::wstring_view> common_acronyms = { L"N/A", L"OK", L"ASCII", L"CD-ROM",
-                                                               L"DVD" };
+        static std::set<std::wstring_view> common_acronyms = { L"N/A", L"NA",     L"OK",  L"ASCII",
+                                                               L"CD",  L"CD-ROM", L"DVD", L"URL" };
         // Just one word?
         if (str.find_first_of(L" \t\n\r") == std::wstring::npos)
             {
