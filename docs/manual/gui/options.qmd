@@ -105,7 +105,12 @@ This will check for issues such as:
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
 - macOS Info.plist files not including any `CFBundleLocalizations` keys.\
   Without these keys, translations will not be loaded by the application at runtime.
+::::
 
+:::: {.optionssection data-latex=""}
+::: {.optionssectiontitle data-latex=""}
+Run the following checks (*continued...*)
+:::
 **Check for ambiguous strings that lack a translator comment**: select this to check for possibly ambiguous strings that lack a translator comment.
 *gettext*- and *Qt*-style comments are searched for, which includes formats such as "// TRANSLATORS: " and "//:".
 
@@ -123,12 +128,7 @@ A string will be considered ambiguous if:
 For example, a string such as "Name: %s\\nDate: %s\\Location: %s" may not need a comment.
 It is assumed that the label in front of the colon serves as a description for the following "%s"; thus, a warning will not be emitted. 
 :::
-::::
 
-:::: {.optionssection data-latex=""}
-::: {.optionssectiontitle data-latex=""}
-Run the following checks (*continued...*)
-:::
 **Deprecated macros and functions**: select this to check for deprecated text macros and functions.
 This will detect the usage of functions that are no longer relevant, and provide a suggested replacement.
 
