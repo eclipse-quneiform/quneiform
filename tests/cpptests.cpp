@@ -3282,24 +3282,10 @@ QString example = tr("UNTITLED");)";
         cpp.clear_results();
         }
 
-    SECTION("Ambiguous long word")
-        {
-        cpp_i18n_review cpp(false);
-        cpp.set_style(check_needing_context);
-        // weird $ at the end makes this ambiguous
-        const wchar_t* code = LR"(SetTitle(wxString::Format(
-        _(L"File\tPath\tThis\tIs\tA\tHearder"), wxGetApp().GetAppName()));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
-        cpp.clear_results();
-        }
-
     SECTION("Hashes")
         {
         cpp_i18n_review cpp(false);
         cpp.set_style(check_needing_context);
-        // weird $ at the end makes this ambiguous
         const wchar_t* code = LR"(SetTitle(wxString::Format(
         _(L"(###) ###-#### Ex.###"), wxGetApp().GetAppName()));)";
         cpp(code, L"");

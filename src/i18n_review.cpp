@@ -1717,7 +1717,8 @@ namespace i18n_check
         static std::set<std::wstring_view> common_acronyms = { L"N/A", L"NA",     L"OK",  L"ASCII",
                                                                L"CD",  L"CD-ROM", L"DVD", L"URL" };
         // Just one word?
-        if (str.find_first_of(L" \t\n\r") == std::wstring::npos)
+        if (str.find_first_of(L" \t\n\r") == std::wstring::npos &&
+            str.find(L"\\t") == std::wstring::npos)
             {
             // this is probably some sort of complex syntactical string
             // if it's abnormally long and has no spaces

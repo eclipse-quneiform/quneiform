@@ -69,7 +69,7 @@ TEST_CASE("Ambiguous", "[i18nreview]")
         {
         CHECK(reviewer.is_string_ambiguous(L"Z+X+S1-2"));
         // not enough to be a problem
-        CHECK_FALSE(reviewer.is_string_ambiguous(L"Redo\tCtrl+Shift+Z"));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"&Redo\\tCtrl+Shift+Z"));
         }
     SECTION("Acronyms")
         {
