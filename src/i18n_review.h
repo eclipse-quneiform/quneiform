@@ -157,7 +157,8 @@ namespace i18n_check
         check_number_assigned_to_id | check_duplicate_value_assigned_to_ids |
         check_malformed_strings | check_utf8_with_signature | check_fonts |
         check_l10n_concatenated_strings | check_needing_context | check_suspect_i18n_usage |
-        check_l10n_contains_excessive_nonl10n_content),
+        check_l10n_contains_excessive_nonl10n_content | check_multipart_strings |
+        check_pluaralization | check_articles_proceeding_placeholder),
 
         /// @brief Check for mismatching printf commands between source strings and their
         ///     respective translations.
@@ -190,7 +191,7 @@ namespace i18n_check
         l10n_reserved19 = (static_cast<int64_t>(1) << 49),
         /// @brief Perform all aforementioned localization checks.
         all_l10n_checks = (check_mismatching_printf_commands | check_accelerators |
-        check_consistency | check_numbers | check_length),
+        check_consistency | check_numbers | check_length | check_halfwidth),
 
         /// @brief Check for trailing spaces at the end of each line.
         check_trailing_spaces = (static_cast<int64_t>(1) << 50),
@@ -360,7 +361,7 @@ namespace i18n_check
                     if (m_type == usage_type::variable)
                         {
                         m_variableInfo.m_name = m_value;
-                    }
+                        }
                     }
 
                 /// @private
@@ -372,7 +373,7 @@ namespace i18n_check
                     if (m_type == usage_type::variable)
                         {
                         m_variableInfo.m_name = m_value;
-                    }
+                        }
                     }
 
                 /// @private
@@ -1010,7 +1011,7 @@ namespace i18n_check
         static bool is_concatenated_localizable_operator(const string_info& str)
             {
             if (str.m_usage.m_hasContext)
-            {
+                {
                 return false;
                 }
             else if (str.m_string == L"%" || str.m_string == L"$")
