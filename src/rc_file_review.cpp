@@ -95,7 +95,7 @@ namespace i18n_check
                     m_unsafe_localizable_strings.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
@@ -105,7 +105,7 @@ namespace i18n_check
                     m_localizable_strings.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
@@ -119,7 +119,7 @@ namespace i18n_check
                         m_localizable_strings_with_urls.emplace_back(
                             tableEntry.second,
                             string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                    std::wstring{}, std::wstring{}),
+                                                    std::wstring{}, std::wstring{}, std::wstring{}),
                             m_file_name,
                             std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                            std::wstring::npos));
@@ -137,7 +137,7 @@ namespace i18n_check
                         m_localizable_strings_with_unlocalizable_content.emplace_back(
                             tableEntry.second,
                             string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                    std::wstring{}, std::wstring{}),
+                                                    std::wstring{}, std::wstring{}, std::wstring{}),
                             m_file_name,
                             std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                            std::wstring::npos));
@@ -150,7 +150,7 @@ namespace i18n_check
                     m_multipart_strings.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
@@ -162,7 +162,7 @@ namespace i18n_check
                     m_faux_plural_strings.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
@@ -175,7 +175,7 @@ namespace i18n_check
                     m_article_issue_strings.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
@@ -187,7 +187,7 @@ namespace i18n_check
                     m_localizable_strings_being_concatenated.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));
@@ -199,7 +199,7 @@ namespace i18n_check
                     m_localizable_strings_with_halfwidths.emplace_back(
                         tableEntry.second,
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name,
                         std::make_pair(get_line_and_column(tableEntry.first, rcFileText).first,
                                        std::wstring::npos));

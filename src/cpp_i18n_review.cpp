@@ -237,8 +237,7 @@ namespace i18n_check
                 // see if this string is in a function call or is a direct variable assignment
                 // and gauge whether it is meant to be translatable or not
                 std::wstring functionName;
-                std::wstring variableName;
-                std::wstring variableType;
+                variable_info variableInfo;
                 std::wstring deprecatedMacroEncountered;
                 size_t parameterPosition{ 0 };
                 const wchar_t* startPos = std::prev(cppText, 1);
@@ -285,12 +284,13 @@ namespace i18n_check
                         {
                         std::advance(directiveStart, -1);
                         }
-                    variableName.assign(std::next(directiveStart), startPos - directiveStart);
+                    variableInfo.m_name.assign(std::next(directiveStart),
+                                               startPos - directiveStart);
                     }
                 else
                     {
                     functionVarNamePos = read_var_or_function_name(
-                        startPos, m_file_start, functionName, variableName, variableType,
+                        startPos, m_file_start, functionName, variableInfo,
                         deprecatedMacroEncountered, parameterPosition);
                     }
                 // find the end of the string now and feed it into the system
@@ -416,9 +416,8 @@ namespace i18n_check
                         {
                         ++nextChar;
                         }
-                    process_quote(cppText, end, functionVarNamePos, variableName, functionName,
-                                  variableType, deprecatedMacroEncountered, parameterPosition,
-                                  *nextChar == L',');
+                    process_quote(cppText, end, functionVarNamePos, functionName, variableInfo,
+                                  deprecatedMacroEncountered, parameterPosition, *nextChar == L',');
                     // closing quote was just cleared; now, clear the opening one
                     if (isRawString && std::prev(cppText, 2) >= m_file_start &&
                         *std::prev(cppText) == L'(' && *std::prev(cppText, 2) == L'\"')
@@ -426,8 +425,7 @@ namespace i18n_check
                         *std::prev(cppText, 2) = L' ';
                         *std::prev(cppText) = L' ';
                         }
-                    else if (std::prev(cppText) >= m_file_start &&
-                             *std::prev(cppText) == L'\"')
+                    else if (std::prev(cppText) >= m_file_start && *std::prev(cppText) == L'\"')
                         {
                         *std::prev(cppText) = L' ';
                         }
@@ -508,7 +506,8 @@ namespace i18n_check
                                     .append(L"..."),
                                 string_info::usage_info{
                                     string_info::usage_info::usage_type::orphan,
-                                    std::to_wstring(currentLineLength), std::wstring{} },
+                                    std::to_wstring(currentLineLength), std::wstring{},
+                                    std::wstring{} },
                                 m_file_name, get_line_and_column(currentPos));
                             }
                         }
@@ -527,7 +526,7 @@ namespace i18n_check
                 m_wx_info.m_app_init_info = string_info{
                     std::wstring{},
                     string_info::usage_info(string_info::usage_info::usage_type::function,
-                                            L"OnInit()", std::wstring{}),
+                                            L"OnInit()", std::wstring{}, std::wstring{}),
                     m_file_name, get_line_and_column(foundPos)
                 };
                 }
@@ -936,8 +935,9 @@ namespace i18n_check
                         {
                         const std::wstring definedValue = std::wstring(
                             std::next(directiveStart), (quoteEnd - directiveStart) - 1);
-                        process_variable(std::wstring{}, definedTerm, definedValue,
-                                         directivePos + (directiveStart - originalStart));
+                        process_variable(
+                            variable_info{ definedTerm, std::wstring{}, std::wstring{} },
+                            definedValue, directivePos + (directiveStart - originalStart));
                         }
                     }
                 // example: #define VALUE height, #define VALUE 0x5

@@ -53,7 +53,7 @@ namespace i18n_check
                     m_noLocalizationBundles.emplace_back(
                         std::wstring{},
                         string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}, std::wstring{}),
                         m_file_name, std::make_pair(std::wstring::npos, std::wstring::npos));
                     }
                 }
@@ -62,7 +62,7 @@ namespace i18n_check
                 m_noLocalizationBundles.emplace_back(
                     std::wstring{},
                     string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                            std::wstring{}, std::wstring{}),
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
                     m_file_name, std::make_pair(std::wstring::npos, std::wstring::npos));
                 }
             }

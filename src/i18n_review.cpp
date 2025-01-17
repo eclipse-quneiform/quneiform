@@ -1159,8 +1159,7 @@ namespace i18n_check
                 m_localizable_strings_ambiguous_needing_context.push_back(str);
                 }
             if ((m_review_styles & check_l10n_concatenated_strings) &&
-                (has_surrounding_spaces(str.m_string) || str.m_string == L"%" ||
-                 str.m_string == L"$"))
+                (has_surrounding_spaces(str.m_string) || is_concatenated_localizable_operator(str)))
                 {
                 m_localizable_strings_being_concatenated.push_back(str);
                 }
@@ -1179,7 +1178,7 @@ namespace i18n_check
                 // as some locales put the % at the front of the string.
                 // Same with a dollar sign, where it is probably a currency string
                 // being pieced together.
-                if (str.m_string == L"%" || str.m_string == L"$")
+                if (is_concatenated_localizable_operator(str))
                     {
                     m_localizable_strings_being_concatenated.push_back(str);
                     }
@@ -1280,7 +1279,7 @@ namespace i18n_check
             {
             if (!should_exceptions_be_translatable() &&
                 (m_exceptions.find(str.m_usage.m_value) != m_exceptions.cend() ||
-                 m_exceptions.find(str.m_usage.m_variableType) != m_exceptions.cend()))
+                 m_exceptions.find(str.m_usage.m_variableInfo.m_type) != m_exceptions.cend()))
                 {
                 return;
                 }
@@ -1343,7 +1342,8 @@ namespace i18n_check
                     m_deprecated_macros.push_back(string_info(
                         std::wstring{ func.first.data(), func.first.length() },
                         string_info::usage_info(string_info::usage_info::usage_type::function,
-                                                std::wstring(func.second), std::wstring{}),
+                                                std::wstring(func.second), std::wstring{},
+                                                std::wstring{}),
                         fileName, get_line_and_column(i, fileText.data())));
                     i += func.first.length();
                     continue;
@@ -1362,7 +1362,7 @@ namespace i18n_check
             return;
             }
 
-        // ::LoadString() being called
+            // ::LoadString() being called
             {
             const std::wregex loadStringRegEx{
                 LR"(([:]{2,2})?LoadString(A|W)?[(](\s*[a-zA-Z0-9_]+\s*,){3}\s*[a-zA-Z0-9_]+[)])"
@@ -1370,30 +1370,31 @@ namespace i18n_check
             auto currentTextBlock{ fileText };
             std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
             size_t currentBlockOffset{ 0 };
-            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(), stPositions,
-                                    loadStringRegEx))
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, loadStringRegEx))
                 {
                 currentTextBlock = currentTextBlock.substr(stPositions.position());
                 currentBlockOffset += stPositions.position();
                 if (currentBlockOffset == 0 ||
                     !(i18n_string_util::is_alpha_7bit(fileText[currentBlockOffset - 1]) ||
-                    fileText[currentBlockOffset - 1] == L'.'))
+                      fileText[currentBlockOffset - 1] == L'.'))
                     {
                     m_suspect_i18n_usage.push_back(string_info(
                         std::wstring{ currentTextBlock.substr(0, stPositions.length()) },
-                        string_info::usage_info(string_info::usage_info::usage_type::function,
-                                                _(L"Prefer using CString::LoadString() (if using MFC) "
-                                                   "or a different framework's string "
-                                                   "loading function. Calling ::LoadString() requires a "
-                                                   "fixed-size buffer and may result "
-                                                   "in truncating translated strings.")
+                        string_info::usage_info(
+                            string_info::usage_info::usage_type::function,
+                            _(L"Prefer using CString::LoadString() (if using MFC) "
+                              "or a different framework's string "
+                              "loading function. Calling ::LoadString() requires a "
+                              "fixed-size buffer and may result "
+                              "in truncating translated strings.")
 #ifdef wxVERSION_NUMBER
 
-                                                .wc_string(),
+                                .wc_string(),
 #else
-                                                ,
+                                ,
 #endif
-                                                std::wstring{}),
+                            std::wstring{}, std::wstring{}),
                         fileName, get_line_and_column(currentBlockOffset, fileText.data())));
                     }
                 currentTextBlock = currentTextBlock.substr(stPositions.length());
@@ -1401,7 +1402,7 @@ namespace i18n_check
                 }
             }
 
-        // _() not taking a literal string
+            // _() not taking a literal string
             {
             const std::wregex l10nStringNonStringLiteralArgRegEx{
                 LR"(\b_\([\(\s]*([a-zA-Z0-9]+)([[:punct:]]))"
@@ -1409,27 +1410,27 @@ namespace i18n_check
             auto currentTextBlock{ fileText };
             std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
             size_t currentBlockOffset{ 0 };
-            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(), stPositions,
-                                     l10nStringNonStringLiteralArgRegEx))
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, l10nStringNonStringLiteralArgRegEx))
                 {
                 currentTextBlock = currentTextBlock.substr(stPositions.position());
                 currentBlockOffset += stPositions.position();
                 if (stPositions.size() >= 3 &&
                     // only something like LR, L, u8, etc. can be in front of a quote
-                    stPositions[1].length() > 2 &&
-                    stPositions[2].str() != L"\"")
+                    stPositions[1].length() > 2 && stPositions[2].str() != L"\"")
                     {
                     m_suspect_i18n_usage.push_back(string_info(
                         stPositions[1].str(),
-                        string_info::usage_info(string_info::usage_info::usage_type::function,
-                                                _(L"Only string literals should be passed to _() function.")
-    #ifdef wxVERSION_NUMBER
-                                                .wc_string(),
-    #else
-                                                ,
-    #endif
-                                                std::wstring{}),
-                    fileName, get_line_and_column(currentBlockOffset, fileText.data())));
+                        string_info::usage_info(
+                            string_info::usage_info::usage_type::function,
+                            _(L"Only string literals should be passed to _() function.")
+#ifdef wxVERSION_NUMBER
+                                .wc_string(),
+#else
+                                ,
+#endif
+                            std::wstring{}, std::wstring{}),
+                        fileName, get_line_and_column(currentBlockOffset, fileText.data())));
                     }
                 currentTextBlock = currentTextBlock.substr(stPositions.length());
                 currentBlockOffset += stPositions.length();
@@ -1855,12 +1856,15 @@ namespace i18n_check
     //--------------------------------------------------
     void i18n_review::process_quote(wchar_t* currentTextPos, const wchar_t* quoteEnd,
                                     const wchar_t* functionVarNamePos,
-                                    const std::wstring& variableName,
                                     const std::wstring& functionName,
-                                    const std::wstring& variableType,
+                                    const variable_info& variableInfo,
                                     const std::wstring& deprecatedMacroEncountered,
                                     const size_t parameterPosition, const bool isFollowedByComma)
         {
+        // Note that we always pass 'variableInfo.m_operator' as the operator value, even if this
+        // quote is really being sent to a function. This will pick up any + or ?: operations in
+        // front of this quote (inside of the arguments to the parent function) that may be relevant
+        // later.
         if (deprecatedMacroEncountered.length() > 0 &&
             static_cast<bool>(m_review_styles & check_deprecated_macros))
             {
@@ -1871,14 +1875,14 @@ namespace i18n_check
                                         (foundMessage != m_deprecated_string_macros.cend()) ?
                                             std::wstring{ foundMessage->second } :
                                             std::wstring{},
-                                        std::wstring{}),
+                                        std::wstring{}, variableInfo.m_operator),
                 m_file_name, get_line_and_column(currentTextPos - m_file_start));
             }
 
-        if (variableName.length() > 0)
+        if (variableInfo.m_name.length() > 0)
             {
             process_variable(
-                variableType, variableName,
+                variableInfo,
                 std::wstring_view{ currentTextPos, static_cast<size_t>(quoteEnd - currentTextPos) },
                 (currentTextPos - m_file_start));
             }
@@ -1889,7 +1893,7 @@ namespace i18n_check
                 m_internal_strings.emplace_back(
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
-                                            functionName, std::wstring{}),
+                                            functionName, std::wstring{}, variableInfo.m_operator),
                     m_file_name, get_line_and_column(currentTextPos - m_file_start));
                 }
             else if (is_i18n_function(functionName))
@@ -1922,7 +1926,8 @@ namespace i18n_check
                     m_internal_strings.emplace_back(
                         std::wstring(currentTextPos, quoteEnd - currentTextPos),
                         string_info::usage_info(string_info::usage_info::usage_type::function,
-                                                functionName, std::wstring{}),
+                                                functionName, std::wstring{},
+                                                variableInfo.m_operator),
                         m_file_name, get_line_and_column(currentTextPos - m_file_start));
 
                     const auto contextLength{ quoteEnd - currentTextPos };
@@ -1942,12 +1947,12 @@ namespace i18n_check
                                     _(L"Context string is considerably long. Are the context and "
                                       "string arguments to %s possibly transposed?"),
                                     functionName)
-                                    .wc_str(),
+                                    .wc_string(),
 #else
                                 L"Context string is considerably long. Are the context and string "
                                 "arguments possibly transposed?",
 #endif
-                                std::wstring{}, true),
+                                std::wstring{}, variableInfo.m_operator, true),
                             m_file_name, get_line_and_column(currentTextPos - m_file_start));
                         }
                     }
@@ -1967,12 +1972,12 @@ namespace i18n_check
                                 _(L"This function is meant for string IDs, "
                                   "not translatable strings."
                                   "Are you sure the provided argument is an ID?")
-                                    .wc_str(),
+                                    .wc_string(),
 #else
                                 L"This function is meant for string IDs, not translatable strings."
                                 "Are you sure the provided argument is an ID?",
 #endif
-                                std::wstring{}, true),
+                                std::wstring{}, variableInfo.m_operator, true),
                             m_file_name, get_line_and_column(currentTextPos - m_file_start));
                         }
                     }
@@ -1982,7 +1987,7 @@ namespace i18n_check
                         std::wstring(currentTextPos, quoteEnd - currentTextPos),
                         string_info::usage_info(
                             string_info::usage_info::usage_type::function, functionName,
-                            std::wstring{},
+                            std::wstring{}, variableInfo.m_operator,
                             (is_i18n_with_context_function(functionName) ||
                              (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
                              m_context_comment_active)),
@@ -1993,14 +1998,12 @@ namespace i18n_check
                         static_cast<bool>(m_review_styles & check_suspect_l10n_string_usage))
                         {
                         std::wstring functionNameOuter;
-                        std::wstring variableNameOuter;
-                        std::wstring variableTypeOuter;
+                        variable_info outerVariable;
                         std::wstring deprecatedMacroOuterEncountered;
                         size_t parameterPositionOuter{ 0 };
                         read_var_or_function_name(
-                            functionVarNamePos, m_file_start, functionNameOuter, variableNameOuter,
-                            variableTypeOuter, deprecatedMacroOuterEncountered,
-                            parameterPositionOuter);
+                            functionVarNamePos, m_file_start, functionNameOuter, outerVariable,
+                            deprecatedMacroOuterEncountered, parameterPositionOuter);
                         if (deprecatedMacroOuterEncountered.length() > 0 &&
                             static_cast<bool>(m_review_styles & check_deprecated_macros))
                             {
@@ -2008,7 +2011,7 @@ namespace i18n_check
                                 deprecatedMacroOuterEncountered,
                                 string_info::usage_info(
                                     string_info::usage_info::usage_type::function, std::wstring{},
-                                    std::wstring{}),
+                                    std::wstring{}, variableInfo.m_operator),
                                 m_file_name, get_line_and_column(currentTextPos - m_file_start));
                             }
                         // internal functions
@@ -2021,34 +2024,36 @@ namespace i18n_check
                                 std::wstring(currentTextPos, quoteEnd - currentTextPos),
                                 string_info::usage_info(
                                     string_info::usage_info::usage_type::function,
-                                    functionNameOuter, std::wstring{}),
+                                    functionNameOuter, std::wstring{}, variableInfo.m_operator),
                                 m_file_name, get_line_and_column(currentTextPos - m_file_start));
                             }
                         // untranslatable variable types
-                        else if (m_variable_types_to_ignore.find(variableTypeOuter) !=
+                        else if (m_variable_types_to_ignore.find(outerVariable.m_type) !=
                                  m_variable_types_to_ignore.cend())
                             {
                             m_localizable_strings_in_internal_call.emplace_back(
                                 std::wstring(currentTextPos, quoteEnd - currentTextPos),
                                 string_info::usage_info(
                                     string_info::usage_info::usage_type::variable,
-                                    variableNameOuter, variableTypeOuter),
+                                    outerVariable.m_name, outerVariable.m_type,
+                                    outerVariable.m_operator),
                                 m_file_name, get_line_and_column(currentTextPos - m_file_start));
                             }
                         // untranslatable variable names (e.g., debugMsg)
-                        else if (variableNameOuter.length() > 0)
+                        else if (outerVariable.m_name.length() > 0)
                             {
                             try
                                 {
                                 for (const auto& reg : get_ignored_variable_patterns())
                                     {
-                                    if (std::regex_match(variableNameOuter, reg))
+                                    if (std::regex_match(outerVariable.m_name, reg))
                                         {
                                         m_localizable_strings_in_internal_call.emplace_back(
                                             std::wstring(currentTextPos, quoteEnd - currentTextPos),
                                             string_info::usage_info(
                                                 string_info::usage_info::usage_type::variable,
-                                                variableNameOuter, variableTypeOuter),
+                                                outerVariable.m_name, outerVariable.m_type,
+                                                outerVariable.m_operator),
                                             m_file_name,
                                             get_line_and_column(currentTextPos - m_file_start));
                                         break;
@@ -2057,7 +2062,7 @@ namespace i18n_check
                                 }
                             catch (const std::exception& exp)
                                 {
-                                log_message(variableNameOuter,
+                                log_message(outerVariable.m_name,
                                             i18n_string_util::lazy_string_to_wstring(exp.what()),
                                             (currentTextPos - m_file_start));
                                 }
@@ -2072,7 +2077,7 @@ namespace i18n_check
                 m_marked_as_non_localizable_strings.emplace_back(
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
-                                            functionName, std::wstring{}),
+                                            functionName, std::wstring{}, variableInfo.m_operator),
                     m_file_name, get_line_and_column(currentTextPos - m_file_start));
                 }
             else if (m_variable_types_to_ignore.find(functionName) !=
@@ -2081,7 +2086,7 @@ namespace i18n_check
                 m_internal_strings.emplace_back(
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
-                                            functionName, std::wstring{}),
+                                            functionName, std::wstring{}, variableInfo.m_operator),
                     m_file_name, get_line_and_column(currentTextPos - m_file_start));
                 }
             else if (is_keyword(functionName))
@@ -2089,7 +2094,8 @@ namespace i18n_check
                 classify_non_localizable_string(
                     string_info(std::wstring(currentTextPos, quoteEnd - currentTextPos),
                                 string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                        std::wstring{}, std::wstring{}),
+                                                        std::wstring{}, std::wstring{},
+                                                        variableInfo.m_operator),
                                 m_file_name, get_line_and_column(currentTextPos - m_file_start)));
                 }
             else
@@ -2097,65 +2103,68 @@ namespace i18n_check
                 classify_non_localizable_string(string_info(
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
-                                            functionName, std::wstring{}),
+                                            functionName, std::wstring{}, variableInfo.m_operator),
                     m_file_name, get_line_and_column(currentTextPos - m_file_start)));
                 }
             }
         else
             {
-            classify_non_localizable_string(
-                string_info(std::wstring(currentTextPos, quoteEnd - currentTextPos),
-                            string_info::usage_info(string_info::usage_info::usage_type::orphan,
-                                                    std::wstring{}, std::wstring{}),
-                            m_file_name, get_line_and_column(currentTextPos - m_file_start)));
+            classify_non_localizable_string(string_info(
+                std::wstring(currentTextPos, quoteEnd - currentTextPos),
+                string_info::usage_info(string_info::usage_info::usage_type::orphan, std::wstring{},
+                                        std::wstring{}, variableInfo.m_operator),
+                m_file_name, get_line_and_column(currentTextPos - m_file_start)));
             }
         clear_section(currentTextPos, std::next(quoteEnd));
         }
 
     //--------------------------------------------------
-    void i18n_review::process_variable(const std::wstring& variableType,
-                                       const std::wstring& variableName,
+    void i18n_review::process_variable(const variable_info& variableInfo,
                                        const std::wstring_view value, const size_t quotePosition)
         {
 #ifndef NDEBUG
-        if (variableType.length() > 0 &&
-            get_ignored_variable_types().find(variableType) ==
+        if (variableInfo.m_type.length() > 0 &&
+            get_ignored_variable_types().find(variableInfo.m_type) ==
                 get_ignored_variable_types().cend() &&
-            m_ctors_to_ignore.find(variableType) == m_ctors_to_ignore.cend() &&
-            (variableType.length() < 5 ||
-             std::wstring_view(variableType.c_str(), 5).compare(std::wstring_view{ L"std::", 5 }) !=
-                 0) &&
-            (variableType.length() < 2 ||
-             std::wstring_view(variableType.c_str(), 2).compare(std::wstring_view{ L"wx", 2 }) !=
-                 0) &&
-            (variableType.length() < 3 ||
-             std::wstring_view(variableType.c_str(), 3).compare(std::wstring_view{ L"_wx", 3 }) !=
-                 0) &&
-            (variableType.length() < 2 ||
-             std::wstring_view(variableType.c_str(), 2).compare(std::wstring_view{ L"My", 2 }) !=
-                 0) &&
-            variableType != L"auto" && variableType != L"Bar" && variableType != L"ifstream" &&
-            variableType != L"ofstream" && variableType != L"const" && variableType != L"char" &&
-            variableType != L"int" && variableType != L"UINT" && variableType != L"size_t" &&
-            variableType != L"float" && variableType != L"double" &&
-            variableType != L"static_cast" && variableType != L"StyleInfo" &&
-            variableType != L"Utf8CharBuffer" && variableType != L"rgbRecord" &&
-            variableType != L"LPCTSTR" && variableType != L"CDialog" &&
-            variableType != L"string_view" && variableType != L"wstring_view" &&
-            variableType != L"LanguageInfo" && variableType != L"MessageParameters")
+            m_ctors_to_ignore.find(variableInfo.m_type) == m_ctors_to_ignore.cend() &&
+            (variableInfo.m_type.length() < 5 ||
+             std::wstring_view(variableInfo.m_type.c_str(), 5)
+                     .compare(std::wstring_view{ L"std::", 5 }) != 0) &&
+            (variableInfo.m_type.length() < 2 ||
+             std::wstring_view(variableInfo.m_type.c_str(), 2)
+                     .compare(std::wstring_view{ L"wx", 2 }) != 0) &&
+            (variableInfo.m_type.length() < 3 ||
+             std::wstring_view(variableInfo.m_type.c_str(), 3)
+                     .compare(std::wstring_view{ L"_wx", 3 }) != 0) &&
+            (variableInfo.m_type.length() < 2 ||
+             std::wstring_view(variableInfo.m_type.c_str(), 2)
+                     .compare(std::wstring_view{ L"My", 2 }) != 0) &&
+            variableInfo.m_type != L"auto" && variableInfo.m_type != L"Bar" &&
+            variableInfo.m_type != L"ifstream" && variableInfo.m_type != L"ofstream" &&
+            variableInfo.m_type != L"const" && variableInfo.m_type != L"char" &&
+            variableInfo.m_type != L"int" && variableInfo.m_type != L"UINT" &&
+            variableInfo.m_type != L"size_t" && variableInfo.m_type != L"float" &&
+            variableInfo.m_type != L"double" && variableInfo.m_type != L"static_cast" &&
+            variableInfo.m_type != L"StyleInfo" && variableInfo.m_type != L"Utf8CharBuffer" &&
+            variableInfo.m_type != L"rgbRecord" && variableInfo.m_type != L"LPCTSTR" &&
+            variableInfo.m_type != L"CDialog" && variableInfo.m_type != L"string_view" &&
+            variableInfo.m_type != L"wstring_view" && variableInfo.m_type != L"LanguageInfo" &&
+            variableInfo.m_type != L"MessageParameters")
             {
-            log_message(variableType, L"New variable type detected.", quotePosition);
+            log_message(variableInfo.m_type, L"New variable type detected.", quotePosition);
             }
 #endif
         // For large string values, a 1024 substring will suffice for classifying it.
         // This is more optimal and will prevent memory exhaustion with regex comparisons.
         std::wstring clippedValue{ value.length() >= 1024 ? value.substr(0, 1024) : value };
-        if (get_ignored_variable_types().find(variableType) != get_ignored_variable_types().cend())
+        if (get_ignored_variable_types().find(variableInfo.m_type) !=
+            get_ignored_variable_types().cend())
             {
             m_internal_strings.emplace_back(
                 std::move(clippedValue),
-                string_info::usage_info(string_info::usage_info::usage_type::variable, variableName,
-                                        variableType),
+                string_info::usage_info(string_info::usage_info::usage_type::variable,
+                                        variableInfo.m_name, variableInfo.m_type,
+                                        variableInfo.m_operator),
                 m_file_name, get_line_and_column(quotePosition));
             return;
             }
@@ -2166,12 +2175,13 @@ namespace i18n_check
                 bool matchedInternalVar(false);
                 for (const auto& reg : get_ignored_variable_patterns())
                     {
-                    if (std::regex_match(variableName, reg))
+                    if (std::regex_match(variableInfo.m_name, reg))
                         {
                         m_internal_strings.emplace_back(
                             std::move(clippedValue),
                             string_info::usage_info(string_info::usage_info::usage_type::variable,
-                                                    variableName, variableType),
+                                                    variableInfo.m_name, variableInfo.m_type,
+                                                    variableInfo.m_operator),
                             m_file_name, get_line_and_column(quotePosition));
                         matchedInternalVar = true;
                         break;
@@ -2183,14 +2193,15 @@ namespace i18n_check
                     classify_non_localizable_string(string_info(
                         std::move(clippedValue),
                         string_info::usage_info(string_info::usage_info::usage_type::variable,
-                                                variableName, variableType),
+                                                variableInfo.m_name, variableInfo.m_type,
+                                                variableInfo.m_operator),
                         m_file_name, get_line_and_column(quotePosition)));
                     }
                 }
             catch (const std::exception& exp)
                 {
-                log_message(variableName, i18n_string_util::lazy_string_to_wstring(exp.what()),
-                            quotePosition);
+                log_message(variableInfo.m_name,
+                            i18n_string_util::lazy_string_to_wstring(exp.what()), quotePosition);
                 }
             }
         else
@@ -2198,7 +2209,8 @@ namespace i18n_check
             classify_non_localizable_string(
                 string_info(std::move(clippedValue),
                             string_info::usage_info(string_info::usage_info::usage_type::variable,
-                                                    variableName, variableType),
+                                                    variableInfo.m_name, variableInfo.m_type,
+                                                    variableInfo.m_operator),
                             m_file_name, get_line_and_column(quotePosition)));
             }
         }
@@ -2605,14 +2617,15 @@ namespace i18n_check
         }
 
     //--------------------------------------------------
-    const wchar_t* i18n_review::read_var_or_function_name(
-        const wchar_t* startPos, const wchar_t* const startSentinel, std::wstring& functionName,
-        std::wstring& variableName, std::wstring& variableType,
-        std::wstring& deprecatedMacroEncountered, size_t& parameterPosition)
+    const wchar_t* i18n_review::read_var_or_function_name(const wchar_t* startPos,
+                                                          const wchar_t* const startSentinel,
+                                                          std::wstring& functionName,
+                                                          variable_info& variableInfo,
+                                                          std::wstring& deprecatedMacroEncountered,
+                                                          size_t& parameterPosition)
         {
         functionName.clear();
-        variableName.clear();
-        variableType.clear();
+        variableInfo.reset();
         parameterPosition = 0;
         deprecatedMacroEncountered.clear();
         int32_t closeParenCount{ 0 };
@@ -2620,12 +2633,28 @@ namespace i18n_check
         bool quoteWrappedInCTOR{ false };
         const wchar_t* functionOrVarNamePos = startPos;
 
+        const auto readOperator =
+            [&variableInfo](const wchar_t* startPos, const wchar_t* operatorEnd)
+        {
+            if (startPos < operatorEnd)
+                {
+                const wchar_t* operatorStart{ startPos };
+                while (std::next(operatorStart) < operatorEnd &&
+                       static_cast<bool>(std::iswspace(*operatorStart)))
+                    {
+                    std::advance(operatorStart, 1);
+                    }
+                variableInfo.m_operator.assign(operatorStart,
+                                               static_cast<size_t>(operatorEnd - operatorStart));
+                }
+        };
+
         /// @todo experimental!!! Reads the variable type from a variable constructed from a string.
         const auto readVarType = [&]()
         {
             const auto loadVarType = [&]()
             {
-                variableType.clear();
+                variableInfo.m_type.clear();
                 if (functionOrVarNamePos == startSentinel)
                     {
                     return;
@@ -2669,27 +2698,27 @@ namespace i18n_check
                     {
                     std::advance(functionOrVarNamePos, 1);
                     }
-                variableType.assign(functionOrVarNamePos, typeEnd - functionOrVarNamePos);
+                variableInfo.m_type.assign(functionOrVarNamePos, typeEnd - functionOrVarNamePos);
                 // make sure the variable type is a word, not something like "<<"
-                if (variableType.length() > 0 &&
-                    !static_cast<bool>(std::iswalpha(variableType.front())))
+                if (variableInfo.m_type.length() > 0 &&
+                    !static_cast<bool>(std::iswalpha(variableInfo.m_type.front())))
                     {
-                    variableType.clear();
+                    variableInfo.m_type.clear();
                     }
-                remove_decorations(variableType);
+                remove_decorations(variableInfo.m_type);
             };
 
             loadVarType();
-            if (is_variable_type_decorator(variableType))
+            if (is_variable_type_decorator(variableInfo.m_type))
                 {
                 loadVarType();
                 }
 
             // ignore case labels, else commands, etc.
-            if (is_keyword(variableType) ||
-                (variableType.length() > 0 && variableType.back() == L':'))
+            if (is_keyword(variableInfo.m_type) ||
+                (variableInfo.m_type.length() > 0 && variableInfo.m_type.back() == L':'))
                 {
-                variableType.clear();
+                variableInfo.m_type.clear();
                 }
         };
 
@@ -2793,7 +2822,7 @@ namespace i18n_check
                 if (functionName.length() > 0)
                     {
                     // see if function is actually a CTOR
-                    if (variableName.empty() &&
+                    if (variableInfo.m_name.empty() &&
                         m_localization_functions.find(functionName) ==
                             m_localization_functions.cend() &&
                         m_non_localizable_functions.find(functionName) ==
@@ -2804,9 +2833,9 @@ namespace i18n_check
                         {
                         readVarType();
 
-                        if (variableType.length() > 0)
+                        if (variableInfo.m_type.length() > 0)
                             {
-                            variableName = functionName;
+                            variableInfo.m_name = functionName;
                             functionName.clear();
                             }
                         }
@@ -2821,6 +2850,7 @@ namespace i18n_check
                      *std::prev(startPos) != L'!' && *std::prev(startPos) != L'>' &&
                      *std::prev(startPos) != L'<')
                 {
+                const wchar_t* operatorEnd{ std::next(startPos) };
                 std::advance(startPos, -1);
                 // skip spaces (and "+=" tokens)
                 while (startPos > startSentinel &&
@@ -2828,6 +2858,7 @@ namespace i18n_check
                     {
                     std::advance(startPos, -1);
                     }
+                readOperator(std::next(startPos), operatorEnd);
                 // skip array info
                 if (startPos > startSentinel && *startPos == L']')
                     {
@@ -2854,12 +2885,12 @@ namespace i18n_check
                     {
                     std::advance(functionOrVarNamePos, 1);
                     }
-                variableName.assign(functionOrVarNamePos,
-                                    std::next(startPos) - functionOrVarNamePos);
+                variableInfo.m_name.assign(functionOrVarNamePos,
+                                           std::next(startPos) - functionOrVarNamePos);
 
                 readVarType();
 
-                if (variableName.length() > 0)
+                if (variableInfo.m_name.length() > 0)
                     {
                     break;
                     }
@@ -2935,8 +2966,8 @@ namespace i18n_check
                         }
                     else
                         {
-                        variableName.assign(functionOrVarNamePos,
-                                            std::next(startPos) - functionOrVarNamePos);
+                        variableInfo.m_name.assign(functionOrVarNamePos,
+                                                   std::next(startPos) - functionOrVarNamePos);
                         }
 
                     return functionOrVarNamePos;
@@ -2947,6 +2978,11 @@ namespace i18n_check
                 if (*startPos == L',')
                     {
                     ++parameterPosition;
+                    }
+                else if (*startPos == L'+' || *startPos == L'?' || *startPos == L':')
+                    {
+                    const wchar_t* operatorEnd{ std::next(startPos) };
+                    readOperator(startPos, operatorEnd);
                     }
                 std::advance(startPos, -1);
                 }

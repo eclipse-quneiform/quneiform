@@ -1408,7 +1408,7 @@ TEST_CASE("Ignore", "[cpp]")
         CHECK(cpp.get_localizable_strings().size() == 0);
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         REQUIRE(cpp.get_internal_strings().size() == 1);
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableType == L"LOGFONTW");
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type == L"LOGFONTW");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"font");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::variable);
 
@@ -1419,7 +1419,7 @@ TEST_CASE("Ignore", "[cpp]")
         CHECK(cpp.get_localizable_strings().size() == 0);
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         REQUIRE(cpp.get_internal_strings().size() == 1);
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableType == L"LOGFONTW");
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type == L"LOGFONTW");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"font");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::variable);
 
@@ -1430,7 +1430,7 @@ TEST_CASE("Ignore", "[cpp]")
         CHECK(cpp.get_localizable_strings().size() == 0);
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         REQUIRE(cpp.get_internal_strings().size() == 1);
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableType == L"LOGFONTW");
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type == L"LOGFONTW");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"font");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::variable);
 
@@ -2147,7 +2147,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"std::string");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::string");
         }
 
     SECTION("Variable assignment add")
@@ -2162,7 +2162,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"std::wstring");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::wstring");
         }
 
     SECTION("Variable assignment with pattern")
@@ -2178,7 +2178,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
         CHECK(cpp.get_internal_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"testMessage");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableType == L"std::string");
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type == L"std::string");
         i18n_review::get_ignored_variable_patterns().clear();
         }
 
@@ -2194,7 +2194,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"char");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"char");
         }
 
     SECTION("Variable assignment template")
@@ -2210,7 +2210,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
         // decorations get stripped
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"std::basic_string");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::basic_string");
         }
 
     SECTION("Variable CTOR")
@@ -2225,7 +2225,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"std::string");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::string");
         }
 
     SECTION("Variable CTOR template")
@@ -2241,7 +2241,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
         // decorations get stripped
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"std::basic_string");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::basic_string");
         }
 
     SECTION("Variable CTOR complex template")
@@ -2257,7 +2257,7 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
         // decorations get stripped
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"std::map");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::map");
         }
     }
 
@@ -2458,7 +2458,7 @@ TEST_CASE("String in CTORs", "[cpp]")
         REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"wstring");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"wstring");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"message");
         CHECK(cpp.get_internal_strings().size() == 0);
         }
@@ -2474,7 +2474,7 @@ TEST_CASE("String in CTORs", "[cpp]")
         REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::variable);
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableType == L"wstring");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"wstring");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"message");
         CHECK(cpp.get_internal_strings().size() == 0);
         }
@@ -3053,7 +3053,7 @@ TEST_CASE("CPP Tests", "[cpp]")
         CHECK(cpp.get_internal_strings()[0].m_string == L"unexpected alignment");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
         CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"wxFAIL_MSG");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableType.empty());
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type.empty());
         }
     
     SECTION("Pointers function")
@@ -3069,7 +3069,7 @@ TEST_CASE("CPP Tests", "[cpp]")
         CHECK(cpp.get_internal_strings()[0].m_string == L"ButtonClickHandler");
         CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
         CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"FindHandlerInfo");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableType.empty());
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type.empty());
         CHECK(cpp.get_error_log().empty());
         }
 

@@ -310,6 +310,28 @@ namespace i18n_check
     class i18n_review
         {
       public:
+        /// @private
+        struct variable_info
+            {
+            variable_info() = default;
+
+            variable_info(std::wstring name, std::wstring type, std::wstring oper)
+                : m_name(std::move(name)), m_type(std::move(type)), m_operator(std::move(oper))
+                {
+                }
+
+            void reset()
+                {
+                m_name.clear();
+                m_type.clear();
+                m_operator.clear();
+                }
+
+            std::wstring m_name;
+            std::wstring m_type;
+            std::wstring m_operator;
+            };
+
         /// @brief Information about a string found in the source code.
         struct string_info
             {
@@ -330,17 +352,27 @@ namespace i18n_check
                 usage_info() = default;
 
                 /// @private
-                usage_info(const usage_type& type, std::wstring val, std::wstring varType)
-                    : m_type(type), m_value(std::move(val)), m_variableType(std::move(varType))
+                usage_info(const usage_type& type, std::wstring val, std::wstring varType,
+                           std::wstring varOperator)
+                    : m_type(type), m_value(std::move(val)),
+                      m_variableInfo(std::wstring{}, varType, varOperator)
                     {
+                    if (m_type == usage_type::variable)
+                        {
+                        m_variableInfo.m_name = m_value;
+                    }
                     }
 
                 /// @private
                 usage_info(const usage_type& type, std::wstring val, std::wstring varType,
-                           bool hasContext)
-                    : m_type(type), m_value(std::move(val)), m_variableType(std::move(varType)),
-                      m_hasContext(hasContext)
+                           std::wstring varOperator, bool hasContext)
+                    : m_type(type), m_value(std::move(val)),
+                      m_variableInfo(std::wstring{}, varType, varOperator), m_hasContext(hasContext)
                     {
+                    if (m_type == usage_type::variable)
+                        {
+                        m_variableInfo.m_name = m_value;
+                    }
                     }
 
                 /// @private
@@ -351,7 +383,7 @@ namespace i18n_check
                 /// @private
                 std::wstring m_value;
                 /// @private
-                std::wstring m_variableType;
+                variable_info m_variableInfo;
                 /// @private
                 bool m_hasContext{ false };
                 };
@@ -972,6 +1004,38 @@ namespace i18n_check
             size_t m_previousBlockEnd{ 0 };
             };
 
+        /// @returns @c true if a string is a localizable operator being concatenated.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_concatenated_localizable_operator(const string_info& str)
+            {
+            if (str.m_usage.m_hasContext)
+            {
+                return false;
+                }
+            else if (str.m_string == L"%" || str.m_string == L"$")
+                {
+                if (str.m_usage.m_variableInfo.m_operator == L"=" ||
+                    str.m_usage.m_variableInfo.m_operator == L"+" ||
+                    str.m_usage.m_variableInfo.m_operator == L"?" ||
+                    str.m_usage.m_variableInfo.m_operator == L":")
+                    {
+                    return true;
+                    }
+                else if (str.m_usage.m_type == string_info::usage_info::usage_type::function &&
+                         (str.m_usage.m_value == L"append" || str.m_usage.m_value == L"Append" ||
+                          str.m_usage.m_value == L"prepend" || str.m_usage.m_value == L"Prepend"))
+                    {
+                    return true;
+                    }
+                return false;
+                }
+            else
+                {
+                return false;
+                }
+            }
+
         /// @returns @c true if a string starts or ends with spaces.
         ///     (Not tabs or newlines, but actual spaces.)
         /// @param str The string to review.
@@ -1021,16 +1085,15 @@ namespace i18n_check
             @param quoteEnd The end of the quote.
             @param functionVarNamePos The position in the buffer of the quote's
                 function or variable being assigned to.
-            @param variableName If this quote is being assigned to a variable, the variable name.
             @param functionName If this quote is inside of function, the function name.
-            @param variableType If being assigned to a variable, the variable's type.
+            @param variableInfo If being assigned to a variable, the variable's information.
             @param deprecatedMacroEncountered If the quote is inside of a deprecated
                 macro, then name of this macro.
             @param parameterPosition The string's position in the function call (if applicable).
             @param isFollowedByComma Whether the quote is followed by a comma.*/
         void process_quote(wchar_t* currentTextPos, const wchar_t* quoteEnd,
-                           const wchar_t* functionVarNamePos, const std::wstring& variableName,
-                           const std::wstring& functionName, const std::wstring& variableType,
+                           const wchar_t* functionVarNamePos, const std::wstring& functionName,
+                           const variable_info& variableInfo,
                            const std::wstring& deprecatedMacroEncountered,
                            const size_t parameterPosition, const bool isFollowedByComma);
 
@@ -1172,14 +1235,12 @@ namespace i18n_check
 
         /// @brief Reviews and classifies a string value based on the
         ///     variable it is being assigned to.
-        /// @param variableType The type of the variable being assigned to
-        ///     (e.g.,  wxString).
-        /// @param variableName The name of the variable being assigned to.
+        /// @param variableInfo The variable being assigned to.
         /// @param value The string value being reviewed.
         /// @param quotePosition The character position of where the
         ///     quote starting @c value begins.
-        void process_variable(const std::wstring& variableType, const std::wstring& variableName,
-                              const std::wstring_view value, const size_t quotePosition);
+        void process_variable(const variable_info& variableInfo, const std::wstring_view value,
+                              const size_t quotePosition);
 
         /// @brief Fills a block with blanks.
         /// @details Useful for excluding an already processed text block.
@@ -1200,17 +1261,18 @@ namespace i18n_check
             @param startSentinel The furthest point to look backwards.
             @param[out] functionName If the string is in a function call,
                 the name of that function.
-            @param[out] variableName If the string is being assigned to a variable,
-                the name of that variable.
-            @param[out] variableType What the string was being assigned to (function or variable).
+            @param[out] variableInfo If the string is being assigned to a variable,
+                then info about it (name, type, etc.).
             @param[out] deprecatedMacroEncountered If a deprecated text macro is encountered,
                 will write that to this parameter.
             @param[out] parameterPosition The strings parameter position in the function call.
             @returns The position of the function or variable related to the string.*/
-        const wchar_t* read_var_or_function_name(
-            const wchar_t* startPos, const wchar_t* const startSentinel, std::wstring& functionName,
-            std::wstring& variableName, std::wstring& variableType,
-            std::wstring& deprecatedMacroEncountered, size_t& parameterPosition);
+        const wchar_t* read_var_or_function_name(const wchar_t* startPos,
+                                                 const wchar_t* const startSentinel,
+                                                 std::wstring& functionName,
+                                                 variable_info& variableInfo,
+                                                 std::wstring& deprecatedMacroEncountered,
+                                                 size_t& parameterPosition);
 
         /// @returns @c true if provided variable type is just a decorator after the real
         ///     variable type (e.g., const) and should be skipped.
