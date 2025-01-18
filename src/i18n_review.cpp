@@ -2639,11 +2639,11 @@ namespace i18n_check
         const wchar_t* functionOrVarNamePos = startPos;
 
         const auto readOperator =
-            [&variableInfo](const wchar_t* startPos, const wchar_t* operatorEnd)
+            [&variableInfo](const wchar_t* startingPos, const wchar_t* operatorEnd)
         {
-            if (startPos < operatorEnd)
+            if (startingPos < operatorEnd)
                 {
-                const wchar_t* operatorStart{ startPos };
+                const wchar_t* operatorStart{ startingPos };
                 while (std::next(operatorStart) < operatorEnd &&
                        static_cast<bool>(std::iswspace(*operatorStart)))
                     {
