@@ -348,6 +348,45 @@ namespace i18n_check
                                     std::advance(connectedQuote, 1);
                                     }
                                 }
+                            // step over any comments at the end of the line
+                            else if (std::next(connectedQuote) < endSentinel &&
+                                *connectedQuote == L'/' &&
+                                *std::next(connectedQuote) == L'/')
+                                {
+                                // move to the end of the line
+                                if (const size_t endOfLine = std::wcscspn(connectedQuote, L"\n\r");
+                                    std::next(connectedQuote, static_cast<ptrdiff_t>(endOfLine)) <
+                                    endSentinel)
+                                    {
+                                    clear_section(
+                                        connectedQuote,
+                                                  std::next(connectedQuote,
+                                                            static_cast<ptrdiff_t>(endOfLine)));
+                                    std::advance(connectedQuote, endOfLine);
+                                    while (connectedQuote < endSentinel &&
+                                           static_cast<bool>(std::iswspace(*connectedQuote)))
+                                        {
+                                        std::advance(connectedQuote, 1);
+                                        }
+                                    }
+                                }
+                            else if (std::next(connectedQuote) < endSentinel &&
+                                     *connectedQuote == L'/' && *std::next(connectedQuote) == L'*')
+                                {
+                                // move to the end of the line
+                                wchar_t* endOfLine = std::wcsstr(connectedQuote, L"*/");
+                                if (endOfLine != nullptr && endOfLine < endSentinel)
+                                    {
+                                    clear_section(connectedQuote, std::next(endOfLine, 2));
+                                    connectedQuote = std::next(endOfLine, 2);
+                                    while (connectedQuote < endSentinel &&
+                                           static_cast<bool>(std::iswspace(*connectedQuote)))
+                                        {
+                                        std::advance(connectedQuote, 1);
+                                        }
+                                    }
+                                }
+
                             if (connectedQuote < endSentinel && *connectedQuote == L'\"')
                                 {
                                 end = std::next(connectedQuote);

@@ -582,7 +582,8 @@ namespace i18n_check
                 LR"([\s\S]*(\{[[:space:]]*[a-zA-Z\-]+[[:space:]]*[:][[:space:]]*[0-9a-zA-Z\- \(\)\\;\:%#'",]+[[:space:]]*\})+[\s\S]*)"),
             std::wregex(
                 LR"((margin[-](top|bottom|left|right)|text[-]indent)[:][[:space:]]*[[:alnum:]%]+;)"),
-            std::wregex(LR"([a-z][a-z0-9]+\-[a-z0-9]+(\-[a-z0-9]+)*)"), // single hypenphated word that starts lowercase
+            // single hypenphated word that starts lowercase
+            std::wregex(LR"([a-z][a-z0-9]+\-[a-z0-9]+(\-[a-z0-9]+)*)"),
             // JS
             std::wregex(LR"(class[[:space:]]*=[[:space:]]*['"][A-Za-z0-9\- _]*['"])"),
             // An opening HTML element

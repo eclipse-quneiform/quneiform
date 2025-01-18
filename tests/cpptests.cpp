@@ -3107,6 +3107,72 @@ TEST_CASE("CPP Tests", "[cpp]")
         }
     }
 
+TEST_CASE("Multiline Strings", "[cpp][i18n]")
+    {
+    SECTION("Embedded Comments")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        const wchar_t* code = LR"(val = _("Line 1\n" // a comment
+"Line 2\n" /* another comment*/
+"Line 3"))";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_localizable_strings().size());
+        CHECK(cpp.get_localizable_strings()[0].m_string == std::wstring{ L"Line 1\\nLine 2\\nLine 3" });
+        }
+    }
+
+TEST_CASE("Ambiguity", "[cpp][i18n]")
+    {
+    SECTION("Ambiguous CAPPED")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        const wchar_t* code = LR"(SetTitle(wxString::Format(
+        _(L"FACTOR_VAR"), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
+        cpp.clear_results();
+
+        code = LR"(SetTitle(wxString::Format(
+        _(L"Untitled"), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
+        cpp.clear_results();
+        }
+
+    SECTION("Ambiguous Punct")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_needing_context);
+        // weird $ at the end makes this ambiguous
+        const wchar_t* code = LR"(SetTitle(wxString::Format(
+        _(L"$Print$"), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
+        cpp.clear_results();
+
+        code = LR"(SetTitle(wxString::Format(
+        _(L"&Print"), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
+        cpp.clear_results();
+
+        // ignore ellipsis
+        code = LR"(SetTitle(wxString::Format(
+        _(L"Printing..."), wxGetApp().GetAppName()));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
+        cpp.clear_results();
+        }
+    }
+
 TEST_CASE("Context", "[cpp][i18n]")
     {
     SECTION("Colons negate printf")
@@ -3232,53 +3298,6 @@ QString example = tr("UNTITLED");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
-        cpp.clear_results();
-        }
-
-    SECTION("Ambiguous CAPPED")
-        {
-        cpp_i18n_review cpp(false);
-        cpp.set_style(check_needing_context);
-        const wchar_t* code = LR"(SetTitle(wxString::Format(
-        _(L"FACTOR_VAR"), wxGetApp().GetAppName()));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
-        cpp.clear_results();
-
-        code = LR"(SetTitle(wxString::Format(
-        _(L"Untitled"), wxGetApp().GetAppName()));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
-        cpp.clear_results();
-        }
-
-    SECTION("Ambiguous Punct")
-        {
-        cpp_i18n_review cpp(false);
-        cpp.set_style(check_needing_context);
-        // weird $ at the end makes this ambiguous
-        const wchar_t* code = LR"(SetTitle(wxString::Format(
-        _(L"$Print$"), wxGetApp().GetAppName()));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
-        cpp.clear_results();
-
-        code = LR"(SetTitle(wxString::Format(
-        _(L"&Print"), wxGetApp().GetAppName()));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
-        cpp.clear_results();
-
-        // ignore ellipsis
-        code = LR"(SetTitle(wxString::Format(
-        _(L"Printing..."), wxGetApp().GetAppName()));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings_ambiguous_needing_context().empty());
         cpp.clear_results();
         }
 
