@@ -1714,8 +1714,10 @@ namespace i18n_check
     //--------------------------------------------------
     bool i18n_review::is_string_ambiguous(std::wstring_view str)
         {
+        // quneiform-suppress-begin
         static std::set<std::wstring_view> common_acronyms = { L"N/A", L"NA",     L"OK",  L"ASCII",
                                                                L"CD",  L"CD-ROM", L"DVD", L"URL" };
+        // quneiform-suppress-end
         // Just one word?
         if (str.find_first_of(L" \t\n\r") == std::wstring::npos &&
             str.find(L"\\t") == std::wstring::npos)
@@ -1954,8 +1956,8 @@ namespace i18n_check
                                     functionName)
                                     .wc_string(),
 #else
-                                L"Context string is considerably long. Are the context and string "
-                                "arguments possibly transposed?",
+                                _(L"Context string is considerably long. Are the context and string "
+                                  "arguments possibly transposed?"),
 #endif
                                 std::wstring{}, variableInfo.m_operator, true),
                             m_file_name, get_line_and_column(currentTextPos - m_file_start));
@@ -1979,8 +1981,8 @@ namespace i18n_check
                                   "Are you sure the provided argument is an ID?")
                                     .wc_string(),
 #else
-                                L"This function is meant for string IDs, not translatable strings."
-                                "Are you sure the provided argument is an ID?",
+                                _(L"This function is meant for string IDs, not translatable strings."
+                                  "Are you sure the provided argument is an ID?"),
 #endif
                                 std::wstring{}, variableInfo.m_operator, true),
                             m_file_name, get_line_and_column(currentTextPos - m_file_start));
@@ -2339,7 +2341,7 @@ namespace i18n_check
             }
         string_util::trim(strToReview);
         // something like "%d%%" should be translatable
-        if (allPunctOrSpaces && strToReview.find(L"%%") != std::wstring::npos)
+        if (allPunctOrSpaces && strToReview.find(_DT(L"%%")) != std::wstring::npos)
             {
             return std::make_pair(false, strToReview.length());
             }

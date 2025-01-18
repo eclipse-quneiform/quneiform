@@ -446,7 +446,18 @@ namespace i18n_check
         };
 
         std::wstringstream report;
-        report << _("File\tLine\tColumn\tValue\tExplanation\tWarningID\n");
+        report << // TRANSLATORS: Column header in output
+                  _("File") << L"\t" <<
+                  // TRANSLATORS: Column header in output
+                  _(L"Line") << L"\t" <<
+                  // TRANSLATORS: Column header in output
+                  _(L"Column") << L"\t" <<
+                  // TRANSLATORS: Column header in output
+                  _(L"Value") << L"\t" <<
+                  // TRANSLATORS: Column header in output
+                  _(L"Explanation") << L"\t" <<
+                  // TRANSLATORS: Column header in output
+                  _(L"Warning ID") << L"\n";
 
         // Windows resource file warnings
         for (const auto& val : m_rc->get_unsafe_localizable_strings())
@@ -938,7 +949,7 @@ namespace i18n_check
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
                        << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Trailing space(s) detected at end of line.")
+                       << _(L"Trailing spaces detected at end of line.")
                        << L"\"\t[trailingSpaces]\n";
                 }
 

@@ -169,7 +169,7 @@ namespace i18n_check
                                 {
                                 catEntry.second.m_issues.emplace_back(
                                     translation_issue::printf_issue,
-                                    L"'" + catEntry.second.m_source + L"' vs. '" +
+                                    L"'" + catEntry.second.m_source + _WXTRANS_WSTR(L"' vs. '") +
                                         catEntry.second.m_translation + L"'" + errorInfo);
                                 }
                             }
@@ -188,7 +188,7 @@ namespace i18n_check
                                 {
                                 catEntry.second.m_issues.emplace_back(
                                     translation_issue::printf_issue,
-                                    L"'" + catEntry.second.m_source_plural + L"' vs. '" +
+                                    L"'" + catEntry.second.m_source_plural + _WXTRANS_WSTR(L"' vs. '") +
                                         catEntry.second.m_translation_plural + L"'" + errorInfo);
                                 }
                             }

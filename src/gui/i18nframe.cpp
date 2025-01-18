@@ -1106,7 +1106,7 @@ void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent&)
     aboutInfo.SetLicence(_DT(LR"(Eclipse Public License - v 2.0)"));
     aboutInfo.SetCopyright(
         wxString::Format(_(L"Copyright \U000000A92021-%d %s. All rights reserved."),
-                         buildDate.GetYear(), L"Blake Madden"));
+                         buildDate.GetYear(), _DT(L"Blake Madden")));
     wxIcon appIcon;
     appIcon.CopyFromBitmap(
         wxArtProvider::GetBitmap(L"ID_ABOUT", wxART_OTHER, wxWindow::FromDIP(wxSize{ 32, 32 })));

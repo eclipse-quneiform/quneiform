@@ -104,10 +104,10 @@ NewProjectDialog::NewProjectDialog(
         { wxFONTENCODING_MACTURKISH, _(L"Turkish (Mac)") },
         { wxFONTENCODING_CP1254, _(L"Turkish (Windows)") },
         { wxFONTENCODING_CP437, _(L"United States (DOS)") },
-        { wxFONTENCODING_UTF16, _(L"UTF-16") },
+        { wxFONTENCODING_UTF16, _DT(L"UTF-16") },
         { wxFONTENCODING_UTF16BE, _(L"UTF-16 Big Endian Unicode encoding") },
         { wxFONTENCODING_UTF16LE, _(L"UTF-16 Little Endian Unicode encoding") },
-        { wxFONTENCODING_UTF32, _(L"UTF-32") },
+        { wxFONTENCODING_UTF32, _DT(L"UTF-32") },
         { wxFONTENCODING_UTF32BE, _(L"UTF-32 Big Endian Unicode encoding") },
         { wxFONTENCODING_UTF32LE, _(L"UTF-32 Little Endian Unicode encoding") },
         { wxFONTENCODING_UTF7, _(L"UTF-7 Unicode encoding") },
@@ -115,7 +115,7 @@ NewProjectDialog::NewProjectDialog(
         { wxFONTENCODING_VIETNAMESE, _(L"Vietnamese") },
         { wxFONTENCODING_MACVIATNAMESE, _(L"Vietnamese (Mac)") },
         { wxFONTENCODING_CP1258, _(L"Vietnamese (Windows)") },
-        { wxFONTENCODING_ISO8859_1, _(L"Western European (Latin 1) ") }
+        { wxFONTENCODING_ISO8859_1, _(L"Western European (Latin 1)") }
     };
 
     CreateControls();
