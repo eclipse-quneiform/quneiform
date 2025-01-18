@@ -544,6 +544,10 @@ namespace i18n_check
             std::wregex(LR"([(]*SELECT[[:space:]]+[A-Z_0-9\.]+,.*)"), std::wregex(LR"(^DSN=.*)"),
             std::wregex(LR"(^Provider=(SQLOLEDB|Search).*)"),
             std::wregex(LR"(^Connection: Keep-Alive$)"), std::wregex(LR"(ODBC;DSN=.*)"),
+            // C++ code
+            std::wregex(LR"([a-zA-Z0-9]+\:\:[a-zA-Z0-9]+(\:\:[a-zA-Z0-9]+)?)"),
+            // gettext formats
+            std::wregex(LR"((possible\-)?(c|cpp|kde|qt)\-(plural\-)?format)"),
             // a regex expression
             std::wregex(LR"([(][?]i[)].*)"),
             // single file filter that just has a file extension as its "name"
@@ -578,6 +582,7 @@ namespace i18n_check
                 LR"([\s\S]*(\{[[:space:]]*[a-zA-Z\-]+[[:space:]]*[:][[:space:]]*[0-9a-zA-Z\- \(\)\\;\:%#'",]+[[:space:]]*\})+[\s\S]*)"),
             std::wregex(
                 LR"((margin[-](top|bottom|left|right)|text[-]indent)[:][[:space:]]*[[:alnum:]%]+;)"),
+            std::wregex(LR"([a-z][a-z0-9]+\-[a-z0-9]+(\-[a-z0-9]+)*)"), // single hypenphated word that starts lowercase
             // JS
             std::wregex(LR"(class[[:space:]]*=[[:space:]]*['"][A-Za-z0-9\- _]*['"])"),
             // An opening HTML element
@@ -3080,10 +3085,10 @@ namespace i18n_check
         // "36,600", and "36.600".
         // Also, 7-bit, full-width, and Hindi numbers will be extracted.
         const std::wregex numberRegex{
-            LR"([[:digit:]\u0966-\u096F\uFF10-\uFF19]+([ ,\.][[:digit:]\u0966-\u096F\uFF10-\uFF19]+)*)"
+            LR"([[:digit:]\u0966-\u096F\uFF10-\uFF19]+([\u00A0,\.][[:digit:]\u0966-\u096F\uFF10-\uFF19]+)*)"
         };
         // this will then normalize them all to 36600
-        const std::wregex separatorsRegex{ LR"([ ,\.])" };
+        const std::wregex separatorsRegex{ LR"([\u00A0,\.])" };
         std::wstring_view::const_iterator searchStart{ resource.cbegin() };
         std::match_results<std::wstring_view::const_iterator> res;
         while (std::regex_search(searchStart, resource.cend(), res, numberRegex))
