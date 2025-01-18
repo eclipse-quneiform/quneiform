@@ -1440,7 +1440,7 @@ void I18NFrame::SaveProjectIfNeeded()
 void I18NFrame::SaveSourceFileIfNeeded()
     {
     // editor will be set to read-only if file was corrupted during loading.
-    if (m_editor->IsEditable())
+    if (!m_editor->IsEditable())
         {
         return;
         }
