@@ -137,40 +137,6 @@ void I18NFrame::InitControls()
             }
         }
 
-    if (wxSystemSettings::GetAppearance().IsDark())
-        {
-        m_ribbon->GetArtProvider()->SetColourScheme(
-            wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE),
-            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW), wxColour(253, 211, 155));
-
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_BUTTON_BAR_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_BUTTON_BAR_LABEL_DISABLED_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_BUTTON_BAR_LABEL_HIGHLIGHT_TOP_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(
-            wxRIBBON_ART_BUTTON_BAR_LABEL_HIGHLIGHT_GRADIENT_TOP_COLOUR,
-            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_BUTTON_BAR_LABEL_HIGHLIGHT_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-        m_ribbon->GetArtProvider()->SetColour(
-            wxRIBBON_ART_BUTTON_BAR_LABEL_HIGHLIGHT_GRADIENT_COLOUR,
-            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_TAB_ACTIVE_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_PANEL_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_PANEL_MINIMISED_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_PANEL_HOVER_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_TAB_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        m_ribbon->GetArtProvider()->SetColour(wxRIBBON_ART_TAB_HOVER_LABEL_COLOUR,
-                                              wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-        }
-
     m_ribbon->Realize();
 
     wxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
