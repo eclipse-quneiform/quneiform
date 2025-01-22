@@ -1419,14 +1419,14 @@ namespace i18n_check
             while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
                                      stPositions, l10nStringNonStringLiteralArgRegEx))
                 {
-                currentTextBlock = currentTextBlock.substr(stPositions.position());
-                currentBlockOffset += stPositions.position();
+                currentTextBlock = currentTextBlock.substr(stPositions.position(1));
+                currentBlockOffset += stPositions.position(1);
                 if (stPositions.size() >= 3 &&
                     // only something like LR, L, u8, etc. can be in front of a quote
-                    stPositions[1].length() > 2 && stPositions[2].str() != L"\"")
+                    stPositions[2].length() > 2 && stPositions[3].str() != L"\"")
                     {
                     m_suspect_i18n_usage.push_back(string_info(
-                        stPositions[1].str(),
+                        stPositions[2].str(),
                         string_info::usage_info(
                             string_info::usage_info::usage_type::function,
                             _(L"Only string literals should be passed to _() and wxPLURAL() functions.")
@@ -2330,13 +2330,6 @@ namespace i18n_check
             }
 
         i18n_string_util::remove_hex_color_values(strToReview);
-        // allow %% even when not allowing punctuation-only strings as the
-        // percent symbol in a formatted string can be localized to something else
-        // (or moved to a different position in the string)
-        if (strToReview.find(L"%%") != std::wstring::npos)
-            {
-            return std::make_pair(false, strToReview.length());
-            }
         i18n_string_util::remove_printf_commands(strToReview);
         i18n_string_util::remove_escaped_unicode_values(strToReview);
         string_util::trim(strToReview);
@@ -2348,7 +2341,8 @@ namespace i18n_check
                 {
                 chr = L' ';
                 }
-            if (allPunctOrSpaces && !std::iswdigit(chr) && !std::iswpunct(chr))
+            if (allPunctOrSpaces && !std::iswdigit(chr) && !std::iswpunct(chr) &&
+                !std::iswspace(chr))
                 {
                 allPunctOrSpaces = false;
                 }

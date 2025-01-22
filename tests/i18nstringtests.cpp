@@ -102,6 +102,10 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK(reviewer.is_untranslatable_string(L"#somethingElse", false).first);
     // CSS
     CHECK(reviewer.is_untranslatable_string(L"height:%dpx;", false).first);
+    // formatted percentage symobl should be translatable
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%% (%s)", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%%\n(%s)", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%%\\n(%s)", false).first);
     }
 
 TEST_CASE("translatable", "[i18nreview]")
