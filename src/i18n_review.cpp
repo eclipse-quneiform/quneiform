@@ -1408,10 +1408,10 @@ namespace i18n_check
                 }
             }
 
-            // _() not taking a literal string
+            // _(), wxPLURAL() not taking a literal string
             {
             const std::wregex l10nStringNonStringLiteralArgRegEx{
-                LR"(\b_\([\(\s]*([a-zA-Z0-9]+)([[:punct:]]))"
+                LR"(\b(_|wxPLURAL)\([\(\s]*([a-zA-Z0-9]+)([[:punct:]]))"
             };
             auto currentTextBlock{ fileText };
             std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
@@ -1429,7 +1429,7 @@ namespace i18n_check
                         stPositions[1].str(),
                         string_info::usage_info(
                             string_info::usage_info::usage_type::function,
-                            _(L"Only string literals should be passed to _() function.")
+                            _(L"Only string literals should be passed to _() and wxPLURAL() functions.")
 #ifdef wxVERSION_NUMBER
                                 .wc_string(),
 #else
@@ -2002,6 +2002,7 @@ namespace i18n_check
                             string_info::usage_info::usage_type::function, functionName,
                             std::wstring{}, variableInfo.m_operator,
                             (is_i18n_with_context_function(functionName) ||
+                             functionName == L"wxPLURAL" ||
                              (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
                              m_context_comment_active)),
                         m_file_name, get_line_and_column(currentTextPos - m_file_start));
@@ -2329,6 +2330,13 @@ namespace i18n_check
             }
 
         i18n_string_util::remove_hex_color_values(strToReview);
+        // allow %% even when not allowing punctuation-only strings as the
+        // percent symbol in a formatted string can be localized to something else
+        // (or moved to a different position in the string)
+        if (strToReview.find(L"%%") != std::wstring::npos)
+            {
+            return std::make_pair(false, strToReview.length());
+            }
         i18n_string_util::remove_printf_commands(strToReview);
         i18n_string_util::remove_escaped_unicode_values(strToReview);
         string_util::trim(strToReview);

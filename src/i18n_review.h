@@ -1014,7 +1014,7 @@ namespace i18n_check
                 {
                 return false;
                 }
-            else if (str.m_string == L"%" || str.m_string == L"$")
+            else if (str.m_string == L"%" || str.m_string == L"%)" || str.m_string == L"$")
                 {
                 if (str.m_usage.m_variableInfo.m_operator == L"=" ||
                     str.m_usage.m_variableInfo.m_operator == L"+" ||
