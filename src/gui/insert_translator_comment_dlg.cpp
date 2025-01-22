@@ -69,6 +69,8 @@ void InsertTransCommentDlg::CreateControls()
     mainDlgSizer->Add(CreateSeparatedButtonSizer(wxOK | wxCANCEL | wxHELP),
                       wxSizerFlags{}.Expand().Border());
 
+    commentTextCtrl->SetFocus();
+
     TransferDataToWindow();
 
     SetSizerAndFit(mainDlgSizer);
