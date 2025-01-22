@@ -1774,7 +1774,7 @@ namespace i18n_check
                 {
                 return false;
                 }
-            // Single word with multiple punctuations marks?
+            // Single word with multiple punctuation marks?
             const size_t punctCount = std::count_if(str.cbegin(), str.cend(),
                                                     [](const auto chr)
                                                     {
