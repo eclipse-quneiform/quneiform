@@ -1158,7 +1158,7 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent&)
 
     wxFileDialog dialog(
         this, _(L"Select Project to Open"), wxString{}, wxString{},
-        wxString::Format(_(L"%s Project Files (*.cfn)|*.cfn"), wxGetApp().GetAppName()),
+        wxString::Format(_(L"%s Project Files (*.qfn)|*.qfn"), wxGetApp().GetAppName()),
         wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
     if (dialog.ShowModal() != wxID_OK)
         {
@@ -1368,8 +1368,8 @@ void I18NFrame::OnSave([[maybe_unused]] wxCommandEvent&)
         const wxString lastFolder =
             projectName.GetName().empty() ? wxString{ _(L"Project") } : projectName.GetName();
         wxFileDialog dialog(
-            nullptr, _(L"Save Project"), wxString{}, lastFolder + L".cfn",
-            wxString::Format(_(L"%s Project Files (*.cfn)|*.cfn"), wxGetApp().GetAppName()),
+            nullptr, _(L"Save Project"), wxString{}, lastFolder + L".qfn",
+            wxString::Format(_(L"%s Project Files (*.qfn)|*.qfn"), wxGetApp().GetAppName()),
             wxFD_SAVE | wxFD_PREVIEW | wxFD_OVERWRITE_PROMPT);
         if (dialog.ShowModal() != wxID_OK)
             {
