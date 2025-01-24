@@ -1427,15 +1427,15 @@ namespace i18n_check
                     {
                     m_suspect_i18n_usage.push_back(string_info(
                         stPositions[2].str(),
-                        string_info::usage_info(
-                            string_info::usage_info::usage_type::function,
-                            _(L"Only string literals should be passed to _() and wxPLURAL() functions.")
+                        string_info::usage_info(string_info::usage_info::usage_type::function,
+                                                _(L"Only string literals should be passed to _() "
+                                                  "and wxPLURAL() functions.")
 #ifdef wxVERSION_NUMBER
-                                .wc_string(),
+                                                    .wc_string(),
 #else
-                                ,
+                                                    ,
 #endif
-                            std::wstring{}, std::wstring{}),
+                                                std::wstring{}, std::wstring{}),
                         fileName, get_line_and_column(currentBlockOffset, fileText.data())));
                     }
                 currentTextBlock = currentTextBlock.substr(stPositions.length());
@@ -1962,8 +1962,8 @@ namespace i18n_check
                                     functionName)
                                     .wc_string(),
 #else
-                                _(L"Context string is considerably long. Are the context and string "
-                                  "arguments possibly transposed?"),
+                                _(L"Context string is considerably long. Are the context and "
+                                  "string arguments possibly transposed?"),
 #endif
                                 std::wstring{}, variableInfo.m_operator, true),
                             m_file_name, get_line_and_column(currentTextPos - m_file_start));
@@ -1987,7 +1987,8 @@ namespace i18n_check
                                   "Are you sure the provided argument is an ID?")
                                     .wc_string(),
 #else
-                                _(L"This function is meant for string IDs, not translatable strings."
+                                _(L"This function is meant for string IDs, "
+                                  "not translatable strings."
                                   "Are you sure the provided argument is an ID?"),
 #endif
                                 std::wstring{}, variableInfo.m_operator, true),
@@ -2305,7 +2306,11 @@ namespace i18n_check
                                                                   const bool limitWordCount) const
         {
         // if no spaces but lengthy, then this is probably some sort of GUID
-        if (strToReview.find(L' ') == std::wstring::npos && strToReview.length() >= 32)
+        if (strToReview.length() >= 32 &&
+            strToReview.find_first_of(L" \n\r") == std::wstring::npos &&
+            strToReview.find(L"\\n") == std::wstring::npos &&
+            strToReview.find(L"\\r") == std::wstring::npos &&
+            strToReview.find(L"\\t") == std::wstring::npos)
             {
             return std::make_pair(true, strToReview.length());
             }
