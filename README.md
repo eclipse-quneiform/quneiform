@@ -110,21 +110,21 @@ When pseudo-translating, a copy of all *gettext* \*.po and \*.pot files will be 
 with mutations of the respective source strings. These files (which will have a "pseudo_" prefix) can then be compiled into \*.mo files and
 loaded by your application for integration testing.
 
-[![Linux Build](https://github.com/Blake-Madden/Cuneiform/actions/workflows/linux-build.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/linux-build.yml)
-[![macOS build](https://github.com/Blake-Madden/Cuneiform/actions/workflows/macOS%20build.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/macOS%20build.yml)
-[![Windows build](https://github.com/Blake-Madden/Cuneiform/actions/workflows/msw-build.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/msw-build.yml)
+[![Linux Build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/linux-build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/linux-build.yml)
+[![macOS build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macOS%20build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macOS%20build.yml)
+[![Windows build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-build.yml)
 
-[![unit-tests](https://github.com/Blake-Madden/Cuneiform/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/unit-tests.yml)
-[![macOS unit tests](https://github.com/Blake-Madden/Cuneiform/actions/workflows/macos-unit-test.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/macos-unit-test.yml)
-[![Windows unit tests](https://github.com/Blake-Madden/Cuneiform/actions/workflows/msw-unit-tests.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/msw-unit-tests.yml)
+[![unit-tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/unit-tests.yml)
+[![macOS unit tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macos-unit-test.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macos-unit-test.yml)
+[![Windows unit tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-unit-tests.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-unit-tests.yml)
 
-[![cppcheck](https://github.com/Blake-Madden/Cuneiform/actions/workflows/cppcheck.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/cppcheck.yml)
-[![CodeQL](https://github.com/Blake-Madden/Cuneiform/actions/workflows/codeql.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/codeql.yml)
-[![Microsoft C++ Code Analysis](https://github.com/Blake-Madden/Cuneiform/actions/workflows/msvc.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/msvc.yml)
+[![cppcheck](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml)
+[![CodeQL](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml)
+[![Microsoft C++ Code Analysis](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml)
 
-[![doxygen](https://github.com/Blake-Madden/Cuneiform/actions/workflows/doxygen.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/doxygen.yml)
-[![Check Spelling](https://github.com/Blake-Madden/Cuneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/spell-check.yml)
-[![Quneiform](https://github.com/Blake-Madden/Cuneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/Blake-Madden/Cuneiform/actions/workflows/i18n-check.yml)
+[![doxygen](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml)
+[![Check Spelling](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml)
+[![Quneiform](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml)
 
 # Usage
 
@@ -301,56 +301,3 @@ On Windows with Visual Studio, build wxWidgets with the defaults, except `wxBUIL
 Open "gui/CMakeLists.txt" in Visual Studio, setting the *CMake* setting's configuration type to "Release" for a release build.
 
 After building, "quneiform" will be available in the "bin" folder.
-
-# GitHub Action
-
-You can also create a `Quneiform` GitHub action to make it part of your CI.
-For example, create a new workflow called "quneiform.yml" and enter the following:
-
-```shellscript
-name: Quneiform
-on: [push]
-
-jobs:
-  build:
-    name: Quneiform
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: install Quneiform
-        run: |
-             git clone https://github.com/Blake-Madden/Quneiform.git --recurse-submodules
-             cd Quneiform
-             cmake ./
-             make -j4
-             cd ..
-
-      - name: analyze
-        run: |
-             # Ignore Quneiform's own folder.
-             # You can ignore other folders by adding a comma and the folder name
-             # after "--ignore=Quneiform".
-             ./Quneiform/bin/quneiform ./ --ignore=Quneiform -q -o i18nresults.txt
-
-      - name: review results
-        run: |
-             REPORTFILE=./i18nresults.txt
-             WARNINGSFILE=./warnings.txt
-             if test -f "$REPORTFILE"; then
-                cat "$REPORTFILE" > "$WARNINGSFILE"
-                # are there any warnings?
-                if grep -qP '\[[a-zA-Z0-9]+\]' "$WARNINGSFILE"; then
-                    # print the remaining warnings
-                    echo Warnings detected:
-                    echo ==================
-                    cat "$WARNINGSFILE" | grep -P '\[[a-zA-Z0-9]+\]'
-                    # fail the job
-                    exit 1
-                else
-                    echo No issues detected
-                fi
-             else
-                echo "$REPORTFILE" not found
-             fi
-```
