@@ -1179,7 +1179,11 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent&)
 //------------------------------------------------------
 void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&)
     {
+    int linePos{ 0 };
+    const wxString lineText = m_editor->GetCurLine(&linePos);
+
     InsertTransCommentDlg dialog(this);
+    dialog.SetLinePosition(linePos);
     if (dialog.ShowModal() != wxID_OK)
         {
         return;
@@ -1187,8 +1191,6 @@ void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&)
 
     if (!dialog.IsMultilineComment())
         {
-        int linePos{ 0 };
-        const wxString lineText = m_editor->GetCurLine(&linePos);
         if (!lineText.empty() && static_cast<size_t>(linePos) < (lineText.length() - 1))
             {
             m_editor->InsertText(m_editor->GetCurrentPos(),

@@ -81,13 +81,11 @@ void InsertTransCommentDlg::OnOK([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
 
-    // if not a multiline comment, the remove any newlines
-    if (!m_selectedTag.starts_with(L"/*"))
+    if (m_comment.find(L"\n") != wxString::npos && !IsMultilineComment())
         {
-        m_comment.Replace(L"\r\n", L" ");
-        m_comment.Replace(L"\r", L" ");
-        m_comment.Replace(L"\n", L" ");
-        TransferDataToWindow();
+        wxMessageBox(_(L"Please select a multiline comment style if using a multiline comment."),
+                     _(L"Invalid Comment Style"));
+        return;
         }
 
     if (IsModal())
@@ -105,13 +103,20 @@ wxString InsertTransCommentDlg::GetFormattedOutput()
     {
     TransferDataFromWindow();
 
+    // if a multiline comment, push each subsequent line over to
+    // line up with the start of the comment
+    wxString formattedComment{ m_comment };
+    formattedComment.Replace(
+        L"\n",
+        L"\n" + wxString{}.Pad(m_linePosition + ((m_selectedTag == _DT(L"/*: */")) ? 4 : 3)));
+
     if (m_selectedTag == _DT(L"// TRANSLATORS:"))
         {
         return m_selectedTag + L" " + m_comment;
         }
     else if (m_selectedTag == _DT(L"/* TRANSLATORS: */"))
         {
-        return _DT(L"/* TRANSLATORS: ") + m_comment + L" */";
+        return _DT(L"/* TRANSLATORS: ") + formattedComment + L" */";
         }
     else if (m_selectedTag == _DT(L"//:"))
         {
@@ -119,7 +124,7 @@ wxString InsertTransCommentDlg::GetFormattedOutput()
         }
     else if (m_selectedTag == _DT(L"/*: */"))
         {
-        return _DT(L"/*: ") + m_comment + L" */";
+        return _DT(L"/*: ") + formattedComment + L" */";
         }
     else
         {

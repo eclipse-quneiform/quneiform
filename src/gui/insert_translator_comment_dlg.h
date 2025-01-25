@@ -59,6 +59,10 @@ class InsertTransCommentDlg final : public wxDialog
     /// @private
     InsertTransCommentDlg& operator=(const InsertTransCommentDlg&) = delete;
 
+    /** @brief For multiline comments, the number of spaces to insert in front of each line.
+        @param linePos The number of spaces to insert.*/
+    void SetLinePosition(const int linePos) { m_linePosition = linePos; }
+
     /// @returns The fully formatted results.
     [[nodiscard]]
     wxString GetFormattedOutput();
@@ -102,6 +106,8 @@ class InsertTransCommentDlg final : public wxDialog
 
     wxString m_selectedTag;
     wxString m_comment;
+
+    int m_linePosition{ 0 };
 
     wxArrayString m_translatorTags;
     };
