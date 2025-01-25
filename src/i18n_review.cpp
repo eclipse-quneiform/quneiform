@@ -1721,8 +1721,12 @@ namespace i18n_check
     bool i18n_review::is_string_ambiguous(std::wstring_view str)
         {
         // quneiform-suppress-begin
-        static std::set<std::wstring_view> common_acronyms = { L"N/A", L"NA",     L"OK",  L"ASCII",
-                                                               L"CD",  L"CD-ROM", L"DVD", L"URL" };
+        static std::set<std::wstring_view> common_acronyms = { L"N/A",    L"NA",       L"OK",
+                                                               L"ASCII",  L"US-ASCII", L"CD",
+                                                               L"CD-ROM", L"DVD",      L"URL" };
+        static std::set<std::wstring_view> allowable_values = { _DT(L" of "), _DT(L"Page "),
+                                                                _DT(L"Column "), _DT(L"Row "),
+                                                                _DT(L"Page  of ") };
         // quneiform-suppress-end
         // Just one word?
         if (str.find_first_of(L" \t\n\r") == std::wstring::npos &&
@@ -1768,6 +1772,11 @@ namespace i18n_check
             if (str.starts_with(L"&"))
                 {
                 str.remove_prefix(1);
+                }
+
+            if (str.empty())
+                {
+                return false;
                 }
             // some acronyms are self explanatory, so ignore them
             if (common_acronyms.find(str) != common_acronyms.cend())
@@ -1820,15 +1829,13 @@ namespace i18n_check
         if (nonObviousCommands >= 3 || (nonObviousCommands >= 2 && str.length() < 16) ||
             (nonObviousCommands >= 1 && str.length() < 10))
             {
-            if (printfCmds.size() == 2)
+            std::wstring filteredStr{ str };
+            i18n_string_util::remove_printf_commands(filteredStr);
+            // although this meets the criteria, "%1 of %2", "Page %d", etc.
+            // are probably self explanatory
+            if (allowable_values.find(filteredStr) != allowable_values.cend())
                 {
-                std::wstring filteredStr{ str };
-                i18n_string_util::remove_printf_commands(filteredStr);
-                // although this meets the criteria, "%d of %d" is probably self explanatory
-                if (filteredStr == _DT(L" of "))
-                    {
-                    return false;
-                    }
+                return false;
                 }
             return true;
             }
@@ -1841,15 +1848,11 @@ namespace i18n_check
         if (nonObviousCommands >= 3 || (nonObviousCommands >= 2 && str.length() < 16) ||
             (nonObviousCommands >= 1 && str.length() < 10))
             {
-            if (posCmds.size() == 2)
+            std::wstring filteredStr{ str };
+            i18n_string_util::remove_positional_commands(filteredStr);
+            if (allowable_values.find(filteredStr) != allowable_values.cend())
                 {
-                std::wstring filteredStr{ str };
-                i18n_string_util::remove_positional_commands(filteredStr);
-                // although this meets the criteria, "%1 of %2" is probably self explanatory
-                if (filteredStr == _DT(L" of "))
-                    {
-                    return false;
-                    }
+                return false;
                 }
             return true;
             }

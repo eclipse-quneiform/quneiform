@@ -56,6 +56,9 @@ TEST_CASE("Ambiguous", "[i18nreview]")
         CHECK(reviewer.is_string_ambiguous(L"%s is not a %d"));
         // although meets critia, this is generally self explanatory
         CHECK_FALSE(reviewer.is_string_ambiguous(L"%d of %lu"));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"Page %lu"));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"Row %d"));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"..."));
         }
     SECTION("Positionals")
         {
