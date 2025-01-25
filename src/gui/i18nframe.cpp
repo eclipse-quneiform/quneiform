@@ -1479,6 +1479,9 @@ void I18NFrame::Process()
 
     std::filesystem::path inputFolder{ m_activeProjectOptions.m_filePath.wc_string() };
 
+    m_resultsModel->SetBasePath(
+        wxFileName::DirExists(inputFolder.wstring()) ? inputFolder.wstring() : wxString{});
+
     std::vector<std::filesystem::path> excludedPaths;
     for (const auto& currentFile : m_activeProjectOptions.m_excludedPaths)
         {

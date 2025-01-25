@@ -212,10 +212,21 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
             {
             bmps = wxArtProvider::GetBitmapBundle(L"ID_DEBUG", wxART_OTHER);
             }
-        variant = static_cast<wxVariant>(wxDataViewIconText(
-            wxFileName::Exists(node->m_warningId) ? wxFileName{ node->m_warningId }.GetFullName() :
-                                                    node->m_warningId,
-            bmps));
+        wxString fileOrWarningIdValue = wxFileName::Exists(node->m_warningId) ?
+                                            wxFileName{ node->m_warningId }.GetFullPath() :
+                                            node->m_warningId;
+        // strip the base path from the fill file path so that we render just the relative
+        // path to the file
+        if (fileOrWarningIdValue.starts_with(m_basePath))
+            {
+            fileOrWarningIdValue.erase(0, m_basePath.length());
+            if (fileOrWarningIdValue.length() > 0 &&
+                fileOrWarningIdValue.at(0) == wxFileName::GetPathSeparator())
+                {
+                fileOrWarningIdValue.erase(0, 1);
+                }
+            }
+        variant = static_cast<wxVariant>(wxDataViewIconText{ fileOrWarningIdValue, bmps });
         }
         break;
     case 1:

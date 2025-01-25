@@ -103,6 +103,11 @@ class I18NResultsTreeModel : public wxDataViewModel
 
     ~I18NResultsTreeModel() { delete m_root; }
 
+    /// @brief Sets the base path common to all file path nodes.
+    /// @details This will be removed from the file paths when rendered in the display.
+    /// @param path The base path.
+    void SetBasePath(const wxString& path) { m_basePath = path; }
+
     // helper methods to change the model
 
     wxDataViewItem GetRoot() { return wxDataViewItem(reinterpret_cast<void*>(m_root)); }
@@ -128,6 +133,7 @@ class I18NResultsTreeModel : public wxDataViewModel
 
   private:
     I18NResultsTreeModelNode* m_root{ nullptr };
+    wxString m_basePath;
     };
 
     /** @}*/
