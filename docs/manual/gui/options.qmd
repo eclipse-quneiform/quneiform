@@ -103,6 +103,8 @@ This will check for issues such as:
   This may indicate that the context and translatable string arguments are reversed.
 - String literals being passed to `_()`.
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
+- Using two-digit year specifiers (\'%g\', \'%y\', and \'%C\') in `strftime`-like functions.\
+  This causes ambiguity between years and months for end users and is also not Y2K compliant.
 - macOS Info.plist files not including any `CFBundleLocalizations` keys.\
   Without these keys, translations will not be loaded by the application at runtime.
 ::::

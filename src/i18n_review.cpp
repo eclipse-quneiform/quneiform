@@ -323,7 +323,8 @@ namespace i18n_check
         m_deprecated_string_functions = {
             // Win32 TCHAR functions (which mapped between _MBCS and _UNICODE builds).
             // Nowadays, you should always be compiling as _UNICODE (i.e., UTF-16).
-            { L"_tfopen", _WXTRANS_WSTR(L"Use fopen instead of _tfopen.") },
+            { L"_tcsftime", _WXTRANS_WSTR(L"Use wcsftime instead of _tcsftime().") },
+            { L"_tfopen", _WXTRANS_WSTR(L"Use fopen() instead of _tfopen().") },
             { L"__targv", _WXTRANS_WSTR(L"Use __wargv instead of __targv.") },
             { L"__tcserror", _WXTRANS_WSTR(L"Use __wcserror() instead of __tcserror().") },
             { L"__tcserror_s", _WXTRANS_WSTR(L"Use __wcserror_s() instead of __tcserror_s().") },
@@ -1260,6 +1261,33 @@ namespace i18n_check
             };
             classifyPrintfIntStrings(m_internal_strings);
             classifyPrintfIntStrings(m_localizable_strings_in_internal_call);
+            }
+
+        if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage))
+            {
+            static std::set<std::wstring_view> strftimeFunctions{ L"strftime", L"_strftime_l",
+                                                                  L"wcsftime", L"_wcsftime_l",
+                                                                  L"_tcsftime" };
+            const auto& classifyYearIssueStrings = [&, this](const auto& strings)
+            {
+                for (const auto& str : strings)
+                    {
+                    if ((str.m_string.find(L"%g") != std::wstring::npos ||
+                         str.m_string.find(L"%C") != std::wstring::npos ||
+                         str.m_string.find(L"%y") != std::wstring::npos) &&
+                        strftimeFunctions.find(str.m_usage.m_value) != strftimeFunctions.cend())
+                        {
+                        auto expandedStr{ str };
+                        expandedStr.m_usage.m_value =
+                            _WXTRANS_WSTR(L"Don't use two-digit year specifiers ('%g', '%y', '%C') "
+                                          "in strftime-like functions.");
+                        m_suspect_i18n_usage.push_back(expandedStr);
+                        }
+                    }
+            };
+            classifyYearIssueStrings(m_localizable_strings);
+            classifyYearIssueStrings(m_not_available_for_localization_strings);
+            classifyYearIssueStrings(m_internal_strings);
             }
 
         // if this is wxWidgets code, see if they initialized the locale framework

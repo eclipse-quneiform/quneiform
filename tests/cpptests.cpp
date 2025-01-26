@@ -11,6 +11,27 @@
 using namespace i18n_check;
 using namespace Catch::Matchers;
 
+TEST_CASE("Dates", "[cpp][i18n]")
+    {
+    SECTION("LoadString")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(strftime( tmpbuf, 128,
+              "Today is %A, day %d of %B in the year %Y.\n", &today );)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_suspect_i18n_usuage().empty());
+
+        code = LR"(strftime( tmpbuf, 128,
+              "Today is %A, day %d of %B in the year %y.\n", &today );)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_suspect_i18n_usuage().size() == 1);
+        }
+    }
+
 // clang-format off
 TEST_CASE("Pluarl", "[cpp][i18n]")
     {
