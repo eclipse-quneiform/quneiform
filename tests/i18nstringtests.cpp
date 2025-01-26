@@ -54,11 +54,12 @@ TEST_CASE("Ambiguous", "[i18nreview]")
     SECTION("Printf")
         {
         CHECK(reviewer.is_string_ambiguous(L"%s is not a %d"));
-        // although meets critia, this is generally self explanatory
+        // although meets criteria, this is generally self explanatory
         CHECK_FALSE(reviewer.is_string_ambiguous(L"%d of %lu"));
         CHECK_FALSE(reviewer.is_string_ambiguous(L"Page %lu"));
         CHECK_FALSE(reviewer.is_string_ambiguous(L"Row %d"));
         CHECK_FALSE(reviewer.is_string_ambiguous(L"..."));
+        CHECK_FALSE(reviewer.is_string_ambiguous(L"Alternative:<br/>"));
         }
     SECTION("Positionals")
         {
@@ -105,16 +106,25 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK(reviewer.is_untranslatable_string(L"#somethingElse", false).first);
     // CSS
     CHECK(reviewer.is_untranslatable_string(L"height:%dpx;", false).first);
-    // formatted percentage symobl should be translatable
+    // formatted percentage symbol should be translatable
     CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%% (%s)", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%%\n(%s)", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%%\\n(%s)", false).first);
+    // command line options
+    CHECK(reviewer.is_untranslatable_string(L"--no-ext-diff", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"--no-ext", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"--date=raw", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"%1> rm -rf %2", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"rm -rf %2", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"dorm room", false).first);
     }
 
 TEST_CASE("translatable", "[i18nreview]")
     {
     i18n_check::cpp_i18n_review reviewer{ false };
     CHECK_FALSE(reviewer.is_untranslatable_string(L"Q3FY%", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"Debug", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"...", false).first);
     }
 
 TEST_CASE("i18n string utils", "[i18nstringutil]")

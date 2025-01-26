@@ -258,6 +258,9 @@ namespace i18n_check
         L"wxFFileOutputStream",
         L"wxFFile",
         L"wxFileName",
+        L"QFileInfo",
+        L"QDir",
+        L"QTemporaryFile",
         L"wxColor",
         L"wxColour",
         L"wxFont",
@@ -266,6 +269,7 @@ namespace i18n_check
         L"SecretSchema",
         L"GtkTypeInfo",
         L"QKeySequence",
+        L"QRegExp",
         L"wxRegEx",
         L"wregex",
         L"std::wregex",
@@ -600,6 +604,8 @@ namespace i18n_check
             std::wregex(LR"([a-zA-Z0-9_]+([-][>]|::)[a-zA-Z0-9_]+([(][)];)?)"),
             std::wregex(LR"(#(define|pragma) .*)"),
             // command lines
+            std::wregex(LR"(.*\b(rm|rmdir|mv) .*)"),
+            std::wregex(LR"(\-\-[a-z0-9]+([\-\=][a-z0-9]+)*)"),
             std::wregex(LR"([-]D [A-Z_]{2,}[ =].*)"), std::wregex(LR"([-]dynamiclib .*)"),
             std::wregex(LR"([-]{2}[a-z]{2,}[ :].*)"),
             // registry keys
@@ -758,6 +764,8 @@ namespace i18n_check
             std::wregex(LR"((Microsoft )VS Code)"), std::wregex(LR"((Microsoft )?Visual Studio)"),
             std::wregex(LR"((Microsoft )?Visual C\+\+)"),
             std::wregex(LR"((Microsoft )?Visual Basic)"), std::wregex(LR"(GNU gdb debugger)"),
+            std::wregex(LR"(Clang\-(Format|Tidy))", std::regex_constants::icase),
+            std::wregex(LR"(GDB)"),
             // culture language tags
             std::wregex(LR"([a-z]{2,3}[\-_][A-Z]{2,3})"),
             // image formats
@@ -1036,7 +1044,7 @@ namespace i18n_check
                                      L"xml", L"gdiplus", L"Direct2D", L"DirectX", L"localhost",
                                      L"32 bit", L"32-bit", L"64 bit", L"64-bit", L"NULL",
                                      // build types
-                                     L"DEBUG", L"NDEBUG",
+                                     L"NDEBUG",
                                      // RTF font families
                                      L"fnil", L"fdecor", L"froman", L"fscript", L"fswiss",
                                      L"fmodern", L"ftech",
@@ -1065,7 +1073,7 @@ namespace i18n_check
         add_variable_name_pattern_to_ignore(std::wregex(LR"(wxColourTable)"));
         add_variable_name_pattern_to_ignore(std::wregex(LR"(QT_MESSAGE_PATTERN)"));
         // console objects
-        add_variable_name_pattern_to_ignore(std::wregex(LR"((std::)?[w]?(cout|cerr))"));
+        add_variable_name_pattern_to_ignore(std::wregex(LR"((std::)?[w]?(cout|cerr|qout|qerr))"));
         }
 
     //--------------------------------------------------
@@ -1724,9 +1732,10 @@ namespace i18n_check
         static std::set<std::wstring_view> common_acronyms = { L"N/A",    L"NA",       L"OK",
                                                                L"ASCII",  L"US-ASCII", L"CD",
                                                                L"CD-ROM", L"DVD",      L"URL" };
-        static std::set<std::wstring_view> allowable_values = { _DT(L" of "), _DT(L"Page "),
-                                                                _DT(L"Column "), _DT(L"Row "),
-                                                                _DT(L"Page  of ") };
+        static std::set<std::wstring_view> allowable_values = {
+            _DT(L" of "), _DT(L"Page "), _DT(L"Column "),
+            _DT(L"Row "), _DT(L"Line "), _DT(L"Page  of ")
+        };
         // quneiform-suppress-end
         // Just one word?
         if (str.find_first_of(L" \t\n\r") == std::wstring::npos &&
@@ -1772,6 +1781,22 @@ namespace i18n_check
             if (str.starts_with(L"&"))
                 {
                 str.remove_prefix(1);
+                }
+            if (str.starts_with(L"<br/>"))
+                {
+                str.remove_prefix(5);
+                }
+            if (str.ends_with(L"<br/>"))
+                {
+                str.remove_suffix(5);
+                }
+            if (str.starts_with(L"<br>"))
+                {
+                str.remove_prefix(4);
+                }
+            if (str.ends_with(L"<br>"))
+                {
+                str.remove_suffix(4);
                 }
 
             if (str.empty())
@@ -2357,7 +2382,8 @@ namespace i18n_check
             }
         string_util::trim(strToReview);
         // something like "%d%%" should be translatable
-        if (allPunctOrSpaces && strToReview.find(_DT(L"%%")) != std::wstring::npos)
+        if (allPunctOrSpaces &&
+            (strToReview.find(_DT(L"%%")) != std::wstring::npos || strToReview == L"..."))
             {
             return std::make_pair(false, strToReview.length());
             }
