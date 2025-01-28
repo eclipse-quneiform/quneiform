@@ -16,9 +16,11 @@
 //-------------------------------------------------------------
 InsertTransCommentDlg::InsertTransCommentDlg(
     wxWindow* parent, wxWindowID id /*= wxID_ANY*/,
+    const wxString& selectedComment /*= _DT(L"// TRANSLATORS:")*/,
     const wxString& caption /*= _(L"Insert Translator Comment")*/,
     const wxPoint& pos /*= wxDefaultPosition*/, const wxSize& size /*= wxDefaultSize*/,
     long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
+    : m_selectedTag(selectedComment)
     {
     SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
@@ -48,7 +50,10 @@ void InsertTransCommentDlg::CreateControls()
     functionComboSzr->Add(new wxStaticText(this, wxID_STATIC, _(L"Translator comment style:")),
                           wxSizerFlags{}.CenterVertical());
 
-    m_selectedTag = m_translatorTags[0];
+    if (m_selectedTag.empty())
+        {
+        m_selectedTag = m_translatorTags[0];
+        }
     functionComboSzr->Add(new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                        m_translatorTags, 0, wxGenericValidator(&m_selectedTag)),
                           wxSizerFlags{}.Left().CenterVertical().Border(wxLEFT));
@@ -106,9 +111,9 @@ wxString InsertTransCommentDlg::GetFormattedOutput()
     // if a multiline comment, push each subsequent line over to
     // line up with the start of the comment
     wxString formattedComment{ m_comment };
-    formattedComment.Replace(
-        L"\n",
-        L"\n" + wxString{}.Pad(m_linePosition + ((m_selectedTag == _DT(L"/*: */")) ? 4 : 3)));
+    formattedComment.Replace(L"\n",
+                             L"\n" + wxString{}.Pad(static_cast<size_t>(m_linePosition) +
+                                                    ((m_selectedTag == _DT(L"/*: */")) ? 4 : 3)));
 
     if (m_selectedTag == _DT(L"// TRANSLATORS:"))
         {

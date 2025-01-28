@@ -65,6 +65,8 @@ struct I18NOptions
     int m_editorHeight{ 200 };
 
     int m_fallbackEncoding{ wxFONTENCODING_SYSTEM };
+
+    wxString m_lastSelectedTranslatorCommentStyle;
     };
 
     /** @}*/

@@ -1182,7 +1182,8 @@ void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&)
     int linePos{ 0 };
     const wxString lineText = m_editor->GetCurLine(&linePos);
 
-    InsertTransCommentDlg dialog(this);
+    InsertTransCommentDlg dialog(this, wxID_ANY,
+                                 wxGetApp().m_defaultOptions.m_lastSelectedTranslatorCommentStyle);
     dialog.SetLinePosition(linePos);
     if (dialog.ShowModal() != wxID_OK)
         {
@@ -1205,6 +1206,8 @@ void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&)
         {
         m_editor->InsertText(m_editor->GetCurrentPos(), dialog.GetFormattedOutput());
         }
+    wxGetApp().m_defaultOptions.m_lastSelectedTranslatorCommentStyle =
+        dialog.GetSelectedCommentStyle();
     }
 
 //------------------------------------------------------

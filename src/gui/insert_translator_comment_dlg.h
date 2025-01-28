@@ -44,11 +44,13 @@ class InsertTransCommentDlg final : public wxDialog
     /** @brief Constructor.
         @param parent The parent window.
         @param id The window ID.
+        @param selectedComment The comment style to select by default.
         @param caption The title of the dialog.
         @param pos The screen position of the window.
         @param size The window size.
         @param style The window style (i.e., decorations and flags).*/
     explicit InsertTransCommentDlg(wxWindow* parent, wxWindowID id = wxID_ANY,
+                                   const wxString& selectedComment = _DT(L"// TRANSLATORS:"),
                                    const wxString& caption = _(L"Insert Translator Comment"),
                                    const wxPoint& pos = wxDefaultPosition,
                                    const wxSize& size = wxDefaultSize,
@@ -66,6 +68,14 @@ class InsertTransCommentDlg final : public wxDialog
     /// @returns The fully formatted results.
     [[nodiscard]]
     wxString GetFormattedOutput();
+
+    /// @return The currently selected comment style.
+    [[nodiscard]]
+    const wxString& GetSelectedCommentStyle() noexcept
+        {
+        TransferDataFromWindow();
+        return m_selectedTag;
+        }
 
     /// @returns @c true if the selected comment is multiline.
     [[nodiscard]]
