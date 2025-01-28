@@ -97,16 +97,20 @@ Refer to @sec-articles and @sec-pronouns for an overview of this issue.
 
 This will check for issues such as:
 
-- Usage of the Win32 function `::LoadString()`.\
+- Usage of the Win32 function `::LoadString()`\index{Windows!string loading issues}.\
   It is recommended to use other functions (e.g., `CString::LoadString()`) that are not limited to fixed buffer sizes; otherwise, translated strings may become truncated.
 - Context arguments passed to l10n functions (e.g., `tr()`) that are longer than 32 characters.\
   This may indicate that the context and translatable string arguments are reversed.
-- String literals being passed to `_()`.
+- String literals being passed to `_()` and `wxPLURAL()`.
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
 - Using two-digit year specifiers (\'%g\', \'%y\', and \'%C\') in `strftime`-like functions.\
-  This causes ambiguity between years and months for end users and is also not Y2K compliant.
-- macOS Info.plist files not including any `CFBundleLocalizations` keys.\
+  This causes ambiguity between years and months/days for end users and is also not Y2K compliant\index{Y2K compliance}.
+- macOS Info.plist files not including any `CFBundleLocalizations` keys\index{macOS!Info.plist issues}.\
   Without these keys, translations will not be loaded by the application at runtime.
+- *wxWidgets* projects not calling `wxUILocale::UseDefault()`\index{wxWidgets!locale initialization}.
+- *wxWidgets* projects not constructing a `wxLocale` object with the user's locale.\
+  `wxLocale` objects are only necessary if your project relies on C runtime functions to use the user's locale.
+  This is only detected if **Include verbose warnings** is checked.
 ::::
 
 :::: {.optionssection data-latex=""}
@@ -163,7 +167,7 @@ For example, "Printing %s," "Player 1," and "Add +" will be seen as one-word str
 :::
 
 **C++ standard when issuing deprecation warnings**: enter into here the C++ standard that should be assumed when issuing deprecated macro warnings (`deprecatedMacro`).
-For example, setting this to `2017` or higher (along with selecting the **Include verbose warnings** option) will issue warnings for `WXUNUSED`, as it can be replaced with `[[maybe_unused]]`.
+For example, setting this to `2017` or higher (along with selecting the **Include verbose warnings** option) will issue warnings for `WXUNUSED`\index{wxWidgets!deprecated macros}, as it can be replaced with `[[maybe_unused]]`.
 If setting this to `2014`, however, `WXUNUSED` will be ignored since `[[maybe_unused]]` requires C++17.
 
 **Include verbose warnings**: select this to perform additional checks, including those that may not be related to i18n/l10n issues.
@@ -300,7 +304,7 @@ Windows RC files
 :::
 
 **Check for font issues**: select this to check for dialogs that use unusual font sizes
-or are not using \'MS Shell Dlg\'.
+or are not using \'MS Shell Dlg\'.\index{Windows!resource file issues}
 ::::
 
 ::: {.notesection data-latex=""}
@@ -348,4 +352,7 @@ It may be preferred to assign framework-defined constants (e.g., `wxID_HIGHEST`)
 
 **ID variables assigned the same value**: select this to check for the same value being assigned to different ID variables.
 This check is performed per file; the same ID being assigned multiple times, but within separate files, will be ignored.
+
+For MFC\index{Windows!MFC ID issues} projects, this will also check for MFC resource IDs that are outside of expected ranges.
+For example, IDs starting with `IDS_` (a string ID) should be between 1 and 0x7FFF.
 ::::

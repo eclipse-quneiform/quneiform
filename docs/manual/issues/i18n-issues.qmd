@@ -92,8 +92,8 @@ And we have another message:
 
 which dynamically replaces "%s" with one of the above values.
 
-First, we should remove all three of the pronoun strings.
-Then we can provide three versions of this message, replacing the "%s" with each of the pronouns.
+First, we should remove all three pronoun strings.
+Then we can provide three versions of the full message, replacing the "%s" with each of the pronouns.
 This will ensure that translators will have full control over how to translate the message when the gender changes.
 
 Another option is to replace the message with gender-neutral language:

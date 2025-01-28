@@ -29,7 +29,7 @@ After building, "quneiform" will be available in the "bin" folder.
 
 [wxWidgets](https://github.com/wxWidgets/wxWidgets) 3.3 or higher is required for building the graphical user interface version.
 
-Download [wxWidgets](https://github.com/wxWidgets/wxWidgets), placing it at the same folder level as this project.
+Download [wxWidgets](https://github.com/wxWidgets/wxWidgets)\index{wxWidgets!building}, placing it at the same folder level as this project.
 After building *wxWidgets*, *Quneiform* can be configured and built with *Cmake*.
 
 On Linux/macOS:
