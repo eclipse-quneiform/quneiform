@@ -36,6 +36,10 @@ An exception is made for strings ending with ": "; here, it is assumed that this
 piecing a message together.
 :::
 
+- `literalL10NStringCompare`
+
+Check for literal, localizable strings being compared or searched for.
+
 - `L10NStringNeedsContext`
 
 Check for ambiguous strings that lack a translator comment.

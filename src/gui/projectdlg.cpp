@@ -260,6 +260,8 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     m_excessiveNonTranslatableContentInL10NString =
         (m_options & i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
     m_concatenatedStrings = (m_options & i18n_check::review_style::check_l10n_concatenated_strings);
+    m_literalL10NStrings =
+        (m_options & i18n_check::review_style::check_literal_l10n_string_comparison);
     m_deprecatedMacro = (m_options & i18n_check::review_style::check_deprecated_macros);
     m_nonUTF8File = (m_options & i18n_check::review_style::check_utf8_encoded);
     m_UTF8FileWithBOM = (m_options & i18n_check::review_style::check_utf8_with_signature);
@@ -381,6 +383,10 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
     if (m_concatenatedStrings)
         {
         m_options |= i18n_check::review_style::check_l10n_concatenated_strings;
+        }
+    if (m_literalL10NStrings)
+        {
+        m_options |= i18n_check::review_style::check_literal_l10n_string_comparison;
         }
     if (m_deprecatedMacro)
         {
@@ -735,6 +741,15 @@ void NewProjectDialog::CreateControls()
                                     wxGenericValidator(&m_concatenatedStrings)),
                      wxGBPosition(currentRow, 0), wxGBSpan{});
         gbSizer->Add(buildCodeLabel(L"concatenatedStrings", checkOptionsSizer->GetStaticBox()),
+                     wxGBPosition(currentRow++, 1), wxGBSpan{});
+
+        gbSizer->Add(
+            new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,
+                           _(L"Literal, localizable strings being compared or searched for"),
+                           wxDefaultPosition, wxDefaultSize, 0,
+                           wxGenericValidator(&m_literalL10NStrings)),
+            wxGBPosition(currentRow, 0), wxGBSpan{});
+        gbSizer->Add(buildCodeLabel(L"literalL10NStringCompare", checkOptionsSizer->GetStaticBox()),
                      wxGBPosition(currentRow++, 1), wxGBSpan{});
 
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(), wxID_ANY,

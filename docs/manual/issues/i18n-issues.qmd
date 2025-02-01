@@ -149,6 +149,73 @@ This can also include URLs and email addresses, unless translators need to provi
 
 Checking the options [**Translatable strings that shouldn\'t be**](#source-code-options), **Translatable strings being used in debug functions**, and **Translatable strings that contain URLs, email addresses, or phone numbers** will help with detecting these issues.
 
+## Comparing Translator Strings {#sec-literal-strings-cmp}
+
+When find and comparison functions contain a literal, localizable string, this usually indicates that this string is exposed for translation in multiple places.
+This can be a problem for a couple of reasons.
+The first is that it assumes translators will localize these strings the same way.
+Although tools like *gettext* will usually combine multiple instances of the same string, it won't if any of them have a unique context added to them.
+By design, these different instances will be presented separately and translators may translate them differently.
+Consider the following example:
+
+```{Rcpp}
+#| include: true
+#| eval: false
+...
+else if (selectedTest == _(L"Dolch Sight Words"))
+    {
+    wxGetApp().GetMainFrame()->DisplayHelp(L"online/reviewing-standard-projects.html");
+    }
+```
+
+The phrase "Dolch Sight Words" will be extracted as a localizable string from this code.
+Most likely, there is another instance of this string exposed for translation elsewhere.
+The issue is, if that other instance has context or translator comments added to it, then it will be treated as a separate resource.
+When the catalog is translated, if the two entries for this string are translated differently, then this comparison will fail at runtime.
+
+The second issue is that this assumes all instances of a string will always match in the program.
+If any instance changes, however, then it will break not only localized products, but the source product as well.
+Consider the following example:
+
+```{Rcpp}
+#| include: true
+#| eval: false
+static wxString FormatClozeValuesLabel(const wxString& testName)
+    {
+    return testName + L" " + _(L"(predicted cloze scores)");
+    }
+...
+static wxString StripClozeValuesLabel(const wxString& testName)
+    {
+    wxString begin;
+    if (testName.EndsWith(_(L"(pred. cloze scores)"), &begin))
+        {
+        begin.Trim();
+        return begin;
+        }
+```
+
+Here we can see that a function is looking for the phrase "(pred. cloze scores)" and removing it if it finds it.
+There is another function that builds a string and presumably appends "(pred. cloze scores)" to it.
+Note, however, that this other function must have been changed and now appends "(predicted cloze scores)".
+Because of this, the source (e.g., English) version of the program (along with localized versions) will all break.
+
+The recommended solution is to make this an extractable string from only one location.
+Then, this one resource can be used from all other locations in the program.
+This will ensure that if this string needs to be changed or have context added to it, it won't negatively impact the program.
+For example, this string could be returned from a common function:
+
+```{Rcpp}
+#| include: true
+#| eval: false
+static wxString GetPredClozeLabel()
+    { return _(L"(predicted cloze scores)"); }
+...
+    return testName + L" " + GetPredClozeLabel();
+...
+    if (testName.EndsWith(GetPredClozeLabel(), &begin))
+```
+
 ## Multipart Strings {#sec-multipart-strings}
 
 Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@{madden:2019}65-66].

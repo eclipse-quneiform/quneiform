@@ -1178,6 +1178,11 @@ namespace i18n_check
                 {
                 m_localizable_strings_being_concatenated.push_back(str);
                 }
+            if ((m_review_styles & check_literal_l10n_string_comparison) &&
+                has_comparison_operator(str))
+                {
+                m_literal_localizable_strings_being_compared.push_back(str);
+                }
             if ((m_review_styles & check_halfwidth) &&
                 !load_matches(str.m_string, m_halfwidth_range_regex).empty())
                 {
@@ -1617,7 +1622,7 @@ namespace i18n_check
 #else
                         string2 + _DT(L" assigned to ") + string1 +
                             _DT(L"; value should be between 1 and 0x6FFF if "
-                                L"this is an MFC project."),
+                                "this is an MFC project."),
 #endif
                         string_info::usage_info{}, fileName,
                         std::make_pair(get_line_and_column(position, fileText).first,
@@ -2313,6 +2318,7 @@ namespace i18n_check
         m_localizable_strings_ambiguous_needing_context.clear();
         m_localizable_strings_in_internal_call.clear();
         m_localizable_strings_being_concatenated.clear();
+        m_literal_localizable_strings_being_compared.clear();
         m_localizable_strings_with_halfwidths.clear();
         m_multipart_strings.clear();
         m_faux_plural_strings.clear();
@@ -2723,6 +2729,7 @@ namespace i18n_check
                     }
                 variableInfo.m_operator.assign(operatorStart,
                                                static_cast<size_t>(operatorEnd - operatorStart));
+                string_util::trim(variableInfo.m_operator);
                 }
         };
 
@@ -2914,6 +2921,41 @@ namespace i18n_check
                             {
                             variableInfo.m_name = functionName;
                             functionName.clear();
+                            }
+                        }
+                    // if function is being compared or assigned, then record that
+                    // for later analyses
+                    if (std::prev(startPos) > startSentinel)
+                        {
+                        std::advance(startPos, -1);
+                        const wchar_t* operatorEnd{ std::next(startPos) };
+                        // skip spaces (and "==" and "!=" tokens)
+                        while (startPos > startSentinel &&
+                               (static_cast<bool>(std::iswspace(*startPos)) || *startPos == L'=' ||
+                                *startPos == L'!'))
+                            {
+                            std::advance(startPos, -1);
+                            }
+                        readOperator(std::next(startPos), operatorEnd);
+                        }
+                    if (is_i18n_function(functionName))
+                        {
+                        std::wstring tmpFunctionName;
+                        variable_info tmpVariableInfo;
+                        std::wstring tmpDeprecatedMacroEncountered;
+                        size_t tmpParameterPosition;
+                        read_var_or_function_name(startPos, startSentinel, tmpFunctionName,
+                                                  tmpVariableInfo, tmpDeprecatedMacroEncountered,
+                                                  tmpParameterPosition);
+                        if ((m_review_styles & check_literal_l10n_string_comparison) &&
+                            is_search_or_comparison_function(tmpFunctionName))
+                            {
+                            m_literal_localizable_strings_being_compared.emplace_back(
+                                tmpFunctionName,
+                                string_info::usage_info(
+                                    string_info::usage_info::usage_type::function, tmpFunctionName,
+                                    std::wstring{}, std::wstring{}),
+                                m_file_name, get_line_and_column(startPos - m_file_start));
                             }
                         }
                     break;

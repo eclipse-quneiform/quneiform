@@ -52,22 +52,29 @@ The command line and GUI versions provide the following checks:
   - Formulas
   - Code (used for code generators)
   - Strings that contain URLs or email addresses
-- Strings not available for translation that possibly should be.
+- Strings not available for translation that probably should be.
+- Localizable strings being concatenated at runtime.
+- Use of deprecated text macros (e.g., `wxT()` in wxWidgets, `_T()` in Win32).
+- Use of deprecated string functions (e.g., `_tcsncpy()` in Win32).
+- Suspect usage of i18n functions.
+- Strings with malformed syntax (e.g., malformed HTML tags).
+- Files that contain extended ASCII characters, but are not UTF-8 encoded.<br />
+  (It is recommended that files be UTF-8 encoded for portability between compilers.)
 - Strings that contain extended ASCII characters that are not encoded.
   ("Danke schön" instead of "Danke sch\\U000000F6n".)<br />
   Encoding extended ASCII characters is recommended for
   best portability between compilers.
-- Strings with malformed syntax (e.g., malformed HTML tags).
-- Use of deprecated text macros (e.g., `wxT()` in wxWidgets\index{wxWidgets!deprecated macros}, `_T()` in Win32).
-- Use of deprecated string functions (e.g., `_tcsncpy` in Win32).
-- Files that contain extended ASCII characters, but are not UTF-8 encoded.<br />
-  (It is recommended that files be UTF-8 encoded for portability between compilers.)
 - UTF-8 encoded files which start with a BOM/UTF-8 signature.<br />
   It is recommended to save without the file signature for best compiler portability.
 - `printf()`-like functions being used to just format an integer to a string.<br />
   It is recommended to use `std::to_string()` to do this instead.
-- `printf()` command mismatches between source and translation strings.<br />
-  (PO catalogs with C/C++ strings are currently supported.)
+- Pluralization and pronoun issues.
+- Usage of half-width characters.
+- Literal, localizable strings being used in search and comparison functions.
+- `printf()` command mismatches between source and translation strings.
+- Accelerator mismatches between source and translation strings.
+- Number mismatches between source and translation strings.
+- Complicated strings that should have translator comments added.
 - Font issues in Windows resource files [@rc-string-tables]:
   - Dialogs not using "MS Shell Dlg" or "MS Shell Dlg 2."
   - Dialogs with non-standard font sizes.

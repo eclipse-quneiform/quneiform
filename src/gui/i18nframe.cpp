@@ -803,6 +803,8 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
                         i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
             excludeFlag(L"[concatenatedStrings]",
                         i18n_check::review_style::check_l10n_concatenated_strings);
+            excludeFlag(L"[literalL10NStringCompare]",
+                        i18n_check::review_style::check_literal_l10n_string_comparison);
             excludeFlag(L"[deprecatedMacro]", i18n_check::review_style::check_deprecated_macros);
             excludeFlag(L"[nonUTF8File]", i18n_check::review_style::check_utf8_encoded);
             excludeFlag(L"[UTF8FileWithBOM]", i18n_check::review_style::check_utf8_with_signature);

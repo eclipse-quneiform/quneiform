@@ -11,6 +11,40 @@
 using namespace i18n_check;
 using namespace Catch::Matchers;
 
+TEST_CASE("Literal Strings", "[cpp][i18n]")
+    {
+    SECTION("Functions")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_literal_l10n_string_comparison);
+        const wchar_t* code = L"if (testName.EndsWith(_(L\"(index values) \"), &begin))";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_literal_localizable_strings_being_compared().size() == 1);
+        }
+    SECTION("==")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_literal_l10n_string_comparison);
+        const wchar_t* code = L"if (val == _(L\"(index values) \"))";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_literal_localizable_strings_being_compared().size() == 1);
+        }
+    SECTION("!=")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_literal_l10n_string_comparison);
+        const wchar_t* code = L"if (val != _(L\"(index values) \"))";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_literal_localizable_strings_being_compared().size() == 1);
+        }
+    }
+
 TEST_CASE("Dates", "[cpp][i18n]")
     {
     SECTION("LoadString")
@@ -2982,7 +3016,66 @@ TEST_CASE("Casing", "[cpp]")
         }
     }
 
-TEST_CASE("CPP Tests", "[cpp]")
+TEST_CASE("Exceptions", "[cpp]")
+    {
+    cpp_i18n_review cpp(false);
+    const wchar_t* code = L"throw std::range_error(\"Arrays passed to phi_coefficient must be the same size!\");";
+    cpp(code, L"");
+    cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+    CHECK(cpp.get_localizable_strings().size() == 0);
+    REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+    CHECK(cpp.get_internal_strings().size() == 0);
+    CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Arrays passed to phi_coefficient must be the same size!");
+    }
+
+TEST_CASE("Switch Statement", "[cpp]")
+    {
+    cpp_i18n_review cpp(false);
+    const wchar_t* code = LR"(switch ( GetWindowStyle() & wxBK_ALIGN_MASK )
+    {
+        case wxBK_TOP:
+            [[fallthrough]];
+        case wxBK_LEFT:
+            // posCtrl is already ok
+            break;
+        case wxBK_BOTTOM:
+            posCtrl.y = sizeClient.y - sizeNew.y;
+            break;
+        case wxBK_RIGHT:
+            posCtrl.x = sizeClient.x - sizeNew.x;
+            break;
+        default:
+            wxFAIL_MSG(L"unexpected alignment");
+    })";
+    cpp(code, L"");
+    cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+    CHECK(cpp.get_localizable_strings().size() == 0);
+    CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+    REQUIRE(cpp.get_internal_strings().size() == 1);
+    CHECK(cpp.get_internal_strings()[0].m_string == L"unexpected alignment");
+    CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
+    CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"wxFAIL_MSG");
+    CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type.empty());
+    }
+
+TEST_CASE("Pointer function", "[cpp]")
+    {
+    cpp_i18n_review cpp(false);
+    const wchar_t* code = LR"(handlerInfo = m_frame->GetClassInfo()->
+            FindHandlerInfo(wxT("ButtonClickHandler"));)";
+    cpp(code, L"");
+    cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+    CHECK(cpp.get_localizable_strings().size() == 0);
+    CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+    REQUIRE(cpp.get_internal_strings().size() == 1);
+    CHECK(cpp.get_internal_strings()[0].m_string == L"ButtonClickHandler");
+    CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
+    CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"FindHandlerInfo");
+    CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type.empty());
+    CHECK(cpp.get_error_log().empty());
+    }
+
+TEST_CASE("Strings", "[cpp]")
     {
     SECTION("Orphan string")
         {
@@ -3023,18 +3116,6 @@ TEST_CASE("CPP Tests", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[1].m_string == L"false");
         }
 
-    SECTION("Exception")
-        {
-        cpp_i18n_review cpp(false);
-        const wchar_t* code = L"throw std::range_error(\"Arrays passed to phi_coefficient must be the same size!\");";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings().size() == 0);
-        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
-        CHECK(cpp.get_internal_strings().size() == 0);
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Arrays passed to phi_coefficient must be the same size!");
-        }
-
     SECTION("String in parameters with other func calls")
         {
         cpp_i18n_review cpp(false);
@@ -3045,53 +3126,6 @@ TEST_CASE("CPP Tests", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         REQUIRE(cpp.get_internal_strings().size() == 1);
         CHECK(cpp.get_internal_strings()[0].m_string == L" called twice?");
-        }
-    
-    SECTION("Switch statement")
-        {
-        cpp_i18n_review cpp(false);
-        const wchar_t* code = LR"(switch ( GetWindowStyle() & wxBK_ALIGN_MASK )
-        {
-            case wxBK_TOP:
-                [[fallthrough]];
-            case wxBK_LEFT:
-                // posCtrl is already ok
-                break;
-            case wxBK_BOTTOM:
-                posCtrl.y = sizeClient.y - sizeNew.y;
-                break;
-            case wxBK_RIGHT:
-                posCtrl.x = sizeClient.x - sizeNew.x;
-                break;
-            default:
-                wxFAIL_MSG(L"unexpected alignment");
-        })";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings().size() == 0);
-        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
-        REQUIRE(cpp.get_internal_strings().size() == 1);
-        CHECK(cpp.get_internal_strings()[0].m_string == L"unexpected alignment");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"wxFAIL_MSG");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type.empty());
-        }
-    
-    SECTION("Pointers function")
-        {
-        cpp_i18n_review cpp(false);
-        const wchar_t* code = LR"(handlerInfo = m_frame->GetClassInfo()->
-                FindHandlerInfo(wxT("ButtonClickHandler"));)";
-        cpp(code, L"");
-        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_localizable_strings().size() == 0);
-        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
-        REQUIRE(cpp.get_internal_strings().size() == 1);
-        CHECK(cpp.get_internal_strings()[0].m_string == L"ButtonClickHandler");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_value == L"FindHandlerInfo");
-        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_type.empty());
-        CHECK(cpp.get_error_log().empty());
         }
 
     SECTION("Casts")

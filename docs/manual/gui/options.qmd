@@ -78,6 +78,15 @@ It is assumed that this part of tabular data being concatenated and will be igno
 
 Refer to @sec-concatenated-strings for an overview of this issue.
 
+**Literal, localizable strings being compared or searched for**: select this to check for literal, localizable strings being compared or searched for.
+This usually indicates a string being marked for localization in multiple places and the program assuming they will all be translated the same way.
+This is a dangerous assumption and can likely break the program.
+
+Instead, it is recommended to expose the string for localization from one location and use that throughout the program.
+For example, the string could be defined as a constant variable or returned from a common function.
+
+Refer to @sec-literal-strings-cmp for an overview of this issue.
+
 **Multipart strings ("mega strings")**: select this to check for strings that appear to contain multiple parts that are being sliced into separate strings at runtime.
 
 Refer to @sec-multipart-strings for an overview of this issue.
@@ -92,7 +101,12 @@ Refer to @sec-pluralization for an overview of this issue.
 Additionally, this will check for pronouns being used as individual strings.
 
 Refer to @sec-articles and @sec-pronouns for an overview of this issue.
+::::
 
+:::: {.optionssection data-latex=""}
+::: {.optionssectiontitle data-latex=""}
+Run the following checks (*continued...*)
+:::
 **Suspect i18n usage**: select this to check for suspect usage of i18n functions and project settings.
 
 This will check for issues such as:
@@ -111,12 +125,7 @@ This will check for issues such as:
 - *wxWidgets* projects not constructing a `wxLocale` object with the user's locale.\
   `wxLocale` objects are only necessary if your project relies on C runtime functions to use the user's locale.
   This is only detected if **Include verbose warnings** is checked.
-::::
 
-:::: {.optionssection data-latex=""}
-::: {.optionssectiontitle data-latex=""}
-Run the following checks (*continued...*)
-:::
 **Check for ambiguous strings that lack a translator comment**: select this to check for possibly ambiguous strings that lack a translator comment.
 *gettext*- and *Qt*-style comments are searched for, which includes formats such as "// TRANSLATORS: " and "//:".
 

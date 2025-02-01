@@ -61,22 +61,29 @@ The command line and GUI versions provide the following checks:
   - Formulas
   - Code (used for code generators)
   - Strings that contain URLs, email addresses, or phone numbers
-- Strings not available for translation that possibly should be.
+- Strings not available for translation that probably should be.
+- Localizable strings being concatenated at runtime.
+- Use of deprecated text macros (e.g., `wxT()` in wxWidgets, `_T()` in Win32).
+- Use of deprecated string functions (e.g., `_tcsncpy()` in Win32).
+- Suspect usage of i18n functions.
+- Strings with malformed syntax (e.g., malformed HTML tags).
+- Files that contain extended ASCII characters, but are not UTF-8 encoded.<br />
+  (It is recommended that files be UTF-8 encoded for portability between compilers.)
 - Strings that contain extended ASCII characters that are not encoded.
   ("Danke schön" instead of "Danke sch\U000000F6n".)<br />
   Encoding extended ASCII characters is recommended for
   best portability between compilers.
-- Strings with malformed syntax (e.g., malformed HTML tags).
-- Use of deprecated text macros (e.g., `wxT()` in wxWidgets, `_T()` in Win32).
-- Use of deprecated string functions (e.g., `_tcsncpy()` in Win32).
-- Files that contain extended ASCII characters, but are not UTF-8 encoded.<br />
-  (It is recommended that files be UTF-8 encoded for portability between compilers.)
 - UTF-8 encoded files which start with a BOM/UTF-8 signature.<br />
   It is recommended to save without the file signature for best compiler portability.
 - `printf()`-like functions being used to just format an integer to a string.<br />
   It is recommended to use `std::to_string()` to do this instead.
-- `printf()` command mismatches between source and translation strings.<br />
-  (PO catalogs with C/C++ strings are currently supported.)
+- Pluralization and pronoun issues.
+- Usage of half-width characters.
+- Literal, localizable strings being used in search and comparison functions.
+- `printf()` command mismatches between source and translation strings.
+- Accelerator mismatches between source and translation strings.
+- Number mismatches between source and translation strings.
+- Complicated strings that should have translator comments added.
 - Font issues in Windows resource files:
   - Dialogs not using "MS Shell Dlg" or "MS Shell Dlg 2."
   - Dialogs with non-standard font sizes.
@@ -134,57 +141,63 @@ loaded by your application for integration testing.
 [input]: The folder to analyze.
 
 --enable: Which checks to perform. Can be any combination of:
-  allI18N:                 Perform all internationalization checks (the default).
-  allL10N:                 Perform all localization checks (the default).
-  allCodeFormatting:       Check all code formatting issues.
-                           These are not enabled by default.
-  suspectL10NString:       Check for translatable strings that shouldn't be
-                           (e.g., numbers, keywords, printf() commands).
-  suspectL10NUsage:        Check for translatable strings being used in internal contexts
-                           (e.g., debugging functions).
-  suspectI18NUsage:        Check for suspect usage of i18n functions.
-  urlInL10NString:         Check for translatable strings that contain URLs, email addresses, or phone numbers.
-                           It is recommended to dynamically format these into the string so that
-                           translators don't have to manage them.
-  concatenatedStrings:     Check for strings that may be concatenated at runtime.
-  L10NStringNeedsContext:  Check for possibly ambiguous strings that lack a translator comment.
-  notL10NAvailable:        Check for strings not exposed for translation.
-  deprecatedMacro:         Check for deprecated text macros (e.g., wxT()).
-  nonUTF8File:             Check that files containing extended ASCII characters are UTF-8 encoded.
-  UTF8FileWithBOM:         Check for UTF-8 encoded files which start with a BOM/UTF-8 signature.
-                           It is recommended to save without the file signature for
-                           best compiler portability.
-  unencodedExtASCII:       Check for strings containing extended ASCII characters that are not encoded.
-  printfSingleNumber:      Check for printf()-like functions being used to just format a number.
-  dupValAssignedToIds:     Check for the same value being assigned to different ID variables.
-  numberAssignedToId:      Check for ID variables being assigned a hard-coded number.
-                           It may be preferred to assign framework-defined constants to IDs.
-  malformedString:         Check for malformed syntax in strings (e.g., malformed HTML tags).
-  fontIssue:               Check for font issues (e.g., Windows *.RC dialogs not using MS Shell Dlg
-                           or using unusual font sizes).
-  trailingSpaces:          Check for trailing spaces at the end of each line.
-                           This is a code formatting check and is not enabled by default.
-  tabs:                    Check for tabs.
-                           (Spaces are recommended as tabs may appear differently between editors.)
-                           This is a code formatting check and is not enabled by default.
-  wideLine:                Check for overly long lines.
-                           This is a code formatting check and is not enabled by default.
-  commentMissingSpace:     Check that there is a space at the start of a comment.
-                           This is a code formatting check and is not enabled by default.
-  printfMismatch:          Check for mismatching printf() commands between source and translation strings.
-  acceleratorMismatch:     Check for mismatching keyboard accelerators between source and translation strings.
-  transInconsistency:      Check for inconsistent trailing punctuation, spaces, or newlines.
-  numberInconsistency:     Check for mismatching numbers between the source and target strings.
-  lengthInconsistency:     Check for suspect lengths of translations compared to their source strings.
-  excessiveNonL10NContent: Check for translatable strings that contain large blocks on non-translatable content.
-  halfWidth:               Check for halfwidth Kanas, Hanguls, and punctuation in source and target strings.
-  multipartString:         Check for strings that appear to contain multiple parts that are
-                           being sliced at runtime.
-  pluralization:           Check for strings being used for both singular and plural that
-                           should be use different variations.
-  articleOrPronoun:        Check for strings with an article (e.g., the, a) in front of a
-                           formatting placeholder.
-                           Also checks for pronouns being used as individual strings.
+  allI18N:                  Perform all internationalization checks (the default).
+  allL10N:                  Perform all localization checks (the default).
+  allCodeFormatting:        Check all code formatting issues.
+                            These are not enabled by default.
+  suspectL10NString:        Check for translatable strings that shouldn't be
+                            (e.g., numbers, keywords, printf() commands).
+  suspectL10NUsage:         Check for translatable strings being used in internal contexts
+                            (e.g., debugging functions).
+  suspectI18NUsage:         Check for suspect usage of i18n functions.
+  urlInL10NString:          Check for translatable strings that contain URLs, email addresses,
+                            or phone numbers.
+                            It is recommended to dynamically format these into the string so that
+                            translators don't have to manage them.
+  concatenatedStrings:      Check for strings that may be concatenated at runtime.
+  literalL10NStringCompare: Check for literal, localizable strings being compared or searched for.
+  L10NStringNeedsContext:   Check for possibly ambiguous strings that lack a translator comment.
+  notL10NAvailable:         Check for strings not exposed for translation.
+  deprecatedMacro:          Check for deprecated text macros (e.g., wxT()).
+  nonUTF8File:              Check that files containing extended ASCII characters are UTF-8 encoded.
+  UTF8FileWithBOM:          Check for UTF-8 encoded files which start with a BOM/UTF-8 signature.
+                            It is recommended to save without the file signature for
+                            best compiler portability.
+  unencodedExtASCII:        Check for strings containing extended ASCII characters that are not encoded.
+  printfSingleNumber:       Check for printf()-like functions being used to just format a number.
+  dupValAssignedToIds:      Check for the same value being assigned to different ID variables.
+  numberAssignedToId:       Check for ID variables being assigned a hard-coded number.
+                            It may be preferred to assign framework-defined constants to IDs.
+  malformedString:          Check for malformed syntax in strings (e.g., malformed HTML tags).
+  fontIssue:                Check for font issues (e.g., Windows *.RC dialogs not using MS Shell Dlg
+                            or using unusual font sizes).
+  trailingSpaces:           Check for trailing spaces at the end of each line.
+                            This is a code formatting check and is not enabled by default.
+  tabs:                     Check for tabs.
+                            (Spaces are recommended as tabs may appear differently between editors.)
+                            This is a code formatting check and is not enabled by default.
+  wideLine:                 Check for overly long lines.
+                            This is a code formatting check and is not enabled by default.
+  commentMissingSpace:      Check that there is a space at the start of a comment.
+                            This is a code formatting check and is not enabled by default.
+  printfMismatch:           Check for mismatching printf() commands between source and
+                            translation strings.
+  acceleratorMismatch:      Check for mismatching keyboard accelerators between source and
+                            translation strings.
+  transInconsistency:       Check for inconsistent trailing punctuation, spaces, or newlines.
+  numberInconsistency:      Check for mismatching numbers between the source and target strings.
+  lengthInconsistency:      Check for suspect lengths of translations compared to their source strings.
+  excessiveNonL10NContent:  Check for translatable strings that contain large blocks on
+                            non-translatable content.
+  halfWidth:                Check for halfwidth Kanas, Hanguls, and punctuation in source and
+                            target strings.
+  multipartString:          Check for strings that appear to contain multiple parts that are
+                            being sliced at runtime.
+  pluralization:            Check for strings being used for both singular and plural that
+                            should be use different variations.
+  articleOrPronoun:         Check for strings with an article (e.g., the, a) in front of a
+                            formatting placeholder.
+                            Also checks for pronouns being used as individual strings.
 
 --disable: Which checks to not perform. (Refer to options available above.)
            This will override any options passed to "--enable".

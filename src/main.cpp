@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
          "urlInL10NString, notL10NAvailable, deprecatedMacro, nonUTF8File, transInconsistency, articleOrPronoun"
          "numberInconsistency, multipartString, lengthInconsistency, L10NStringNeedsContext, UTF8FileWithBOM, "
          "unencodedExtASCII, pluralization, printfSingleNumber, concatenatedStrings, excessiveNonL10NContent,"
-         "numberAssignedToId, dupValAssignedToIds, malformedString, fontIssue, printfMismatch, "
+         "numberAssignedToId, dupValAssignedToIds, malformedString, fontIssue, printfMismatch, literalL10NStringCompare, "
          "acceleratorMismatch, trailingSpaces, tabs, wideLine, commentMissingSpace)",
          cxxopts::value<std::vector<std::string>>())
         ("disable", "Which checks to not perform (same as the options for --enable)",
@@ -268,6 +268,10 @@ int main(int argc, char* argv[])
                 {
                 rs |= i18n_check::review_style::check_l10n_concatenated_strings;
                 }
+            else if (r == "literalL10NStringCompare")
+                {
+                rs |= i18n_check::review_style::check_literal_l10n_string_comparison;
+                }
             else if (r == "notL10NAvailable")
                 {
                 rs |= i18n_check::review_style::check_not_available_for_l10n;
@@ -419,6 +423,10 @@ int main(int argc, char* argv[])
             else if (r == "concatenatedStrings")
                 {
                 rs = rs & ~i18n_check::review_style::check_l10n_concatenated_strings;
+                }
+            else if (r == "literalL10NStringCompare")
+                {
+                rs = rs & ~i18n_check::review_style::check_literal_l10n_string_comparison;
                 }
             else if (r == "notL10NAvailable")
                 {

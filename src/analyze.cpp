@@ -391,12 +391,17 @@ namespace i18n_check
                 << ((m_cpp->get_style() & check_l10n_contains_url) ? L"urlInL10NString\n" : L"")
                 << ((m_cpp->get_style() & check_multipart_strings) ? L"multipartString\n" : L"")
                 << ((m_cpp->get_style() & check_pluaralization) ? L"pluralization\n" : L"")
-                << ((m_cpp->get_style() & check_articles_proceeding_placeholder) ? L"articleOrPronoun\n" : L"")
+                << ((m_cpp->get_style() & check_articles_proceeding_placeholder) ?
+                        L"articleOrPronoun\n" :
+                        L"")
                 << ((m_cpp->get_style() & check_l10n_contains_excessive_nonl10n_content) ?
                         L"excessiveNonL10NContent\n" :
                         L"")
                 << ((m_cpp->get_style() & check_l10n_concatenated_strings) ?
                         L"concatenatedStrings\n" :
+                        L"")
+                << ((m_cpp->get_style() & check_literal_l10n_string_comparison) ?
+                        L"literalL10NStringCompare\n" :
                         L"")
                 << ((m_cpp->get_style() & check_not_available_for_l10n) ? L"notL10NAvailable\n" :
                                                                           L"")
@@ -447,17 +452,17 @@ namespace i18n_check
 
         std::wstringstream report;
         report << // TRANSLATORS: Column header in output
-                  _("File") << L"\t" <<
-                  // TRANSLATORS: Column header in output
-                  _(L"Line") << L"\t" <<
-                  // TRANSLATORS: Column header in output
-                  _(L"Column") << L"\t" <<
-                  // TRANSLATORS: Column header in output
-                  _(L"Value") << L"\t" <<
-                  // TRANSLATORS: Column header in output
-                  _(L"Explanation") << L"\t" <<
-                  // TRANSLATORS: Column header in output
-                  _(L"Warning ID") << L"\n";
+            _("File") << L"\t" <<
+            // TRANSLATORS: Column header in output
+            _(L"Line") << L"\t" <<
+            // TRANSLATORS: Column header in output
+            _(L"Column") << L"\t" <<
+            // TRANSLATORS: Column header in output
+            _(L"Value") << L"\t" <<
+            // TRANSLATORS: Column header in output
+            _(L"Explanation") << L"\t" <<
+            // TRANSLATORS: Column header in output
+            _(L"Warning ID") << L"\n";
 
         // Windows resource file warnings
         for (const auto& val : m_rc->get_unsafe_localizable_strings())
@@ -519,9 +524,9 @@ namespace i18n_check
             report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                    << _(L"An article is proceeding dynamic content, or a pronoun is being "
-                         "formatted into a larger message. It is recommended to create "
-                         "multiple versions of this string for all possible contexts instead "
-                         "of using dynamic placeholders.")
+                        "formatted into a larger message. It is recommended to create "
+                        "multiple versions of this string for all possible contexts instead "
+                        "of using dynamic placeholders.")
                    << L"\"\t[articleOrPronoun]\n";
             }
 
@@ -626,13 +631,14 @@ namespace i18n_check
                     }
                 else if (issue.first == translation_issue::article_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"An article is proceeding dynamic content, or a pronoun is being "
-                                 "formatted into a larger message. It is recommended to create "
-                                 "multiple versions of this string for all possible contexts instead "
-                                 "of using dynamic placeholders.")
-                           << "\"\t[articleOrPronoun]\n";
+                    report
+                        << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
+                        << issue.second << L"\"\t\""
+                        << _(L"An article is proceeding dynamic content, or a pronoun is being "
+                             "formatted into a larger message. It is recommended to create "
+                             "multiple versions of this string for all possible contexts instead "
+                             "of using dynamic placeholders.")
+                        << "\"\t[articleOrPronoun]\n";
                     }
                 else if (issue.first == translation_issue::pluralization)
                     {
@@ -781,6 +787,17 @@ namespace i18n_check
                 report << L"\"\t[concatenatedStrings]\n";
                 }
 
+            for (const auto& val : sourceParser->get_literal_localizable_strings_being_compared())
+                {
+                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
+                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
+                report << _(L"Literal string available for translation that is either being "
+                            "searched for or compared against. It is recommended to make this "
+                            "localizable string a variable and use that for "
+                            "all locations that this string is referenced.");
+                report << L"\"\t[literalL10NStringCompare]\n";
+                }
+
             for (const auto& val : sourceParser->get_multipart_strings())
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
@@ -804,12 +821,12 @@ namespace i18n_check
             for (const auto& val : sourceParser->get_article_issue_strings())
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                    << _(L"An article is proceeding dynamic content, or a pronoun is being "
-                          "formatted into a larger message. It is recommended to create "
-                          "multiple versions of this string for all possible contexts instead "
-                          "of using dynamic placeholders.")
-                    << L"\"\t[articleOrPronoun]\n";
+                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                       << _(L"An article is proceeding dynamic content, or a pronoun is being "
+                            "formatted into a larger message. It is recommended to create "
+                            "multiple versions of this string for all possible contexts instead "
+                            "of using dynamic placeholders.")
+                       << L"\"\t[articleOrPronoun]\n";
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_with_halfwidths())
@@ -845,7 +862,8 @@ namespace i18n_check
                     }
                 else
                     {
-                    report << _(L"Localizable string being used within non-user element.") << L"\"\t";
+                    report << _(L"Localizable string being used within non-user element.")
+                           << L"\"\t";
                     }
                 report << L"[suspectL10NUsage]\n";
                 }

@@ -337,6 +337,7 @@ class NewProjectDialog final : public wxDialog
     bool m_articles{ false };
     bool m_excessiveNonTranslatableContentInL10NString{ false };
     bool m_concatenatedStrings{ false };
+    bool m_literalL10NStrings{ false };
     bool m_deprecatedMacro{ true };
     bool m_printfSingleNumber{ true };
     bool m_malformedString{ true };

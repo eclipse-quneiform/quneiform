@@ -130,8 +130,9 @@ namespace i18n_check
         ///     formatting placeholder.\n
         ///     Also checks for pronouns being used as individual strings.
         check_articles_proceeding_placeholder = (static_cast<int64_t>(1) << 19),
-        /// @private
-        i18n_reserved8 = (static_cast<int64_t>(1) << 20),
+        /// @brief Check for literal strings in l10n functions being searched for
+        ///     or compared.
+        check_literal_l10n_string_comparison = (static_cast<int64_t>(1) << 20),
         /// @private
         i18n_reserved9 = (static_cast<int64_t>(1) << 21),
         /// @private
@@ -158,7 +159,8 @@ namespace i18n_check
         check_malformed_strings | check_utf8_with_signature | check_fonts |
         check_l10n_concatenated_strings | check_needing_context | check_suspect_i18n_usage |
         check_l10n_contains_excessive_nonl10n_content | check_multipart_strings |
-        check_pluaralization | check_articles_proceeding_placeholder),
+        check_pluaralization | check_articles_proceeding_placeholder |
+        check_literal_l10n_string_comparison),
 
         /// @brief Check for mismatching printf commands between source strings and their
         ///     respective translations.
@@ -603,6 +605,15 @@ namespace i18n_check
             return m_localizable_strings_being_concatenated;
             }
 
+        /// @returns The strings that are being extracted as localizable,
+        ///     but are being used in a search or comparison function.
+        [[nodiscard]]
+        const std::vector<string_info>&
+        get_literal_localizable_strings_being_compared() const noexcept
+            {
+            return m_literal_localizable_strings_being_compared;
+            }
+
         /// @returns The strings that contain halfwidth characters.
         [[nodiscard]]
         const std::vector<string_info>& get_localizable_strings_with_halfwidths() const noexcept
@@ -1037,6 +1048,29 @@ namespace i18n_check
                 }
             }
 
+        /// @returns @c true if @c str is a search or comparison function.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_search_or_comparison_function(const std::wstring& str)
+            {
+            static std::set<std::wstring_view> strFunctions{
+                _DT(L"find"),        L"find_first_of", L"find_last_of", L"find_first_not_of",
+                L"find_last_not_of", _DT(L"rfind"),    L"starts_with",  L"ends_with",
+                L"StartsWith",       L"EndsWith",      _DT(L"Cmp"),     L"CmpNoCase",
+                _DT(L"compare")
+            };
+            return (strFunctions.find(str) != strFunctions.cend());
+            }
+
+        /// @returns @c true if there is a comparison operator in front of string.
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool has_comparison_operator(const string_info& str)
+            {
+            return (str.m_usage.m_variableInfo.m_operator == L"==" ||
+                    str.m_usage.m_variableInfo.m_operator == L"!=");
+            }
+
         /// @returns @c true if a string starts or ends with spaces.
         ///     (Not tabs or newlines, but actual spaces.)
         /// @param str The string to review.
@@ -1357,6 +1391,7 @@ namespace i18n_check
         std::vector<string_info> m_localizable_strings_ambiguous_needing_context;
         std::vector<string_info> m_localizable_strings_in_internal_call;
         std::vector<string_info> m_localizable_strings_being_concatenated;
+        std::vector<string_info> m_literal_localizable_strings_being_compared;
         std::vector<string_info> m_localizable_strings_with_halfwidths;
         std::vector<string_info> m_not_available_for_localization_strings;
         std::vector<string_info> m_multipart_strings;
