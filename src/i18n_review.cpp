@@ -720,6 +720,7 @@ namespace i18n_check
             std::wregex(LR"(^DEBUG:[\s\S].*)"),
             // mail protocols
             std::wregex(LR"(^(RCPT TO|MAIL TO|MAIL FROM):.*)"),
+            std::wregex(LR"(^(mailto)$)"),
             // GUIDs
             std::wregex(
                 LR"(^(CLSID[\\]{1,2})?[\{]?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}[\}]?$)"),
