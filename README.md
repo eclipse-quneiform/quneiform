@@ -1,6 +1,6 @@
 <img src="app-logo.svg" width="150" />
 
-*Eclipse Quneiform*^®^
+*Eclipse Quneiform*®
 =============================
 
 <a href="docs/manual/book/quneiform.pdf"><img alt="Manual" src="docs/manual/images/cover-thumnail.png" width="200" align="right"/></a>
