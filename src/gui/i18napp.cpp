@@ -108,7 +108,7 @@ bool I18NApp::OnInit()
         return false;
         }
 
-    SetAppName(L"Quneiform");
+    SetAppName(L"Eclipse Quneiform");
 
     wxArtProvider::Push(new I18NArtProvider);
 

@@ -50,7 +50,7 @@ if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     message(STATUS "macOS deployment target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
-project(quneiform VERSION 2025.0.0.0 DESCRIPTION "Quneiform")
+project(quneiform VERSION 2025.0.0.0 DESCRIPTION "Eclipse Quneiform")
 set(PROGRAM_NUMBERED_VERSION 1.0)
 set(PROGRAM_AUTHOR "Blake Madden")
 set(PROGRAM_COMMENTS "Internationalization & localization analysis system")

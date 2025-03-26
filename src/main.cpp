@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2023-2024 Blake Madden
+ * Copyright (c) 2021-2025 Blake Madden
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,7 +23,7 @@ namespace fs = std::filesystem;
 //-------------------------------------------------
 int main(int argc, char* argv[])
     {
-    cxxopts::Options options("Quneiform", "Quneiform: Internationalization/localization analysis "
+    cxxopts::Options options("Eclipse Quneiform", "Eclipse Quneiform: Internationalization/localization analysis "
                                           "system, (c) 2021-2025 Blake Madden");
     // clang-format off
     options.add_options()

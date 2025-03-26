@@ -13,7 +13,7 @@ pdf-cover-author-color: "0, 0, 0"
 pdf-cover-font-color: "255, 255, 255"
 pdf-cover-color: "111, 144, 132"
 book:
-  title: "Quneiform 2025"
+  title: "Eclipse Quneiform 2025"
   subtitle: "User Manual"
   description: "Internationalization & localization analysis system"
   author: "Blake Madden"
