@@ -1,13 +1,13 @@
 <img src="app-logo.svg" width="150" />
 
-Quneiform
+*Eclipse Quneiform*^®^
 =============================
 
 <a href="docs/manual/book/quneiform.pdf"><img alt="Manual" src="docs/manual/images/cover-thumnail.png" width="200" align="right"/></a>
 
 Internationalization & localization analysis system for C++ code, *gettext* catalogs, and Windows&reg; RC files.
 
-`Quneiform` is a command-line utility and graphical user interface that scans source and resource files to check for
+`Eclipse Quneiform` is a command-line utility and graphical user interface that scans source and resource files to check for
 various i18n and l10n issues.
 
 Additionally, the GUI version provides pseudo-translation support for
@@ -17,7 +17,7 @@ Refer to the [manual](docs/manual/book/quneiform.pdf) for full documentation.
 
 ## File Support
 
-`Quneiform` supports static analysis for the following:
+`Eclipse Quneiform` supports static analysis for the following:
 
 - C code
 - C++ code ('98 and modern C++)
@@ -135,7 +135,7 @@ loaded by your application for integration testing.
 
 # Usage
 
-`Quneiform` accepts the following arguments:
+`Eclipse Quneiform` accepts the following arguments:
 
 ```shellscript
 [input]: The folder to analyze.
@@ -268,7 +268,7 @@ Refer [here](Example.md) for more examples.
 
 # Building (command line tool)
 
-`Quneiform` can be configured and built with *Cmake*.
+`Eclipse Quneiform` can be configured and built with *Cmake*.
 
 On Unix:
 
@@ -293,7 +293,6 @@ After building wxWidgets, *Quneiform* can be configured and built with *Cmake*.
 On Unix:
 
 ```shellscript
-cd ..
 git clone https://github.com/wxWidgets/wxWidgets.git --recurse-submodules
 cd wxWidgets
 cmake . -DCMAKE_INSTALL_PREFIX=./wxlib -DwxBUILD_SHARED=OFF \
@@ -303,7 +302,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=./wxlib -DwxBUILD_SHARED=OFF \
     -DCMAKE_BUILD_TYPE=Release
 cmake --build . --target install --config Release
 cd ..
-cd Quneiform/gui
+cd quneiform/gui
 cmake . -DCMAKE_BUILD_TYPE=Release
 cmake --build . --target all --config Release
 ```
