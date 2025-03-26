@@ -2,7 +2,7 @@
 <!-- Just want this preface in the gitbook.
      PDF output will have its own copyright page after the title.-->
 
-This book is the guide to using *Quneiform*, an internationalization & localization analysis system for C++ code and translation resources.
+This book is the guide to using *Eclipse Quneiform*^®^, an internationalization & localization analysis system for C++ code and translation resources.
 
 ![](images/by-sa.png)
 
