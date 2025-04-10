@@ -8,15 +8,23 @@ link-citations: true
 nocite: '@*'
 csl: modern-language-association.csl
 pdf-cover: "images/cover.png"
-pdf-logo: "images/app-logo.png"
-pdf-cover-author-color: "0, 0, 0"
+pdf-logo: "images/cover-logo.png"
+pdf-cover-author-color: "61, 60, 59"
 pdf-cover-font-color: "255, 255, 255"
-pdf-cover-color: "111, 144, 132"
+pdf-logo-size: 5cm
+theme-color: "248, 149, 34"
+trademark: ${PROGRAM_LONGNAME}
+publisher: ${PUBLISHER}
+publisher-logo: "images/publisher-logo.png"
+publisher-cities:
+  - Brussels
+  - Ottawa
+  - Darmstadt
 book:
   title: "${quneiform_DESCRIPTION} ${FULL_DISPLAY_VERSION}"
   subtitle: "User Manual"
-  description: "${PROGRAM_COMMENTS}"
-  author: "${PROGRAM_AUTHOR}"
+  description: ${PROGRAM_COMMENTS}
+  author: ${PROGRAM_AUTHOR}
   date: today
   date-format: "YYYY"
   output-file: "quneiform"
@@ -46,7 +54,7 @@ book:
     - acknowledgements.qmd
 format:
   pdf:
-    documentclass: book
+    documentclass: LegrandOrangeBook
     template: latex/default.tex
     include-in-header: latex/preamble.tex
     latex-engine: xelatex
@@ -55,3 +63,6 @@ format:
     cite-method: biblatex
     lot: false
     code-block-bg: false
+    CJKmainfont: "${CJK_FONT}"
+    linkcolor: black
+    citecolor: black

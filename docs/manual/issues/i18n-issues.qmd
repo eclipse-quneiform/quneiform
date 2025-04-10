@@ -158,6 +158,7 @@ Although tools like *gettext* will usually combine multiple instances of the sam
 By design, these different instances will be presented separately and translators may translate them differently.
 Consider the following example:
 
+::: {.minipage data-latex="{\textwidth}"}
 ```{Rcpp}
 #| include: true
 #| eval: false
@@ -167,6 +168,7 @@ else if (selectedTest == _(L"Dolch Sight Words"))
     wxGetApp().GetMainFrame()->DisplayHelp(L"online/reviewing-standard-projects.html");
     }
 ```
+:::
 
 The phrase "Dolch Sight Words" will be extracted as a localizable string from this code.
 Most likely, there is another instance of this string exposed for translation elsewhere.

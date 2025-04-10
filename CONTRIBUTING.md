@@ -1,15 +1,13 @@
-# Contributing to *Eclipse Quneiform*^®^
+# Contributing to *Eclipse Quneiform*®
 
 Thanks for your interest in this project.
 
-
-## Project description
+## Project Description
 
 This is the *Eclipse Quneiform* project,
 an internationalization & localization analysis system for C/C++ code and resource files:
 
 * https://github.com/eclipse-quneiform/quneiform.git
-
 
 ## Eclipse Contributor Agreement
 
