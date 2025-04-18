@@ -57,6 +57,7 @@ set(PUBLISHER "Eclipse Foundation AISBL")
 set(PROGRAM_AUTHOR "Blake Madden")
 set(PROGRAM_COMMENTS "Internationalization & localization analysis system")
 set(PROGRAM_RDNS_IDENTIFIER "org.eclipse.quneiform")
+set(INNOSETUP_GUID "{D56F7D47-08F0-42D4-9A7B-A892D72CBE5A}")
 set(PROGRAM_LICENSE "BSD-3-Clause")
 
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -100,6 +101,20 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
                "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../docs/manual/_quarto.yml.in"
                "${CMAKE_CURRENT_SOURCE_DIR}/../docs/manual/_quarto.yml")
+if(UNIX AND NOT APPLE)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../installers/unix/AppDir/quneiform.desktop.in"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/../installers/unix/AppDir/quneiform.desktop")
+    # AppImage tools have issues with building correct appdata.xml files, so turn this off for now
+    # configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../installers/unix/AppDir/usr/share/metainfo/quneiform.appdata.xml.in"
+    #               "${CMAKE_CURRENT_SOURCE_DIR}/../installers/unix/AppDir/usr/share/metainfo/quneiform.appdata.xml")
+elseif(WIN32)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../installers/windows/setup.isl.in"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/../installers/windows/setup.isl")
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../installers/windows/icons.isl.in"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/../installers/windows/icons.isl")
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../installers/windows/quneiform.iss.in"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/../installers/windows/quneiform.iss")
+endif()
 
 # Build the documentation
 #########################
@@ -238,6 +253,24 @@ add_custom_command(TARGET ${PROJECT_NAME}
                    COMMAND ${CMAKE_COMMAND} -E copy
                    ${CMAKE_CURRENT_SOURCE_DIR}/../app-logo.svg $<TARGET_FILE_DIR:${PROJECT_NAME}>${RESOURCE_FOLDER}/images)
 
+if(UNIX AND NOT APPLE)
+    # Icon used for Linux
+    add_custom_command(TARGET ${PROJECT_NAME}
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_CURRENT_SOURCE_DIR}/../app-logo.svg ${CMAKE_CURRENT_SOURCE_DIR}/installers/unix/AppDir)
+    # Application screenshot
+    add_custom_command(TARGET ${PROJECT_NAME}
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_CURRENT_SOURCE_DIR}/../docs/manual/images/main-window.png ${CMAKE_CURRENT_SOURCE_DIR}/installers/unix/AppDir)
+endif()
+# License file
+add_custom_command(TARGET ${PROJECT_NAME}
+                   POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                   ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE $<TARGET_FILE_DIR:${PROJECT_NAME}>${RESOURCE_FOLDER})
+
 if(UNIX)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_VISIBILITY_PRESET hidden
@@ -252,4 +285,28 @@ if(APPLE)
         OUTPUT_NAME "Quneiform"
         XCODE_ATTRIBUTE_EXECUTABLE_NAME ${PROJECT_NAME}
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in)
+endif()
+
+# Copy application (and resources) to installer folders (if a production build)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    if(WIN32)
+        add_custom_command(TARGET ${PROJECT_NAME}
+                           POST_BUILD
+                           COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${PROJECT_NAME}>" "${CMAKE_CURRENT_SOURCE_DIR}/installers/windows/release/"
+                           COMMENT "Copying binary to installer folder.")
+    elseif(UNIX AND NOT APPLE)
+        add_custom_command(TARGET ${PROJECT_NAME}
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/installers/unix/AppDir/usr/bin)
+        add_custom_command(TARGET ${PROJECT_NAME}
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>" "${CMAKE_CURRENT_SOURCE_DIR}/installers/unix/AppDir/usr/bin"
+                        COMMENT "Copying binary to installer folder.")
+    elseif(APPLE)
+        add_custom_command(TARGET ${PROJECT_NAME}
+                           POST_BUILD
+                           COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>" "${CMAKE_CURRENT_SOURCE_DIR}/installers/macos/release/"
+                           COMMENT "Copying binary to installer folder.")
+    endif()
 endif()

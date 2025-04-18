@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>${PROGRAM_RDNS_IDENTIFIER}</id>
+	<metadata_license>${PROGRAM_LICENSE}</metadata_license>
+	<project_license>${PROGRAM_LICENSE}</project_license>
+	<name>${quneiform_DESCRIPTION}</name>
+	<summary>${PROGRAM_COMMENTS}</summary>
+	<description>
+		<p>${PROGRAM_COMMENTS}</p>
+	</description>
+	<launchable type="desktop-id">quneiform.desktop</launchable>
+  <url type="homepage">${quneiform_HOMEPAGE_URL}</url>
+	<provides>
+		<id>quneiform.desktop</id>
+	</provides>
+</component>

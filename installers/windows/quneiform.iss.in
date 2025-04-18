@@ -1,0 +1,131 @@
+﻿;Installer for ${PROGRAM_LONGNAME}
+[Setup]
+#include "setup.isl"
+MergeDuplicateFiles=true
+Compression=lzma
+SolidCompression=true
+UserInfoPage=true
+ChangesAssociations=true
+PrivilegesRequired=admin
+LicenseFile=..\..\LICENSE
+ShowLanguageDialog=yes
+LanguageDetectionMethod=locale
+AppendDefaultDirName=no
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+; Don't use MinVersion because some
+; customized Windows systems have their OS version messed up and InnoSetup can't
+; determine the version.
+
+[Files]
+; program files
+Source: release\${CMAKE_PROJECT_NAME}.exe; DestDir: {app}; Components: ProgramFiles; Flags: replacesameversion restartreplace
+; resource files (required part of programs)
+Source: ..\..\gui\images\*.svg; DestDir: {app}\images; Components: ProgramFiles; Flags: replacesameversion restartreplace recursesubdirs
+Source: ..\..\LICENSE; DestDir: {app}; Components: ProgramFiles; Flags: replacesameversion
+; help files
+Source: ..\..\docs\manual\book\quneiform.pdf; DestDir: {app}; Components: HelpFiles; Flags: replacesameversion restartreplace recursesubdirs
+
+[Languages]
+#include "lang.isl"
+
+[Icons]
+#include "icons.isl"
+
+[Registry]
+; Make is so that you can run the program from the command line
+Root: HKLM; Subkey: SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\${CMAKE_PROJECT_NAME}.exe; ValueType: string; ValueName: ; ValueData: {app}\${CMAKE_PROJECT_NAME}.exe; Flags: uninsdeletekey
+; Set file association (standard project)
+Root: HKCR; Subkey: .qfn; ValueType: string; ValueData: quneiformProject; Flags: uninsdeletekey
+Root: HKCR; Subkey: quneiformProject; ValueType: string; ValueName: ; ValueData: ${quneiform_DESCRIPTION} Project; Flags: uninsdeletekey
+Root: HKCR; Subkey: quneiformProject\DefaultIcon; ValueType: string; ValueData: {app}\${CMAKE_PROJECT_NAME}.EXE,0; Flags: uninsdeletekey
+Root: HKCR; Subkey: quneiformProject\shell\open\command; ValueType: string; ValueData: """{app}\${CMAKE_PROJECT_NAME}.EXE"" ""%1"""; Flags: uninsdeletekey
+
+[Components]
+Name: ProgramFiles; Description: {cm:ProgramFiles}; Flags: fixed; Types: Typical Custom
+Name: HelpFiles; Description: {cm:HelpFiles}; Types: Typical Custom
+
+[Types]
+Name: Typical; Description: {cm:Typical}
+Name: Custom; Description: {cm:Custom}; Flags: iscustom
+
+[InstallDelete]
+; Delete any old start menu icons
+Type: filesandordirs ; Name:"{commonprograms}\${quneiform_DESCRIPTION}"
+
+[UninstallDelete]
+Type: files; Name: {app}\rs.xml
+Name: {app}\res; Type: dirifempty
+Name: {app}; Type: dirifempty
+
+[Code]
+var
+  Upgrade: Boolean;
+
+function InitializeSetup(): Boolean;
+var
+  userName: String;
+begin
+  // next, see if this is an upgrade installation
+  if RegQueryStringValue(HKLM,
+    'Software\Microsoft\Windows\CurrentVersion\Uninstall\${INNOSETUP_GUID}_is1',
+    'Inno Setup: User Info: Name', userName) then
+    begin
+      Upgrade := true
+    end
+  // no user info, so prompt for it later
+  else
+    Upgrade := false;
+
+  Result := true
+end;
+
+// see if certain dialogs should be skipped if we are in upgrade mode
+function ShouldSkipPage(PageID: Integer): Boolean;
+var
+   iconGroup: String;
+   installDir: String;
+begin
+  if (PageID = wpUserInfo) then
+    Result := Upgrade
+  else if (PageID = wpLicense) then
+    Result := Upgrade
+  else if (PageID = wpReady) then
+    Result := Upgrade
+  // install directory dialog
+  else if (PageID = wpSelectDir) then
+    begin
+      if (Upgrade = true) then
+        begin
+          // first, see if there is an installation folder already
+          if RegQueryStringValue(HKLM,
+              'Software\Microsoft\Windows\CurrentVersion\Uninstall\${INNOSETUP_GUID}_is1',
+              'Inno Setup: App Path', installDir) then
+            Result := true
+          // no path found, so prompt for it
+          else
+            Result := false
+        end
+      else
+        Result := false
+    end
+  // menu group dialog
+  else if (PageID = wpSelectProgramGroup) then
+    begin
+      if (Upgrade = true) then
+        begin
+          // first, see if there is a menu group already
+          if RegQueryStringValue(HKLM,
+              'Software\Microsoft\Windows\CurrentVersion\Uninstall\${INNOSETUP_GUID}_is1',
+              'Inno Setup: Icon Group', iconGroup) then
+            Result := true
+          // no menu group found, so prompt for it
+          else
+            Result := false
+        end
+      else
+        Result := false
+    end
+  else
+    Result := false
+end;

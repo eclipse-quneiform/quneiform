@@ -1,0 +1,12 @@
+[Desktop Entry]
+X-AppImage-Arch=${UNIX_ARCHITECTURE}
+X-AppImage-Version=${quneiform_VERSION_MAJOR}.${quneiform_VERSION_MINOR}.${quneiform_VERSION_PATCH}.${quneiform_VERSION_TWEAK}
+X-AppImage-Name=${quneiform_DESCRIPTION}
+Name=${quneiform_DESCRIPTION}
+Exec=${CMAKE_PROJECT_NAME}
+Icon=app-logo
+Type=Application
+Terminal=false
+Categories=Office
+Comment=${PROGRAM_COMMENTS}
+Keywords=i18n,l10n

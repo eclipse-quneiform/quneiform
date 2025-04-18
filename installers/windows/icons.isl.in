@@ -1,0 +1,1 @@
+Name: {group}\${quneiform_DESCRIPTION} ${quneiform_VERSION_MAJOR}; Filename: {app}\${CMAKE_PROJECT_NAME}.exe; IconIndex: 0
