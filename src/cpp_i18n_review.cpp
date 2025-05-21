@@ -59,15 +59,15 @@ namespace i18n_check
                         { std::next(cppText, 2),
                           static_cast<size_t>(endSentinel - std::next(cppText, 2)) });
 
-                    const auto [isSuppressed, suppresionEnd] = i18n_review::is_block_suppressed(
+                    const auto [isSuppressed, suppressionEnd] = i18n_review::is_block_suppressed(
                         { std::next(cppText, 2),
                           static_cast<size_t>(endSentinel - std::next(cppText, 2)) });
                     if (isSuppressed)
                         {
                         m_context_comment_active = false;
                         clear_section(
-                            cppText, std::next(cppText, static_cast<ptrdiff_t>(suppresionEnd + 2)));
-                        std::advance(cppText, suppresionEnd);
+                            cppText, std::next(cppText, static_cast<ptrdiff_t>(suppressionEnd + 2)));
+                        std::advance(cppText, suppressionEnd);
                         }
                     wchar_t* end = std::wcsstr(cppText, L"*/");
                     if (end != nullptr && end < endSentinel)
@@ -116,15 +116,15 @@ namespace i18n_check
                         { std::next(cppText, 2),
                           static_cast<size_t>(endSentinel - std::next(cppText, 2)) });
 
-                    const auto [isSuppressed, suppresionEnd] = i18n_review::is_block_suppressed(
+                    const auto [isSuppressed, suppressionEnd] = i18n_review::is_block_suppressed(
                         { std::next(cppText, 2),
                           static_cast<size_t>(endSentinel - std::next(cppText, 2)) });
                     if (isSuppressed)
                         {
                         m_context_comment_active = false;
                         clear_section(
-                            cppText, std::next(cppText, static_cast<ptrdiff_t>(suppresionEnd + 2)));
-                        std::advance(cppText, suppresionEnd);
+                            cppText, std::next(cppText, static_cast<ptrdiff_t>(suppressionEnd + 2)));
+                        std::advance(cppText, suppressionEnd);
                         }
 
                     if (static_cast<bool>(m_review_styles & check_space_after_comment) &&
