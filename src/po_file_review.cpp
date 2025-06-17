@@ -73,6 +73,7 @@ namespace i18n_check
             currentPos = newLinePos + 1;
             }
 
+        size_t prefixRemovedLength{ 0 };
         while (!poFileText.empty())
             {
             auto [entryFound, entry, entryPos] = read_po_catalog_entry(poFileText);
@@ -80,10 +81,11 @@ namespace i18n_check
                 {
                 break;
                 }
+            // update the position in the original text of where this entry is
+            currentPos += entryPos + prefixRemovedLength;
             // step over the section for the next catalog read later
             poFileText.remove_prefix(entry.length());
-            // update the position in the original text of where this entry is
-            currentPos += entryPos + entry.length();
+            prefixRemovedLength = entry.length();
 
             // load information about the string's fuzzy status and its printf format
             entryLines.clear();
