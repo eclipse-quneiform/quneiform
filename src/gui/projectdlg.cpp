@@ -583,6 +583,10 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
         {
         m_exclusionList->SetStrings(m_excludedPaths);
         }
+    if (m_ignoredVarsList != nullptr)
+        {
+        m_ignoredVarsList->SetStrings(m_varsToIgnore);
+        }
     if (m_untranslatableNamesList != nullptr)
         {
         m_untranslatableNamesList->SetStrings(m_untranslatableNames);
