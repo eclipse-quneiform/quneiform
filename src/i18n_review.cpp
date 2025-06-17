@@ -1402,7 +1402,7 @@ namespace i18n_check
         }
 
     //--------------------------------------------------
-    void i18n_review::load_suspect_i18n_ussage(const std::wstring_view fileText,
+    void i18n_review::load_suspect_i18n_usage(const std::wstring_view fileText,
                                                const std::filesystem::path& fileName)
         {
         if (!static_cast<bool>(m_review_styles & check_suspect_i18n_usage))

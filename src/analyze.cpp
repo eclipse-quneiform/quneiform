@@ -760,7 +760,7 @@ namespace i18n_check
                 report << L"\t\"[excessiveNonL10NContent]\n";
                 }
 
-            for (const auto& val : sourceParser->get_suspect_i18n_usuage())
+            for (const auto& val : sourceParser->get_suspect_i18n_usage())
                 {
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";

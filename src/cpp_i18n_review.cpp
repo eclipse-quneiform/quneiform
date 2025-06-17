@@ -552,7 +552,7 @@ namespace i18n_check
 
         load_id_assignments(cppBuffer, fileName);
         load_deprecated_functions(cppBuffer, fileName);
-        load_suspect_i18n_ussage(cppBuffer, fileName);
+        load_suspect_i18n_usage(cppBuffer, fileName);
 
         m_file_name.clear();
         m_file_start = nullptr;

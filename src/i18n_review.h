@@ -79,7 +79,7 @@ namespace i18n_check
         /// @brief Check for localizable strings being used with internal functions
         ///     (e.g., debug and logging messages).
         check_suspect_l10n_string_usage = (static_cast<int64_t>(1) << 1),
-        /// @brief Check for quotes strings in the source that are not available
+        /// @brief Check for quoted strings in the source that are not available
         ///     for translation that probably should be.
         check_not_available_for_l10n = (static_cast<int64_t>(1) << 2),
         /// @brief Check for deprecated text macros (e.g., `wxT()`).
@@ -126,7 +126,7 @@ namespace i18n_check
         /// @brief Check for strings being used for both singular and plural that
         ///     should be use different variations.
         check_pluaralization = (static_cast<int64_t>(1) << 18),
-        /// @brief Check for strings with an article (e.g., the, a) in front of a
+        /// @brief Check for strings with an article (e.g., 'the', 'a') in front of a
         ///     formatting placeholder.\n
         ///     Also checks for pronouns being used as individual strings.
         check_articles_proceeding_placeholder = (static_cast<int64_t>(1) << 19),
@@ -566,7 +566,7 @@ namespace i18n_check
 
         /// @returns Suspect usage of i18n functions.
         [[nodiscard]]
-        const std::vector<string_info>& get_suspect_i18n_usuage() const noexcept
+        const std::vector<string_info>& get_suspect_i18n_usage() const noexcept
             {
             return m_suspect_i18n_usage;
             }
@@ -1207,7 +1207,7 @@ namespace i18n_check
         /** @brief Loads any i18n functions being misused.
             @param fileText The source file's text to analyze.
             @param fileName The file name being analyzed.*/
-        void load_suspect_i18n_ussage(const std::wstring_view fileText,
+        void load_suspect_i18n_usage(const std::wstring_view fileText,
                                       const std::filesystem::path& fileName);
 #ifdef __UNITTEST
       public:
