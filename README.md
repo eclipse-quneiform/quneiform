@@ -268,7 +268,7 @@ Refer [here](Example.md) for more examples.
 
 # Building (command line tool)
 
-`Eclipse Quneiform` can be configured and built with *Cmake*.
+`Eclipse Quneiform` can be configured and built with *CMake*.
 
 On Unix:
 
@@ -288,20 +288,12 @@ After building, "quneiform" will be available in the "bin" folder.
 [wxWidgets](https://github.com/wxWidgets/wxWidgets) 3.3 or higher is required for building the graphical user interface version.
 
 Download [wxWidgets](https://github.com/wxWidgets/wxWidgets), placing it at the same folder level as this project.
-After building wxWidgets, *Quneiform* can be configured and built with *Cmake*.
+After building wxWidgets, *Quneiform* can be configured and built with *CMake*.
 
 On Unix:
 
 ```shellscript
 git clone https://github.com/wxWidgets/wxWidgets.git --recurse-submodules
-cd wxWidgets
-cmake . -DCMAKE_INSTALL_PREFIX=./wxlib -DwxBUILD_SHARED=OFF \
-    -D"CMAKE_OSX_ARCHITECTURES:STRING=arm64;x86_64" \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
-    -DwxBUILD_OPTIMISE=ON -DwxBUILD_STRIPPED_RELEASE=ON \
-    -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target install --config Release
-cd ..
 cd quneiform/gui
 cmake . -DCMAKE_BUILD_TYPE=Release
 cmake --build . --target all --config Release
