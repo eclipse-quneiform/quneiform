@@ -135,22 +135,17 @@ add_custom_target(doxygen-docs
 ########################
 include(../cmake/folders.cmake)
 
-# Find wxWidgets (wxWidgetsConfig.cmake, specifically) and select its components
+set(wxUSE_WEBVIEW_EDGE ON)
+set(wxBUILD_SHARED OFF)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(__WXDEBUG__ 0)
+    set(wxBUILD_OPTIMISE ON)
+    set(wxBUILD_STRIPPED_RELEASE ON)
+endif()
 find_directory("wxWidgets" wxWidgets_BASEDIR)
-if(WIN32)
-    set(wxWidgets_DIR "${wxWidgets_BASEDIR}/out/install/x64-${CMAKE_BUILD_TYPE}/lib/cmake/wxWidgets")
-elseif(UNIX)
-    set(wxWidgets_DIR "${wxWidgets_BASEDIR}/wxlib/lib/cmake/wxWidgets")
-endif()
-
-message(STATUS "Adding wxWidgets CMake config folder: ${wxWidgets_DIR}")
-if(NOT EXISTS "${wxWidgets_DIR}/wxWidgetsConfig.cmake" AND NOT EXISTS "${wxWidgets_DIR}/wxwidgets-config.cmake")
-    message(WARNING "Cannot find wxWidgets CMake configuration. (Looked in ${wxWidgets_DIR}.)")
-endif()
-set(wxWidgets_USE_STATIC 1)
-find_package(wxWidgets 3.3 COMPONENTS core base xrc propgrid xml ribbon qa net stc richtext REQUIRED CONFIG)
+add_subdirectory(${wxWidgets_BASEDIR} ${CMAKE_CURRENT_SOURCE_DIR}/wxWidgets_lib)
+set(wxWidgets_LIBRARIES wx::core wx::base wx::xrc wx::propgrid wx::xml wx::aui wx::ribbon wx::qa wx::stc wx::net wx::richtext)
 message(STATUS "Adding wxWidgets libraries: ${wxWidgets_LIBRARIES}")
-message(STATUS "Adding wxWidgets: ${wxPLATFORM_LIB_DIR}")
 
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
@@ -182,13 +177,13 @@ message(STATUS "Configuring program...")
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${FILES})
 
 if(MSVC)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE
+    target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE _CRT_SECURE_NO_WARNINGS
     $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
     target_compile_options(${PROJECT_NAME} PUBLIC /Zc:__cplusplus /MP /W3 /WX /wd6211
                             $<$<CONFIG:Debug>:/Od>
                             $<$<CONFIG:Release>:/O2>)
 elseif(MINGW OR MSYS)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE
+    target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE _CRT_SECURE_NO_WARNINGS
             $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
     target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic -Wshadow -Werror
                            $<$<CONFIG:Debug>:-Og>
