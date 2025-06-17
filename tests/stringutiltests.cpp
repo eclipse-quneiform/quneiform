@@ -1638,7 +1638,20 @@ TEST_CASE("Find Whole Word", "[stringutil][whole word]")
         CHECK(94 == string_util::find_whole_word(haystack, needle, 1));
         CHECK(94 == string_util::find_whole_word(haystack, needle, 94));
         CHECK(120 == string_util::find_whole_word(haystack, needle, 95));
-        CHECK(-1 == string_util::find_whole_word(haystack, needle, 200));
+        CHECK(-1 == string_util::find_whole_word(haystack, needle, 121));
+        CHECK(-1 == string_util::find_whole_word(haystack, needle, 1000)); // out of bounds
+        }
+
+    SECTION("Find with newlines")
+        {
+        std::wstring needle{L"needle"};
+        std::wstring haystack{ L"needle in the haystack. There are needles in the haystack, including knittingneedles."
+                                "knitting\\nneedle? Anyway, just find\\nneedle" };
+        CHECK(0 == string_util::find_whole_word(haystack, needle));
+        CHECK(95 == string_util::find_whole_word(haystack, needle, 1));
+        CHECK(95 == string_util::find_whole_word(haystack, needle, 95));
+        CHECK(122 == string_util::find_whole_word(haystack, needle, 96));
+        CHECK(-1 == string_util::find_whole_word(haystack, needle, 123));
         }
 
     SECTION("No Find")
