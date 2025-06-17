@@ -719,8 +719,7 @@ namespace i18n_check
             // Debug message
             std::wregex(LR"(^DEBUG:[\s\S].*)"),
             // mail protocols
-            std::wregex(LR"(^(RCPT TO|MAIL TO|MAIL FROM):.*)"),
-            std::wregex(LR"(^(mailto)$)"),
+            std::wregex(LR"(^(RCPT TO|MAIL TO|MAIL FROM):.*)"), std::wregex(LR"(^(mailto)$)"),
             // GUIDs
             std::wregex(
                 LR"(^(CLSID[\\]{1,2})?[\{]?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}[\}]?$)"),
@@ -1403,7 +1402,7 @@ namespace i18n_check
 
     //--------------------------------------------------
     void i18n_review::load_suspect_i18n_usage(const std::wstring_view fileText,
-                                               const std::filesystem::path& fileName)
+                                              const std::filesystem::path& fileName)
         {
         if (!static_cast<bool>(m_review_styles & check_suspect_i18n_usage))
             {

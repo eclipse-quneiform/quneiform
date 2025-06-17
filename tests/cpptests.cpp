@@ -55,14 +55,14 @@ TEST_CASE("Dates", "[cpp][i18n]")
         cpp(code, L"");
         cpp.review_strings([](size_t) {},
                            [](size_t, const std::filesystem::path&) { return true; });
-        CHECK(cpp.get_suspect_i18n_usuage().empty());
+        CHECK(cpp.get_suspect_i18n_usage().empty());
 
         code = LR"(strftime( tmpbuf, 128,
               "Today is %A, day %d of %B in the year %y.\n", &today );)";
         cpp(code, L"");
         cpp.review_strings([](size_t) {},
                            [](size_t, const std::filesystem::path&) { return true; });
-        CHECK(cpp.get_suspect_i18n_usuage().size() == 1);
+        CHECK(cpp.get_suspect_i18n_usage().size() == 1);
         }
     }
 
@@ -107,7 +107,7 @@ TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
         const wchar_t* code = LR"(var = _(Format("Open %s", f)); );)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 1);
+        REQUIRE(cpp.get_suspect_i18n_usage().size() == 1);
         }
     SECTION("_ Parens")
         {
@@ -116,8 +116,8 @@ TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
         const wchar_t* code = LR"(var = _((( (wxString::Format("Open %s", f)); );)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 1);
-        CHECK(cpp.get_suspect_i18n_usuage().at(0).m_string == std::wstring{ L"wxString" });
+        REQUIRE(cpp.get_suspect_i18n_usage().size() == 1);
+        CHECK(cpp.get_suspect_i18n_usage().at(0).m_string == std::wstring{ L"wxString" });
         }
     SECTION("_ Parents Correct")
         {
@@ -126,7 +126,7 @@ TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
         const wchar_t* code = LR"(var = _(( "Open %s", f)); );)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_suspect_i18n_usuage().size() == 0);
+        CHECK(cpp.get_suspect_i18n_usage().size() == 0);
         }
      SECTION("Not _")
         {
@@ -135,7 +135,7 @@ TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
         const wchar_t* code = LR"(var = VALUE_(Format("Open %s", f)); );)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        REQUIRE(cpp.get_suspect_i18n_usuage().size() == 0);
+        REQUIRE(cpp.get_suspect_i18n_usage().size() == 0);
         }
     }
 
@@ -196,7 +196,7 @@ str.LoadString(ID);
         )";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        CHECK(cpp.get_suspect_i18n_usuage().size() == 2);
+        CHECK(cpp.get_suspect_i18n_usage().size() == 2);
         }
     }
 
@@ -3274,6 +3274,7 @@ TEST_CASE("Context", "[cpp][i18n]")
         // comments are in the wrong place
         code = LR"(// TRANSLATORS: %s is app name
         SetTitle(wxString::Format(
+        // some comment
         _(L"UNTITLED"), wxGetApp().GetAppName()));)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
@@ -3281,7 +3282,7 @@ TEST_CASE("Context", "[cpp][i18n]")
         cpp.clear_results();
 
         code = LR"(/* TRANSLATORS: %s is app name */
-         SetTitle(wxString::Format( _(L"UNTITLED"), wxGetApp().GetAppName()));)";
+         SetTitle(/*some comment*/wxString::Format( _(L"UNTITLED"), wxGetApp().GetAppName()));)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_localizable_strings_ambiguous_needing_context().size() == 1);
