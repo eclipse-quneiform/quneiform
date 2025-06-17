@@ -45,13 +45,7 @@ class I18NApp : public wxApp
     bool OnInit() final;
     int OnExit() final;
 
-    void SaveSettings()
-        {
-        if (wxFileName::FileExists(m_optionsFilePath))
-            {
-            m_defaultOptions.Save(m_optionsFilePath);
-            }
-        }
+    void SaveSettings() { m_defaultOptions.Save(m_optionsFilePath); }
 
     I18NOptions m_defaultOptions;
     wxString m_optionsFilePath;
