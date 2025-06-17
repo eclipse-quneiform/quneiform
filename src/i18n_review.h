@@ -168,8 +168,8 @@ namespace i18n_check
         /// @brief Check for mismatching keyboard accelerators between the
         ///     source and target strings.
         check_accelerators = (static_cast<int64_t>(1) << 31),
-        /// @brief Check for mismatching trailing newlines or punctuation
-        ///     between the source and target strings.
+        /// @brief Check for mismatching trailing newlines or punctuation,
+        ///     untranslatable names, etc. between the source and target strings.
         check_consistency = (static_cast<int64_t>(1) << 32),
         /// @brief Check for mismatching numbers between the source and target strings.
         check_numbers = (static_cast<int64_t>(1) << 33),
@@ -217,7 +217,7 @@ namespace i18n_check
         suspect_source_issue,
         /// @brief Inconsistent keyboard accelerators.
         accelerator_issue,
-        /// @brief Inconsistent trailing punctuation or newlines.
+        /// @brief Inconsistent trailing punctuation, newlines, proper names.
         consistency_issue,
         /// @brief Localizable strings that may be getting concatenated at runtime.
         concatenation_issue,
@@ -239,7 +239,7 @@ namespace i18n_check
         /// @brief Source strings being used for both singular and plural that
         ///     should be use different variations.
         pluralization,
-        /// @brief Check for strings with an article (e.g., the, a) in front of a
+        /// @brief Check for strings with an article (e.g., 'the', 'a') in front of a
         ///     formatting placeholder.\n
         ///     Also checks for pronouns being used as individual strings.
         article_issue

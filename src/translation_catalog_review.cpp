@@ -15,6 +15,10 @@
 
 namespace i18n_check
     {
+    std::vector<std::wstring> translation_catalog_review::m_untranslatable_names = {
+        L"Java", L"Jakarta", L"Jakarta EE", L"Eclipse Foundation"
+    };
+
     //------------------------------------------------
     void translation_catalog_review::review_strings(analyze_callback_reset resetCallback,
                                                     analyze_callback callback)
@@ -80,10 +84,10 @@ namespace i18n_check
                 }
             if (static_cast<bool>(m_review_styles & check_l10n_contains_excessive_nonl10n_content))
                 {
-                if (const auto [isunTranslatable, translatableContentLength] =
+                if (const auto [isUntranslatable, translatableContentLength] =
                         is_untranslatable_string(catEntry.second.m_source, false);
                     (m_review_styles & check_l10n_contains_excessive_nonl10n_content) &&
-                    !isunTranslatable &&
+                    !isUntranslatable &&
                     catEntry.second.m_source.length() > (translatableContentLength * 3) &&
                     catEntry.second.m_comment.empty())
                     {
@@ -91,10 +95,10 @@ namespace i18n_check
                         translation_issue::excessive_nonl10n_content, catEntry.second.m_source);
                     }
 
-                if (const auto [isunTranslatable, translatableContentLength] =
+                if (const auto [isUntranslatable, translatableContentLength] =
                         is_untranslatable_string(catEntry.second.m_source_plural, false);
                     (m_review_styles & check_l10n_contains_excessive_nonl10n_content) &&
-                    !isunTranslatable &&
+                    !isUntranslatable &&
                     catEntry.second.m_source_plural.length() > (translatableContentLength * 3) &&
                     catEntry.second.m_comment.empty())
                     {
@@ -188,7 +192,8 @@ namespace i18n_check
                                 {
                                 catEntry.second.m_issues.emplace_back(
                                     translation_issue::printf_issue,
-                                    L"'" + catEntry.second.m_source_plural + _WXTRANS_WSTR(L"' vs. '") +
+                                    L"'" + catEntry.second.m_source_plural +
+                                        _WXTRANS_WSTR(L"' vs. '") +
                                         catEntry.second.m_translation_plural + L"'" + errorInfo);
                                 }
                             }
@@ -552,14 +557,14 @@ namespace i18n_check
                                 {
                                 catEntry.second.m_issues.emplace_back(
                                     translation_issue::consistency_issue,
-                                    L"'" + src + _WXTRANS_WSTR(L"' vs. '") + trans + L"'");
+                                    _WXTRANS_WSTR(L"Different ending punctuation."));
                                 }
                             }
                         else if (std::iswupper(src.front()) && std::iswlower(trans.front()))
                             {
                             catEntry.second.m_issues.emplace_back(
                                 translation_issue::consistency_issue,
-                                L"'" + src + _WXTRANS_WSTR(L"' vs. '") + trans + L"'");
+                                _WXTRANS_WSTR(L"Different casing of first word."));
                             }
 
                         // see if the number of pipe or tabs (not literal, but embedded 't'
@@ -571,7 +576,46 @@ namespace i18n_check
                             {
                             catEntry.second.m_issues.emplace_back(
                                 translation_issue::consistency_issue,
-                                L"'" + src + _WXTRANS_WSTR(L"' vs. '") + trans + L"'");
+                                _WXTRANS_WSTR(L"Different number of pipe or tab characters."));
+                            }
+
+                        // check for names that shouldn't be translated
+                        for (const auto& unsafeWord : get_untranslatable_names())
+                            {
+                            size_t stcInstanceCount{ 0 };
+                            size_t wordIndex{ 0 };
+                            while (wordIndex != std::wstring::npos)
+                                {
+                                wordIndex =
+                                    string_util::find_whole_word(src, unsafeWord, wordIndex);
+                                if (wordIndex == std::wstring::npos)
+                                    {
+                                    break;
+                                    }
+                                ++stcInstanceCount;
+                                wordIndex += unsafeWord.length();
+                                }
+                            size_t transInstanceCount{ 0 };
+                            wordIndex = 0;
+                            while (wordIndex != std::wstring::npos)
+                                {
+                                wordIndex =
+                                    string_util::find_whole_word(trans, unsafeWord, wordIndex);
+                                if (wordIndex == std::wstring::npos)
+                                    {
+                                    break;
+                                    }
+                                ++transInstanceCount;
+                                wordIndex += unsafeWord.length();
+                                }
+                            if (stcInstanceCount > transInstanceCount)
+                                {
+                                catEntry.second.m_issues.emplace_back(
+                                    translation_issue::consistency_issue,
+                                    L"'" + unsafeWord + L"'" +
+                                        _WXTRANS_WSTR(L" appears more times in the source "
+                                                      "string than in the translation."));
+                                }
                             }
                         }
                 };

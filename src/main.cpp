@@ -23,8 +23,9 @@ namespace fs = std::filesystem;
 //-------------------------------------------------
 int main(int argc, char* argv[])
     {
-    cxxopts::Options options("Eclipse Quneiform", "Eclipse Quneiform: Internationalization/localization analysis "
-                                          "system, (c) 2021-2025 Blake Madden");
+    cxxopts::Options options("Eclipse Quneiform",
+                             "Eclipse Quneiform: Internationalization/localization analysis "
+                             "system, (c) 2021-2025 Blake Madden");
     // clang-format off
     options.add_options()
         ("input", "The folder (or file) to analyze",
@@ -59,6 +60,8 @@ int main(int argc, char* argv[])
          "Whether to review fuzzy translations. (Default is false.)",
          cxxopts::value<bool>()->default_value("false"))
         ("i,ignore", "Folders and files to ignore (can be used multiple times)",
+                               cxxopts::value<std::vector<std::string>>())
+        ("u,untranslatables", "Phrases that should not be translated.",
                                cxxopts::value<std::vector<std::string>>())
         ("o,output", "The output report path (tab-delimited format)",
          cxxopts::value<std::string>())
@@ -160,6 +163,18 @@ int main(int argc, char* argv[])
     // input folder
     const auto filesToAnalyze = i18n_check::get_files_to_analyze(
         inputFolder, excludedInfo.m_excludedPaths, excludedInfo.m_excludedFiles);
+
+    std::vector<std::string> untranslatableNames{
+        (result["untranslatables"].count() > 0) ?
+            result["untranslatables"].as<std::vector<std::string>>() :
+            std::vector<std::string>{}
+    };
+
+    for (const auto& untransName : untranslatableNames)
+        {
+        i18n_check::translation_catalog_review::get_untranslatable_names().push_back(
+            i18n_string_util::lazy_string_to_wstring(untransName));
+        }
 
     const auto setSourceParserInfo = [&readBoolOption, &readIntOption](auto& parser)
     {

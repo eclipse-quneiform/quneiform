@@ -142,13 +142,13 @@ NewProjectDialog::NewProjectDialog(
                 {
                 m_transLongerThresholdLabel->Enable(evt.IsChecked());
                 }
-            if (m_transLongerThresholdtMinLabel != nullptr)
+            if (m_transLongerThresholdMinLabel != nullptr)
                 {
-                m_transLongerThresholdtMinLabel->Enable(evt.IsChecked());
+                m_transLongerThresholdMinLabel->Enable(evt.IsChecked());
                 }
-            if (m_transLongerThresholdtMaxLabel != nullptr)
+            if (m_transLongerThresholdMaxLabel != nullptr)
                 {
-                m_transLongerThresholdtMaxLabel->Enable(evt.IsChecked());
+                m_transLongerThresholdMaxLabel->Enable(evt.IsChecked());
                 }
             if (m_transLongerThresholdSlider != nullptr)
                 {
@@ -159,6 +159,9 @@ NewProjectDialog::NewProjectDialog(
     Bind(
         wxEVT_CHECKBOX, [this]([[maybe_unused]] wxCommandEvent&)
         { UpdateEmbeddedStringsOptions(); }, ID_CHECK_STRINGS_NOT_AVAILABLE);
+    Bind(
+        wxEVT_CHECKBOX, [this]([[maybe_unused]] wxCommandEvent&) { UpdateConsistencyOptions(); },
+        ID_CHECK_TRANS_CONSISTENCY);
     Bind(
         wxEVT_CHOICE, [this]([[maybe_unused]] wxCommandEvent&) { UpdatePseudoTransOptions(); },
         ID_PSEUDO_METHODS);
@@ -180,6 +183,16 @@ void NewProjectDialog::UpdateEmbeddedStringsOptions()
     if (m_ignoredVarsList != nullptr)
         {
         m_ignoredVarsList->Enable(m_notL10NAvailable);
+        }
+    }
+
+//-------------------------------------------------------------
+void NewProjectDialog::UpdateConsistencyOptions()
+    {
+    TransferDataFromWindow();
+    if (m_untranslatableNamesList != nullptr)
+        {
+        m_untranslatableNamesList->Enable(m_transConsistency);
         }
     }
 
@@ -280,19 +293,20 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     TransferDataToWindow();
 
     UpdateEmbeddedStringsOptions();
+    UpdateConsistencyOptions();
     UpdatePseudoTransOptions();
 
     if (m_transLongerThresholdLabel != nullptr)
         {
         m_transLongerThresholdLabel->Enable(m_lengthInconsistency);
         }
-    if (m_transLongerThresholdtMinLabel != nullptr)
+    if (m_transLongerThresholdMinLabel != nullptr)
         {
-        m_transLongerThresholdtMinLabel->Enable(m_lengthInconsistency);
+        m_transLongerThresholdMinLabel->Enable(m_lengthInconsistency);
         }
-    if (m_transLongerThresholdtMaxLabel != nullptr)
+    if (m_transLongerThresholdMaxLabel != nullptr)
         {
-        m_transLongerThresholdtMaxLabel->Enable(m_lengthInconsistency);
+        m_transLongerThresholdMaxLabel->Enable(m_lengthInconsistency);
         }
     if (m_transLongerThresholdSlider != nullptr)
         {
@@ -449,6 +463,8 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
         }
     m_ignoredVarsList->GetStrings(m_varsToIgnore);
 
+    m_untranslatableNamesList->GetStrings(m_untranslatableNames);
+
     if (IsModal())
         {
         EndModal(wxID_OK);
@@ -551,6 +567,7 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
     m_filePath = options.m_filePath;
     m_excludedPaths = options.m_excludedPaths;
     m_varsToIgnore = options.m_varsToIgnore;
+    m_untranslatableNames = options.m_untranslatableNames;
     m_fuzzyTranslations = options.m_fuzzyTranslations;
     m_widthPseudoChange = options.m_widthPseudoChange;
     m_maxTranslationLongerThreshold = options.m_maxTranslationLongerThreshold;
@@ -566,6 +583,10 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
         {
         m_exclusionList->SetStrings(m_excludedPaths);
         }
+    if (m_untranslatableNamesList != nullptr)
+        {
+        m_untranslatableNamesList->SetStrings(m_untranslatableNames);
+        }
     MinCppVersion(options.m_minCppVersion);
     // editor options
     m_fallbackEncoding = options.m_fallbackEncoding;
@@ -578,6 +599,7 @@ void NewProjectDialog::SetAllOptions(const I18NOptions& options)
     TransferDataToWindow();
 
     UpdateEmbeddedStringsOptions();
+    UpdateConsistencyOptions();
     UpdatePseudoTransOptions();
     }
 
@@ -910,14 +932,21 @@ void NewProjectDialog::CreateControls()
             gbSizer->Add(buildCodeLabel(L"acceleratorMismatch", poOptionsSizer->GetStaticBox()),
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
-            gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
-                                        _(L"Check for inconsistent casing, separators, "
-                                          "trailing punctuation, spaces, or newlines"),
-                                        wxDefaultPosition, wxDefaultSize, 0,
-                                        wxGenericValidator(&m_transConsistency)),
-                         wxGBPosition(currentRow, 0), wxGBSpan{});
+            gbSizer->Add(
+                new wxCheckBox(poOptionsSizer->GetStaticBox(), ID_CHECK_TRANS_CONSISTENCY,
+                               _(L"Check for inconsistent punctuation, untranslatable names, etc."),
+                               wxDefaultPosition, wxDefaultSize, 0,
+                               wxGenericValidator(&m_transConsistency)),
+                wxGBPosition(currentRow, 0), wxGBSpan{});
             gbSizer->Add(buildCodeLabel(L"transInconsistency", poOptionsSizer->GetStaticBox()),
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
+
+            m_untranslatableNamesList =
+                new wxEditableListBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
+                                      _(L"Untranslatable words and phrases:"),
+                                      wxDefaultPosition, wxSize{ -1, FromDIP(100) });
+            gbSizer->Add(m_untranslatableNamesList, wxGBPosition(currentRow++, 0), wxGBSpan{ 1, 2 },
+                         wxLEFT, wxSizerFlags::GetDefaultBorder() * 3);
 
             gbSizer->Add(new wxCheckBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
                                         _(L"Check for inconsistent numbers"), wxDefaultPosition,
@@ -953,7 +982,7 @@ void NewProjectDialog::CreateControls()
                              wxGenericValidator(&m_maxTranslationLongerThreshold));
             m_transLongerThresholdSlider->SetPageSize(25);
             m_transLongerThresholdSlider->SetTickFreq(25);
-            m_transLongerThresholdtMinLabel = new wxStaticText(
+            m_transLongerThresholdMinLabel = new wxStaticText(
                 poOptionsSizer->GetStaticBox(), wxID_STATIC,
                 wxString::Format(
                     // TRANSLATORS: number and then percent symbol
@@ -962,7 +991,7 @@ void NewProjectDialog::CreateControls()
                                    wxNumberFormatter::Style::Style_NoTrailingZeroes |
                                        wxNumberFormatter::Style::Style_WithThousandsSep)),
                 wxDefaultPosition, wxDefaultSize);
-            m_transLongerThresholdtMaxLabel = new wxStaticText(
+            m_transLongerThresholdMaxLabel = new wxStaticText(
                 poOptionsSizer->GetStaticBox(), wxID_STATIC,
                 wxString::Format(
                     // TRANSLATORS: number and then percent symbol
@@ -974,11 +1003,11 @@ void NewProjectDialog::CreateControls()
             transLongerThresholdSizer->Add(m_transLongerThresholdLabel,
                                            wxSizerFlags{}.Left().CenterVertical().Border(
                                                wxLEFT, wxSizerFlags::GetDefaultBorder() * 3));
-            transLongerThresholdSizer->Add(m_transLongerThresholdtMinLabel,
+            transLongerThresholdSizer->Add(m_transLongerThresholdMinLabel,
                                            wxSizerFlags{}.Border(wxLEFT).Left().Bottom());
             transLongerThresholdSizer->Add(m_transLongerThresholdSlider,
                                            wxSizerFlags{ 1 }.Expand().Border(wxLEFT));
-            transLongerThresholdSizer->Add(m_transLongerThresholdtMaxLabel,
+            transLongerThresholdSizer->Add(m_transLongerThresholdMaxLabel,
                                            wxSizerFlags{}.Border(wxLEFT).Left().Bottom());
             gbSizer->Add(transLongerThresholdSizer, wxGBPosition(currentRow++, 0), wxGBSpan{ 1, 2 },
                          wxEXPAND);
@@ -1280,5 +1309,6 @@ void NewProjectDialog::CreateControls()
 
     TransferDataToWindow();
     UpdateEmbeddedStringsOptions();
+    UpdateConsistencyOptions();
     UpdatePseudoTransOptions();
     }

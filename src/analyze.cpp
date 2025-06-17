@@ -674,12 +674,8 @@ namespace i18n_check
                     }
                 else if (issue.first == translation_issue::consistency_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"Mismatching first character casing, mismatching trailing "
-                                "punctuation/spaces/newlines, or mismatching number of tabs or "
-                                "pipe symbols between source and translation strings.")
-                           << "\"\t[transInconsistency]\n";
+                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\t\""
+                           << issue.second << "\"\t[transInconsistency]\n";
                     }
                 else if (issue.first == translation_issue::halfwidth)
                     {

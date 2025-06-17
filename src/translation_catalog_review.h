@@ -53,6 +53,17 @@ namespace i18n_check
             return m_catalog_entries;
             }
 
+        /// @brief The list of words/phrases that should never be translated.
+        /// @details This is pre-loaded with common product and company names, but can be
+        ///     extended also by calling this.
+        /// @note This uses case-sensitive comparisons.
+        /// @returns The list of words/phrases that should never be translated.
+        [[nodiscard]]
+        static std::vector<std::wstring>& get_untranslatable_names() noexcept
+            {
+            return m_untranslatable_names;
+            }
+
         /** @brief Reviews the loaded translation catalog entries for issues.
             @param resetCallback Callback function to tell the progress system in @c callback
                 how many items to expect to be processed.
@@ -69,6 +80,7 @@ namespace i18n_check
             }
 
         std::vector<std::pair<std::filesystem::path, translation_catalog_entry>> m_catalog_entries;
+        static std::vector<std::wstring> m_untranslatable_names;
         };
     } // namespace i18n_check
 

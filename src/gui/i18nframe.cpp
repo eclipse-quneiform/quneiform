@@ -1151,6 +1151,16 @@ void I18NFrame::CopyProjectOptionsToGlobalOptions()
             wxGetApp().m_defaultOptions.m_varsToIgnore.push_back(var);
             }
         }
+    for (const auto& var : m_activeProjectOptions.m_untranslatableNames)
+        {
+        if (std::find_if(wxGetApp().m_defaultOptions.m_untranslatableNames.cbegin(),
+                         wxGetApp().m_defaultOptions.m_untranslatableNames.cend(),
+                         [&var](const auto& val) { return val == var; }) ==
+            wxGetApp().m_defaultOptions.m_untranslatableNames.cend())
+            {
+            wxGetApp().m_defaultOptions.m_untranslatableNames.push_back(var);
+            }
+        }
     }
 
 //------------------------------------------------------
@@ -1313,7 +1323,7 @@ void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent&)
         return;
         }
 
-    InsertTransMacroDlg dlg(this, selText, wxID_ANY, _("Mark Selection as Non-translable"),
+    InsertTransMacroDlg dlg(this, selText, wxID_ANY, _("Mark Selection as Non-translatable"),
                             TransMacroType::MarkForNoTranslation);
     if (dlg.ShowModal() != wxID_OK)
         {
@@ -1546,6 +1556,18 @@ void I18NFrame::Process()
     po.set_style(static_cast<i18n_check::review_style>(m_activeProjectOptions.m_options));
     po.review_fuzzy_translations(m_activeProjectOptions.m_fuzzyTranslations);
     po.set_translation_length_threshold(m_activeProjectOptions.m_maxTranslationLongerThreshold);
+
+    for (const auto& untransName : m_activeProjectOptions.m_untranslatableNames)
+        {
+        if (std::find(i18n_check::translation_catalog_review::get_untranslatable_names().cbegin(),
+                      i18n_check::translation_catalog_review::get_untranslatable_names().cend(),
+                      untransName.wc_string()) ==
+            i18n_check::translation_catalog_review::get_untranslatable_names().cend())
+            {
+            i18n_check::translation_catalog_review::get_untranslatable_names().push_back(
+                untransName.wc_string());
+            }
+        }
 
     i18n_check::info_plist_file_review infoPlist(m_activeProjectOptions.m_verbose);
 

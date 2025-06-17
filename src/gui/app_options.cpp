@@ -52,6 +52,17 @@ void I18NOptions::Save(const wxString& filePath)
             }
         }
 
+    auto* untransNameNode = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"untranslatable-names");
+    for (const auto& untransName : m_untranslatableNames)
+        {
+        if (!untransName.empty())
+            {
+            auto* pathNode =
+                new wxXmlNode(untransNameNode, wxXML_ELEMENT_NODE, L"untranslatable-name");
+            pathNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, untransName));
+            }
+        }
+
     node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"checks");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, std::to_wstring(m_options)));
 
@@ -135,6 +146,7 @@ void I18NOptions::Load(const wxString& filePath)
     m_filePath.clear();
     m_excludedPaths.clear();
     m_varsToIgnore.clear();
+    m_untranslatableNames.clear();
     m_options = static_cast<int64_t>(i18n_check::review_style::check_l10n_strings |
                                      i18n_check::review_style::check_suspect_l10n_string_usage |
                                      i18n_check::review_style::check_suspect_i18n_usage |
@@ -201,6 +213,18 @@ void I18NOptions::Load(const wxString& filePath)
                     m_varsToIgnore.push_back(ignoredVarChild->GetNodeContent());
                     }
                 ignoredVarChild = ignoredVarChild->GetNext();
+                }
+            }
+        else if (child->GetName() == L"untranslatable-names")
+            {
+            wxXmlNode* untransNameChild = child->GetChildren();
+            while (untransNameChild != nullptr)
+                {
+                if (!untransNameChild->GetNodeContent().empty())
+                    {
+                    m_untranslatableNames.push_back(untransNameChild->GetNodeContent());
+                    }
+                untransNameChild = untransNameChild->GetNext();
                 }
             }
         else if (child->GetName() == L"checks")

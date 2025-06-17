@@ -184,7 +184,8 @@ loaded by your application for integration testing.
                             translation strings.
   acceleratorMismatch:      Check for mismatching keyboard accelerators between source and
                             translation strings.
-  transInconsistency:       Check for inconsistent trailing punctuation, spaces, or newlines.
+  transInconsistency:       Check for inconsistent trailing punctuation, spaces, newlines,
+                            and untranslatable names.
   numberInconsistency:      Check for mismatching numbers between the source and target strings.
   lengthInconsistency:      Check for suspect lengths of translations compared to their source strings.
   excessiveNonL10NContent:  Check for translatable strings that contain large blocks on

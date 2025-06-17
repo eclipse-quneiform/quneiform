@@ -163,9 +163,14 @@ This is performed on *gettext* \*.po files.
 
 - `transInconsistency`
 
-Check for inconsistent casing or trailing punctuation, spaces, or newlines between source and translation strings.
+Check for inconsistent punctuation, untranslatable names, etc.
 
 This is performed on *gettext* \*.po files.
+
+- `untranslatables`
+
+Comma-separated list of phrases that should not be translated within *gettext* \*.po files.
+`transInconsistency` must be enabled to perform this check.
 
 - `numberInconsistency`
 

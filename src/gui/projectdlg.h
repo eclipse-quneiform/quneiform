@@ -86,6 +86,7 @@ class NewProjectDialog final : public wxDialog
         options.m_filePath = GetPath();
         options.m_excludedPaths = GetExcludedPath();
         options.m_varsToIgnore = m_varsToIgnore;
+        options.m_untranslatableNames = m_untranslatableNames;
         options.m_fuzzyTranslations = UseFuzzyTranslations();
         options.m_addPseudoTransBrackets = m_addPseudoTransBrackets;
         options.m_pseudoTrack = m_pseudoTrack;
@@ -139,6 +140,12 @@ class NewProjectDialog final : public wxDialog
     const wxArrayString& GetIgnoreVariables() const noexcept
         {
         return m_varsToIgnore;
+        }
+
+    [[nodiscard]]
+    const wxArrayString& GetUntranslatableNames() const noexcept
+        {
+        return m_untranslatableNames;
         }
 
     [[nodiscard]]
@@ -300,6 +307,7 @@ class NewProjectDialog final : public wxDialog
         }
 
     void UpdateEmbeddedStringsOptions();
+    void UpdateConsistencyOptions();
     void UpdatePseudoTransOptions();
 
     constexpr static int ID_FOLDER_BROWSE_BUTTON = wxID_HIGHEST;
@@ -313,12 +321,14 @@ class NewProjectDialog final : public wxDialog
     constexpr static int ID_PSEUDO_WIDTH_SLIDER = wxID_HIGHEST + 8;
     constexpr static int ID_CHECK_TRANS_LONGER_CHECK = wxID_HIGHEST + 9;
     constexpr static int ID_CHECK_STRINGS_NOT_AVAILABLE = wxID_HIGHEST + 10;
+    constexpr static int ID_CHECK_TRANS_CONSISTENCY = wxID_HIGHEST + 11;
 
     EditorPageOptions m_extraPages{ NoExtraPages };
 
     wxString m_filePath;
     wxArrayString m_excludedPaths;
     wxArrayString m_varsToIgnore;
+    wxArrayString m_untranslatableNames;
     // options for all file types
     bool m_notL10NAvailable{ true };
     bool m_suspectL10NString{ true };
@@ -376,8 +386,8 @@ class NewProjectDialog final : public wxDialog
     wxString m_fallbackEncodingStr{ _(L"System Default") };
 
     wxStaticText* m_transLongerThresholdLabel{ nullptr };
-    wxStaticText* m_transLongerThresholdtMinLabel{ nullptr };
-    wxStaticText* m_transLongerThresholdtMaxLabel{ nullptr };
+    wxStaticText* m_transLongerThresholdMinLabel{ nullptr };
+    wxStaticText* m_transLongerThresholdMaxLabel{ nullptr };
     wxSlider* m_transLongerThresholdSlider{ nullptr };
     wxCheckBox* m_pseudoSurroundingBracketsCheckbox{ nullptr };
     wxCheckBox* m_pseudoTrackCheckbox{ nullptr };
@@ -387,6 +397,7 @@ class NewProjectDialog final : public wxDialog
     wxSlider* m_pseudoIncreaseSlider{ nullptr };
     wxEditableListBox* m_exclusionList{ nullptr };
     wxEditableListBox* m_ignoredVarsList{ nullptr };
+    wxEditableListBox* m_untranslatableNamesList{ nullptr };
     wxStaticBoxSizer* m_previewSizer{ nullptr };
     wxTextCtrl* m_sampleTextWindow{ nullptr };
     wxTextCtrl* m_previewTextWindow{ nullptr };
