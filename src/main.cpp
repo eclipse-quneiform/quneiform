@@ -61,7 +61,9 @@ int main(int argc, char* argv[])
          cxxopts::value<bool>()->default_value("false"))
         ("i,ignore", "Folders and files to ignore (can be used multiple times)",
                                cxxopts::value<std::vector<std::string>>())
-        ("u,untranslatables", "Phrases that should not be translated.",
+        ("u,untranslatables", "Comma-separated words that should not be translated. "
+                              "(If including phrases with spaces, "
+                              "put entire argument in double quotes.)",
                                cxxopts::value<std::vector<std::string>>())
         ("o,output", "The output report path (tab-delimited format)",
          cxxopts::value<std::string>())

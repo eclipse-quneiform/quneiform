@@ -169,8 +169,12 @@ This is performed on *gettext* \*.po files.
 
 - `untranslatables`
 
-Comma-separated list of phrases that should not be translated within *gettext* \*.po files.
+Comma-separated list of words that should not be translated within *gettext* \*.po files.
 `transInconsistency` must be enabled to perform this check.
+
+::: {.tipsection data-latex=""}
+If including phrases with spaces, wrap the entire argument in double quotes.
+:::
 
 - `numberInconsistency`
 
