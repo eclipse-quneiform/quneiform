@@ -508,6 +508,7 @@ namespace i18n_check
                         if (currentLine.find(L"LR") == std::wstring::npos &&
                             currentLine.find(L'|') == std::wstring::npos)
                             {
+                            // quneiform-suppress-begin
                             m_wide_lines.emplace_back(
                                 // truncate and add ellipsis
                                 std::wstring{ currentLine.substr(
@@ -519,6 +520,7 @@ namespace i18n_check
                                     std::to_wstring(currentLineLength), std::wstring{},
                                     std::wstring{} },
                                 m_file_name, get_line_and_column(currentPos));
+                            // quneiform-suppress-end
                             }
                         }
                     }

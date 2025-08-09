@@ -16,7 +16,7 @@
 namespace i18n_check
     {
     std::vector<std::wstring> translation_catalog_review::m_untranslatable_names = {
-        L"Java", L"Jakarta", L"Jakarta EE", L"Eclipse Foundation"
+        _DT(L"Java"), _DT(L"Jakarta"), _DT(L"Jakarta EE"), _DT(L"Eclipse Foundation")
     };
 
     //------------------------------------------------

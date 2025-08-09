@@ -1279,6 +1279,7 @@ namespace i18n_check
             {
                 for (const auto& str : strings)
                     {
+                    // quneiform-suppress-begin
                     if ((str.m_string.find(L"%g") != std::wstring::npos ||
                          str.m_string.find(L"%C") != std::wstring::npos ||
                          str.m_string.find(L"%y") != std::wstring::npos) &&
@@ -1290,6 +1291,7 @@ namespace i18n_check
                                           "in strftime-like functions.");
                         m_suspect_i18n_usage.push_back(expandedStr);
                         }
+                    // quneiform-suppress-end
                     }
             };
             classifyYearIssueStrings(m_localizable_strings);
@@ -1805,10 +1807,12 @@ namespace i18n_check
                 {
                 str.remove_suffix(2);
                 }
+            // quneiform-suppress-begin
             if (str.ends_with(L"..."))
                 {
                 str.remove_suffix(3);
                 }
+            // quneiform-suppress-end
             if (str.ends_with(L"(s)"))
                 {
                 str.remove_suffix(3);
@@ -2417,12 +2421,14 @@ namespace i18n_check
                 }
             }
         string_util::trim(strToReview);
+        // quneiform-suppress-begin
         // something like "%d%%" should be translatable
         if (allPunctOrSpaces &&
             (strToReview.find(_DT(L"%%")) != std::wstring::npos || strToReview == L"..."))
             {
             return std::make_pair(false, strToReview.length());
             }
+        // quneiform-suppress-end
 
         try
             {
