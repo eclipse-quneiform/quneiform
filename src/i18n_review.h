@@ -1208,7 +1208,7 @@ namespace i18n_check
             @param fileText The source file's text to analyze.
             @param fileName The file name being analyzed.*/
         void load_suspect_i18n_usage(const std::wstring_view fileText,
-                                      const std::filesystem::path& fileName);
+                                     const std::filesystem::path& fileName);
 #ifdef __UNITTEST
       public:
 #endif

@@ -115,10 +115,7 @@ namespace lily_of_the_valley
         void trim() { string_util::rtrim(m_text_buffer); }
 
         /** @brief Clears any text.*/
-        void clear()
-            {
-            m_text_buffer.clear();
-            }
+        void clear() { m_text_buffer.clear(); }
 
         /** @brief Resizes the buffer.
             @param newSize The new size of the buffer.*/

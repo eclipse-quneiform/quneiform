@@ -1,4 +1,4 @@
-﻿#include "../src/cpp_i18n_review.h"
+#include "../src/cpp_i18n_review.h"
 #include "../src/i18n_review.h"
 #include "../src/i18n_string_util.h"
 #include <algorithm>
@@ -22,7 +22,7 @@ TEST_CASE("Articles", "[i18nreview]")
         {
         CHECK(reviewer.is_string_article_issue(L"Find the %d"));
         }
-    SECTION("Modern formattings")
+    SECTION("Modern formatting")
         {
         CHECK(reviewer.is_string_article_issue(L"Find the {0}"));
         }

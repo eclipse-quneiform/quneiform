@@ -254,7 +254,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
             }
         break;
     case 4:
-        variant = node->m_explaination;
+        variant = node->m_explanation;
         break;
     default:
         wxLogError(L"I18NResultsTreeModel::GetValue(): wrong column %ud", col);
@@ -288,7 +288,7 @@ bool I18NResultsTreeModel::SetValue(const wxVariant& variant, const wxDataViewIt
         node->m_column = variant.GetLong();
         return true;
     case 4:
-        node->m_explaination = variant.GetString();
+        node->m_explanation = variant.GetString();
         return true;
     default:
         wxLogError(L"I18NResultsTreeModel::SetValue(): wrong column %ud", col);

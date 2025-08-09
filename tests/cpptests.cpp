@@ -356,7 +356,7 @@ TEST_CASE("Raw Strings", "[cpp][i18n]")
     SECTION("Raw String in Multiple Arguments")
         {
         cpp_i18n_review cpp(false);
-        const wchar_t* code = L"auto var = _DT(LR\"(Hello \"world!\")\", DT::NoExplaination, L\"Some Comment\");";
+        const wchar_t* code = L"auto var = _DT(LR\"(Hello \"world!\")\", DT::NoExplanation, L\"Some Comment\");";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
@@ -390,10 +390,10 @@ TEST_CASE("QLabel", "[cpp][i18n][qt]")
     
     QColor col4(_DT("#2F2F2F"));
 	
-    QString test1 = qApp->translate("SomeContex", "source");
-    QString test2 = QApplication::translate("SomeContex", "source");
-    QString test3 = QApplication::tr("SomeContex", "source");
-    QString test3 = QApplication::trUtf8("SomeContex", "some source");
+    QString test1 = qApp->translate("SomeContext", "source");
+    QString test2 = QApplication::translate("SomeContext", "source");
+    QString test3 = QApplication::tr("SomeContext", "source");
+    QString test3 = QApplication::trUtf8("SomeContext", "some source");
 }
 
 void TestCLass::TestCase2()
@@ -432,13 +432,13 @@ void TestCLass::TestCase2()
     CHECK(cpp.get_internal_strings()[2].m_usage.m_value == std::wstring{ L"col2" });
     CHECK(cpp.get_internal_strings()[3].m_string == std::wstring{ L"black" });
     CHECK(cpp.get_internal_strings()[3].m_usage.m_value == std::wstring{ L"setNamedColor" });
-    CHECK(cpp.get_internal_strings()[4].m_string == std::wstring{ L"SomeContex" });
+    CHECK(cpp.get_internal_strings()[4].m_string == std::wstring{ L"SomeContext" });
     CHECK(cpp.get_internal_strings()[4].m_usage.m_value == std::wstring{ L"translate" });
-    CHECK(cpp.get_internal_strings()[5].m_string == std::wstring{ L"SomeContex" });
+    CHECK(cpp.get_internal_strings()[5].m_string == std::wstring{ L"SomeContext" });
     CHECK(cpp.get_internal_strings()[5].m_usage.m_value == std::wstring{ L"QApplication::translate" });
-    CHECK(cpp.get_internal_strings()[6].m_string == std::wstring{ L"SomeContex" });
+    CHECK(cpp.get_internal_strings()[6].m_string == std::wstring{ L"SomeContext" });
     CHECK(cpp.get_internal_strings()[6].m_usage.m_value == std::wstring{ L"QApplication::tr" });
-    CHECK(cpp.get_internal_strings()[7].m_string == std::wstring{ L"SomeContex" });
+    CHECK(cpp.get_internal_strings()[7].m_string == std::wstring{ L"SomeContext" });
     CHECK(cpp.get_internal_strings()[7].m_usage.m_value == std::wstring{ L"QApplication::trUtf8" });
     }
 
@@ -613,7 +613,7 @@ wxWindowID MENU_ID_NEW = 1000;
 wxWindowID MENU_ID_SAVE = wxID_HIGHEST;)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
-        // same variable name and value assigned, so ignore that (may be intentional assignments in diffence code sections)
+        // same variable name and value assigned, so ignore that (may be intentional assignments in different code sections)
         CHECK(cpp.get_duplicates_value_assigned_to_ids().size() == 0);
         }
 
@@ -2446,7 +2446,7 @@ TEST_CASE("HTML", "[cpp]")
         cpp_i18n_review cpp(false);
         std::wstring str;
         CHECK(cpp.is_untranslatable_string(str = L"<html>", false).first);
-        CHECK(cpp.is_untranslatable_string(str = L"<!--commment>", false).first);
+        CHECK(cpp.is_untranslatable_string(str = L"<!--comment>", false).first);
         CHECK(cpp.is_untranslatable_string(str = L"<SPAN style=", false).first);
         CHECK_FALSE(cpp.is_untranslatable_string(str = L"<HTML>hello", false).first);
         CHECK(cpp.is_untranslatable_string(str = LR"(<HTML = "hello"></html>)", false).first);

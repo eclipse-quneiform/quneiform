@@ -3,7 +3,7 @@
 *Eclipse Quneiform*®
 =============================
 
-<a href="docs/manual/book/quneiform.pdf"><img alt="Manual" src="docs/manual/images/cover-thumnail.png" width="200" align="right"/></a>
+<a href="docs/manual/book/quneiform.pdf"><img alt="Manual" src="docs/manual/images/cover-thumbnail.png" width="200" align="right"/></a>
 
 Internationalization & localization analysis system for C++ code, *gettext* catalogs, and Windows&reg; RC files.
 
@@ -128,10 +128,12 @@ loaded by your application for integration testing.
 [![cppcheck](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml)
 [![CodeQL](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml)
 [![Microsoft C++ Code Analysis](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml)
+[![Quneiform](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml)
 
 [![doxygen](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml)
-[![Check Spelling](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml)
-[![Quneiform](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml)
+[![Check Spelling (codespell)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml)
+[![Spell Check (Typos)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/typos.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/typos.yml)
+[![test-clang-format](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-format-check.yml)
 
 # Usage
 

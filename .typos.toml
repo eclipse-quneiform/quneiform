@@ -4,9 +4,13 @@ wrk = "wrk"
 fo = "fo"
 odf = "odf"
 ODF = "ODF"
-# tags
+PN = "PN"
 # non-English words or odd spellings
 BERKLEY = "BERKLEY"
+FORCAST = "FORCAST"
+Hel = "Hel"
+ist = "ist"
+ommand = "ommand"
 
 [type.svg]
 extend-glob = ["*.svg"]
@@ -14,6 +18,7 @@ check-file = false
 
 [files]
 extend-exclude = ["src/cxxopts/", "src/utfcpp/", "locale/es/quneiform.po",
+                  "tests/stringutiltests.cpp",
                   "installers/windows/messages/messages-de.isl",
                   "installers/windows/messages/messages-fr.isl",
                   "installers/windows/messages/messages-es.isl",

@@ -374,7 +374,7 @@ void I18NFrame::InitControls()
                         node->m_warningId + L'\t' + node->m_issue + L'\t' +
                         std::to_wstring((node->m_line == -1) ? 0 : node->m_line) + L'\t' +
                         std::to_wstring((node->m_column == -1) ? 0 : node->m_column) + L'\t' +
-                        node->m_explaination;
+                        node->m_explanation;
                     if (wxTheClipboard->Open())
                         {
                         if (rowText.length())
@@ -688,7 +688,7 @@ void I18NFrame::InitControls()
                     m_editor->GotoLine((m_editor->GetFirstVisibleLine() < node->m_line) ?
                                            node->m_line :
                                            node->m_line - 1);
-                    m_editor->AnnotationSetText(node->m_line - 1, node->m_explaination);
+                    m_editor->AnnotationSetText(node->m_line - 1, node->m_explanation);
                     m_editor->AnnotationSetStyle(node->m_line - 1, ERROR_ANNOTATION_STYLE);
 
                     // Scintilla doesn't update the scroll width for annotations, even with
@@ -702,7 +702,7 @@ void I18NFrame::InitControls()
                     const int indent = m_editor->GetLineIndentation(node->m_line - 1) + FromDIP(3);
 
                     const int widthAnn = m_editor->TextWidth(
-                        ERROR_ANNOTATION_STYLE, node->m_explaination + wxString(indent, L' '));
+                        ERROR_ANNOTATION_STYLE, node->m_explanation + wxString(indent, L' '));
 
                     if (widthAnn > width)
                         {

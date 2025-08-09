@@ -74,8 +74,8 @@ void StringInfoDlg::OnTextChanged([[maybe_unused]] wxCommandEvent& event)
     wxString msg(wxString::Format(_(L"Length: %zu"), strToReview.length()));
     if (!extAsciiValues.empty())
         {
-        msg.append(L"\n").append(wxString::Format(
-            _(L"Contains extended ASCII characters: Yes (%s)"), extAsciiValues));
+        msg.append(L"\n").append(
+            wxString::Format(_(L"Contains extended ASCII characters: Yes (%s)"), extAsciiValues));
         // show the underlying hex values if not too long
         if (strToReview.length() < 16)
             {

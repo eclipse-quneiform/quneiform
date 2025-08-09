@@ -70,15 +70,15 @@ namespace i18n_check
             const std::wregex tableEntryRE{ LR"("([^\n\r]*))" };
             for (std::pair<size_t, std::wstring> sTab : stringTables)
                 {
-                size_t matchLenghtOffset{ 0 };
+                size_t matchLengthOffset{ 0 };
                 std::wsmatch tabEntryResults;
                 while (std::regex_search(sTab.second, tabEntryResults, tableEntryRE))
                     {
                     tableEntries.emplace_back(sTab.first + tabEntryResults.position(1) +
-                                                  matchLenghtOffset,
+                                                  matchLengthOffset,
                                               tabEntryResults.str(1));
                     sTab.second.erase(0, tabEntryResults.position(1) + tabEntryResults.length(1));
-                    matchLenghtOffset += tabEntryResults.position(1) + tabEntryResults.length(1);
+                    matchLengthOffset += tabEntryResults.position(1) + tabEntryResults.length(1);
                     }
                 }
 

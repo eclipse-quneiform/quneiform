@@ -15,7 +15,7 @@
 
 namespace i18n_check
     {
-    const std::map<wchar_t, wchar_t> pseudo_translater::m_euro_char_map = {
+    const std::map<wchar_t, wchar_t> pseudo_translator::m_euro_char_map = {
         { L'a', L'\u00E0' }, { L'A', L'\u00C0' }, { L'b', L'\u0180' }, { L'B', L'\u0181' },
         { L'c', L'\u00E7' }, { L'C', L'\u00C7' }, { L'd', L'\u010F' }, { L'D', L'\u010E' },
         { L'e', L'\u00EA' }, { L'E', L'\u00CA' }, { L'f', L'\u0192' }, { L'F', L'\u0191' },
@@ -34,7 +34,7 @@ namespace i18n_check
         { L'8', L'\u0223' }, { L'9', L'\u277E' }
     };
 
-    const std::map<wchar_t, wchar_t> pseudo_translater::m_cherokee_char_map = {
+    const std::map<wchar_t, wchar_t> pseudo_translator::m_cherokee_char_map = {
         { L'a', L'\u13F9' }, { L'A', L'\u13AA' }, { L'b', L'\u13CF' }, { L'B', L'\u13F4' },
         { L'c', L'\u13E3' }, { L'C', L'\u13E3' }, { L'd', L'\u13E7' }, { L'D', L'\u13A0' },
         { L'e', L'\u13CB' }, { L'E', L'\u13AC' }, { L'f', L'\u13B8' }, { L'F', L'\u13C5' },
@@ -54,7 +54,7 @@ namespace i18n_check
     };
 
     //------------------------------------------------
-    void pseudo_translater::translate_po_file(std::wstring& poFileText) const
+    void pseudo_translator::translate_po_file(std::wstring& poFileText) const
         {
         if (poFileText.empty())
             {
@@ -96,7 +96,7 @@ namespace i18n_check
             currentPosition += entryPos;
             fileContent = std::wstring_view{ poFileText }.substr(currentPosition);
 
-            int64_t altertedLenthDiff{ 0 };
+            int64_t altertedLengthDiff{ 0 };
 
             // read the main source string
             std::wstring_view msgIdEntry{ entryContent };
@@ -129,7 +129,7 @@ namespace i18n_check
                     // replace main translation it with a pseudo-translation
                     auto mutatedStr{ mutate_message(msgIdContent) };
                     adjustedMainTranslationLength = mutatedStr.length() - msgStrLen;
-                    altertedLenthDiff = mutatedStr.length() - msgStrLen;
+                    altertedLengthDiff = mutatedStr.length() - msgStrLen;
                     poFileText.replace(currentPosition + msgStrPos + msgStrKey.length(), msgStrLen,
                                        std::move(mutatedStr));
                     }
@@ -142,7 +142,7 @@ namespace i18n_check
                     {
                     // ...and replace it with a pseudo-translation
                     auto mutatedStr{ mutate_message(msgIdPluralContent) };
-                    altertedLenthDiff += mutatedStr.length() - msgStrPluralLen;
+                    altertedLengthDiff += mutatedStr.length() - msgStrPluralLen;
                     poFileText.replace(currentPosition + msgStrPluralPos + MSGSTR1.length() +
                                            adjustedMainTranslationLength,
                                        msgStrPluralLen, std::move(mutatedStr));
@@ -150,7 +150,7 @@ namespace i18n_check
                 }
 
             // step to end of catalog entry and look for next one
-            currentPosition += static_cast<size_t>(entryContent.length() + altertedLenthDiff);
+            currentPosition += static_cast<size_t>(entryContent.length() + altertedLengthDiff);
             fileContent = std::wstring_view{ poFileText }.substr(currentPosition);
             std::tie(foundEntry, entryContent, entryPos) =
                 i18n_review::read_po_catalog_entry(fileContent);
@@ -205,7 +205,7 @@ namespace i18n_check
         }
 
     //------------------------------------------------
-    std::wstring pseudo_translater::mutate_message(const std::wstring& msg) const
+    std::wstring pseudo_translator::mutate_message(const std::wstring& msg) const
         {
         if (msg.empty())
             {

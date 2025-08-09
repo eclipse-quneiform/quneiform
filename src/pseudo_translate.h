@@ -50,7 +50,7 @@ namespace i18n_check
         };
 
     /** @brief Class to pseudo-translate a file.*/
-    class pseudo_translater
+    class pseudo_translator
         {
       public:
         /** @brief Pseudo-translates a gettext PO file.

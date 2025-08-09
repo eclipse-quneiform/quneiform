@@ -238,7 +238,7 @@ void NewProjectDialog::UpdatePseudoTransOptions()
     // this event handler to be called in an infinite loop
     if (m_previewTextWindow != nullptr && m_sampleTextWindow != nullptr)
         {
-        i18n_check::pseudo_translater ptrans;
+        i18n_check::pseudo_translator ptrans;
         ptrans.set_pseudo_method(
             static_cast<i18n_check::pseudo_translation_method>(m_pseudoTranslationMethod));
         ptrans.change_width(m_widthPseudoChange);
@@ -945,10 +945,9 @@ void NewProjectDialog::CreateControls()
             gbSizer->Add(buildCodeLabel(L"transInconsistency", poOptionsSizer->GetStaticBox()),
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
-            m_untranslatableNamesList =
-                new wxEditableListBox(poOptionsSizer->GetStaticBox(), wxID_ANY,
-                                      _(L"Untranslatable words and phrases:"),
-                                      wxDefaultPosition, wxSize{ -1, FromDIP(100) });
+            m_untranslatableNamesList = new wxEditableListBox(
+                poOptionsSizer->GetStaticBox(), wxID_ANY, _(L"Untranslatable words and phrases:"),
+                wxDefaultPosition, wxSize{ -1, FromDIP(100) });
             gbSizer->Add(m_untranslatableNamesList, wxGBPosition(currentRow++, 0), wxGBSpan{ 1, 2 },
                          wxLEFT, wxSizerFlags::GetDefaultBorder() * 3);
 

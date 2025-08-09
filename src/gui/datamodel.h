@@ -41,7 +41,7 @@ class I18NResultsTreeModelNode
                              wxString warningId, wxString issue, wxString explanation,
                              const int line, const int column)
         : m_fileName(std::move(fileName)), m_warningId(std::move(warningId)),
-          m_issue(std::move(issue)), m_explaination(std::move(explanation)), m_line(line),
+          m_issue(std::move(issue)), m_explanation(std::move(explanation)), m_line(line),
           m_column(column), m_container(false), m_parent(parent)
         {
         }
@@ -74,8 +74,7 @@ class I18NResultsTreeModelNode
     size_t GetChildCount() const { return m_children.size(); }
 
     [[nodiscard]]
-    bool
-    operator==(const wxString& fileName) const
+    bool operator==(const wxString& fileName) const
         {
         return m_fileName.CmpNoCase(fileName) == 0;
         }
@@ -84,7 +83,7 @@ class I18NResultsTreeModelNode
     wxString m_fileName;
     wxString m_warningId;
     wxString m_issue;
-    wxString m_explaination;
+    wxString m_explanation;
     int m_line{ -1 };
     int m_column{ -1 };
 

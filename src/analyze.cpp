@@ -142,7 +142,7 @@ namespace i18n_check
                 }
         };
 
-        pseudo_translater trans;
+        pseudo_translator trans;
         trans.set_pseudo_method(pseudoMethod);
         trans.add_surrounding_brackets(addSurroundingBrackets);
         trans.change_width(widthChange);

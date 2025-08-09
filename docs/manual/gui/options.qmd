@@ -291,7 +291,7 @@ This is recommended for the quickest way to interactively find UI elements that 
 The translation will be clearly different, but still generally readable.
 
 **Cherokee**: letters and numbers from the source string will be replaced with Cherokee characters.
-(Some numbers will be replaced with full-width numbers when a similiar looking Cherokee character isn't available.)
+(Some numbers will be replaced with full-width numbers when a similar looking Cherokee character isn't available.)
 Like **European**, translations will be clearly different, but somewhat readable.
 ::::
 

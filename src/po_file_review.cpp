@@ -113,7 +113,7 @@ namespace i18n_check
                         formatSpecFound = true;
                         }
                     else if (formatFlag == L"qt-format" || formatFlag == L"qt-plural-format" ||
-                        formatFlag == L"kde-format")
+                             formatFlag == L"kde-format")
                         {
                         pofs = po_format_string::qt_format;
                         formatSpecFound = true;
