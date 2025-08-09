@@ -589,7 +589,7 @@ namespace i18n_check
                 LR"([\s\S]*(\{[[:space:]]*[a-zA-Z\-]+[[:space:]]*[:][[:space:]]*[0-9a-zA-Z\- \(\)\\;\:%#'",]+[[:space:]]*\})+[\s\S]*)"),
             std::wregex(
                 LR"((margin[-](top|bottom|left|right)|text[-]indent)[:][[:space:]]*[[:alnum:]%]+;)"),
-            // single hypenphated word that starts lowercase
+            // single hyphenated word that starts lowercase
             std::wregex(LR"([a-z][a-z0-9_]*\-[a-z0-9_]+(\-[a-z0-9_]+)*)"),
             // JS
             std::wregex(LR"(class[[:space:]]*=[[:space:]]*['"][A-Za-z0-9\- _]*['"])"),
@@ -2735,7 +2735,7 @@ namespace i18n_check
                 }
         };
 
-        /// @todo experimental!!! Reads the variable type from a variable constructed from a string.
+        /// Reads the variable type from a variable constructed from a string.
         const auto readVarType = [&]()
         {
             const auto loadVarType = [&]()
