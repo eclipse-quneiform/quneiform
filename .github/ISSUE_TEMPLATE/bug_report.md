@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
+title: Bug Report
+labels: bug
+assignees: Blake-Madden
 
 ---
 
@@ -32,4 +32,4 @@ If applicable, add screenshots to help explain your problem.
 Add any other context about the problem here.
 
 **NOTE**
-This report will be publicly available. Please do not include sensitive or confidential information in your report.
+This report will be publicly available. Please do not include sensitive or confidential information.
