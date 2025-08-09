@@ -1,12 +1,12 @@
-name: i18n-check
-on: [push]
+name: Quneiform
+on: [push,pull_request]
 
 jobs:
   build:
     name: unix build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
 

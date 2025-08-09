@@ -1,12 +1,12 @@
 name: macOS Unit Tests
-on: [push]
+on: [push,pull_request]
 
 jobs:
   build:
     name: unit-tests
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
       - name: build & run tests

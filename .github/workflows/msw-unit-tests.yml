@@ -1,5 +1,5 @@
 name: Windows Unit Tests
-on: [push]
+on: [push,pull_request]
 
 env:
   testrunner: 'i18nTestRunner'
@@ -10,7 +10,7 @@ jobs:
     name: unit-tests
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
       - name: Add MSBuild to PATH
