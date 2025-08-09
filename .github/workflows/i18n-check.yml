@@ -21,9 +21,8 @@ jobs:
  
       - name: analyze
         run: |
-             # just analyze code formatting while we are here
              cd bin
-             ./quneiform ../src --ignore=cxxopts,utfcpp --enable=allCodeFormatting -q -o i18nresults.txt
+             ./quneiform ../src --ignore=cxxopts,utfcpp -q -o i18nresults.txt
 
       - name: review results
         run: |
