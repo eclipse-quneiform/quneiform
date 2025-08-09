@@ -499,6 +499,8 @@ namespace i18n_check
                       _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of wxUnusedVar.") });
                 m_deprecated_string_functions.insert(
                     { L"WXUNUSED", _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of WXUNUSED().") });
+                m_deprecated_string_functions.insert(
+                    { L"Q_UNUSED", _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of Q_UNUSED().") });
                 }
             m_deprecated_string_functions.insert(
                 { L"wxEXPAND",
