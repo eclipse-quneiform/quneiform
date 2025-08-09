@@ -22,7 +22,7 @@ jobs:
       - name: analyze
         run: |
              cd bin
-             ./quneiform ../src --ignore=cxxopts,utfcpp,src/main.cpp -q -o i18nresults.txt
+             ./quneiform ../src --ignore=cxxopts,utfcpp,main.cpp -q -o i18nresults.txt
 
       - name: review results
         run: |

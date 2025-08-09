@@ -11,6 +11,7 @@ FORCAST = "FORCAST"
 Hel = "Hel"
 ist = "ist"
 ommand = "ommand"
+tring = "tring"
 
 [type.svg]
 extend-glob = ["*.svg"]

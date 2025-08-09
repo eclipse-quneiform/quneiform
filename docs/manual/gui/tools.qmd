@@ -13,7 +13,7 @@ A selection of tools are available for examining and converting text from the **
 ## String Info
 
 The **String Info** dialog provides information about a string.
-This includes information such as string length and which (if any) extended ASCII chararcters it contains.
+This includes information such as string length and which (if any) extended ASCII characters it contains.
 
 ## Convert String
 

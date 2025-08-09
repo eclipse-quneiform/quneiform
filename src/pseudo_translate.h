@@ -80,14 +80,14 @@ namespace i18n_check
             m_width_change = std::clamp<int8_t>(changedWidth, -50, 100);
             }
 
-        /// @brief Adds a unique ID in front of every pseudo-tranlated string.
+        /// @brief Adds a unique ID in front of every pseudo-translated string.
         /// @param enable @c true to enable tracking.
         void enable_tracking(const bool enable) noexcept { m_track = enable; }
 
-        /// @brief If tracking is enabled, then resets the ID incrementer to zero.
+        /// @brief If tracking is enabled, then resets the ID incrementor to zero.
         void reset_tracking() noexcept { m_current_id = 0; }
 
-        /// @brief Psuudo-translates @c msg using the current settings.
+        /// @brief Pseudo-translates @c msg using the current settings.
         /// @param msg The string to pseudo-translate.
         /// @returns The pseudo-translated string.
         std::wstring mutate_message(const std::wstring& msg) const;
