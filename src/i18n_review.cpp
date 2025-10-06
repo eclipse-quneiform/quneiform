@@ -1595,15 +1595,15 @@ namespace i18n_check
                           std::regex_token_iterator<
                               std::remove_reference_t<decltype(string1)>::const_iterator>(),
                           std::back_inserter(idNameParts));
-                const auto idVal = [&string2 = string2]()
+                const auto idVal = [&string_2 = string2]()
                 {
                     try
                         {
-                        if (string2.starts_with(L"0x"))
+                        if (string_2.starts_with(L"0x"))
                             {
-                            return std::optional<int32_t>(std::stol(string2, nullptr, 16));
+                            return std::optional<int32_t>(std::stol(string_2, nullptr, 16));
                             }
-                        return std::optional<int32_t>(std::stol(string2));
+                        return std::optional<int32_t>(std::stol(string_2));
                         }
                     catch (...)
                         {
