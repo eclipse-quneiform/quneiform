@@ -469,7 +469,11 @@ namespace i18n_check
             { L"wxSplitPath",
               _WXTRANS_WSTR(
                   L"wxSplitPath is obsolete, please use wxFileName::SplitPath() instead.") },
-            { L"*wxConvCurrent", _WXTRANS_WSTR(L"Prefer using a wxConvAuto object instead.") }
+            { L"wxConvCurrent", _WXTRANS_WSTR(L"Prefer using a wxConvAuto object instead.") },
+            { L"mb_str()", _WXTRANS_WSTR(L"Relying on wxConvLibc can be unpredictable on some "
+                                         "platforms. Prefer calling utf8_str() instead.") },
+            { L"wxConvLibc", _WXTRANS_WSTR(L"Relying on wxConvLibc can be unpredictable on some "
+                                           "platforms. Prefer calling utf8_str() instead.") }
         };
 
         if (verbose)
