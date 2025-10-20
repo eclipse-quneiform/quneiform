@@ -129,6 +129,7 @@ loaded by your application for integration testing.
 [![CodeQL](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml)
 [![Microsoft C++ Code Analysis](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml)
 [![Quneiform](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml)
+[!clang-tidy]([![clang-tidy](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-tidy.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-tidy.yml))
 
 [![doxygen](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml)
 [![Check Spelling (codespell)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml)
