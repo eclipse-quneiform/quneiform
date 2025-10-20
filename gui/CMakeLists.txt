@@ -135,12 +135,19 @@ add_custom_target(doxygen-docs
 ########################
 include(../cmake/folders.cmake)
 
-set(wxUSE_WEBVIEW_EDGE ON)
-set(wxBUILD_SHARED OFF)
+set(PROJECT_WX_DEBUG_LEVEL 1)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(__WXDEBUG__ 0)
-    set(wxBUILD_OPTIMISE ON)
-    set(wxBUILD_STRIPPED_RELEASE ON)
+    set(PROJECT_WX_DEBUG_LEVEL 0)
+else()
+    set(PROJECT_WX_DEBUG_LEVEL 1)
+endif()
+
+set(wxUSE_WEBVIEW_EDGE ON CACHE BOOL "Use Edge backend for WebView (MSW)" FORCE)
+set(wxBUILD_SHARED OFF CACHE BOOL "Build wxWidgets statically" FORCE)
+set(wxBUILD_DEBUG_LEVEL ${PROJECT_WX_DEBUG_LEVEL} CACHE STRING "wxWidgets runtime debug level" FORCE)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(wxBUILD_OPTIMISE ON CACHE BOOL "Optimize wxWidgets for Release" FORCE)
+    set(wxBUILD_STRIPPED_RELEASE ON CACHE BOOL "Strip symbols from wxWidgets Release builds" FORCE)
 endif()
 find_directory("wxWidgets" wxWidgets_BASEDIR)
 add_subdirectory(${wxWidgets_BASEDIR} ${CMAKE_CURRENT_SOURCE_DIR}/wxWidgets_lib)
@@ -175,6 +182,9 @@ endif()
 # Define the build target for the executable
 message(STATUS "Configuring program...")
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${FILES})
+
+# Define wxDEBUG_LEVEL consistently for all platforms
+target_compile_definitions(${PROJECT_NAME} PUBLIC wxDEBUG_LEVEL=${PROJECT_WX_DEBUG_LEVEL})
 
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE _CRT_SECURE_NO_WARNINGS
