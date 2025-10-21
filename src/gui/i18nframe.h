@@ -103,6 +103,8 @@ class I18NFrame : public wxFrame
         m_editBar->EnableButton(wxID_SELECTALL, enable);
         }
 
+    wxBitmap ReadRibbonSvgIcon(const wxString& path);
+
     void Process();
 
     /// @brief Copies select options (i.e., ignored variable patterns) from a project to

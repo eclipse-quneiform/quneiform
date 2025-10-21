@@ -17,6 +17,18 @@
 wxDECLARE_APP(I18NApp);
 
 //------------------------------------------------------
+wxBitmap I18NFrame::ReadRibbonSvgIcon(const wxString& path)
+    {
+    const auto contentScalingFactor{ GetContentScaleFactor() };
+    const wxSize buttonSize =
+        FromDIP(wxSize{ wxRound(32 * contentScalingFactor), wxRound(32 * contentScalingFactor) });
+    wxBitmap loadedImage{ I18NArtProvider::GetSVG(path).GetBitmap(buttonSize) };
+    wxASSERT_MSG(loadedImage.IsOk(), "Failed to load SVG image.");
+    loadedImage.SetScaleFactor(contentScalingFactor);
+    return loadedImage;
+    }
+
+//------------------------------------------------------
 void I18NFrame::InitControls()
     {
     wxRibbonBar* m_ribbon =
@@ -88,15 +100,11 @@ void I18NFrame::InitControls()
                 wxArtProvider::GetBitmap(wxART_REDO, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
                     .ConvertToImage());
 
-            m_editBar->AddDropdownButton(
-                XRCID("ID_INSERT"), _(L"Insert"),
-                wxArtProvider::GetBitmap(L"ID_INSERT", wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            m_editBar->AddDropdownButton(XRCID("ID_INSERT"), _(L"Insert"),
+                                         ReadRibbonSvgIcon(L"images/insert.svg"));
 
-            m_editBar->AddButton(
-                wxID_SELECTALL, _(L"Select All"),
-                wxArtProvider::GetBitmap(L"ID_SELECT_ALL", wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            m_editBar->AddButton(wxID_SELECTALL, _(L"Select All"),
+                                 ReadRibbonSvgIcon(L"images/select-all.svg"));
 
             EnableEditBar(false);
             }
