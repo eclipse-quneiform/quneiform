@@ -201,6 +201,7 @@ int main(int argc, char* argv[])
     po.review_fuzzy_translations(readBoolOption("fuzzy", false));
 
     i18n_check::info_plist_file_review infoPlist(readBoolOption("verbose", false));
+    i18n_check::quarto_review quartoReview;
 
     // see which checks are being performed
     if (result.count("enable"))
@@ -516,7 +517,7 @@ int main(int argc, char* argv[])
         }
 
     const bool isQuiet{ readBoolOption("quiet", false) };
-    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist);
+    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist, &quartoReview);
     analyzer.analyze(
         filesToAnalyze, [](const size_t) {},
         [&filesToAnalyze, isQuiet](const size_t currentFileIndex, const fs::path& file)
