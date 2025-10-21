@@ -32,7 +32,7 @@ endif()
 set(FILES src/analyze.cpp src/main.cpp src/i18n_string_util.cpp src/i18n_review.cpp src/input.cpp
           src/translation_catalog_review.cpp src/pseudo_translate.cpp
           src/cpp_i18n_review.cpp src/csharp_i18n_review.cpp src/info_plist_review.cpp
-          src/po_file_review.cpp src/rc_file_review.cpp)
+          src/po_file_review.cpp src/rc_file_review.cpp src/quarto_review.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 add_executable(quneiform ${FILES})
