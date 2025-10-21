@@ -5,6 +5,7 @@ Perform all internationalization checks (the default).
 - `suspectL10NString`
 
 Check for translatable strings that should not be (e.g., numbers, keywords, `printf()` commands).
+This will also check for bad formatting in *Quarto* files that make text extraction difficult.
 
 - `suspectL10NUsage`
 

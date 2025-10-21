@@ -499,10 +499,11 @@ void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent&)
     const wxFileName fn{ m_filePath };
     wxFileDialog dialog(this, _(L"Select Files to Analyze"),
                         (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
-                        _(L"All Supported Files|*.cpp;*.c;*.h;*.hpp;*.po;*.pot;*.rc;*.plist|"
+                        _(L"All Supported Files|*.cpp;*.c;*.h;*.hpp;*.po;*.pot;*.rc;*.plist;*.qmd|"
                           "Source Files (*.cpp; *.c; *.h; *.hpp)|*.cpp;*.c;*.h;*.hpp|"
                           "gettext Catalogs (*.po; *.pot)|*.po;*.pot|"
                           "macOS Info.plist (Info.plist)|Info.plist|"
+                          "Quarto Files (*.qmd)|*.qmd|"
                           "Windows Resource Files (*.rc)|*.rc"),
                         wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
     if (dialog.ShowModal() != wxID_OK)
@@ -903,7 +904,7 @@ void NewProjectDialog::CreateControls()
                        wxSizerFlags{}.Border().Left());
 
         generalSettingsPage->SetSizer(mainSizer);
-        listBook->AddPage(generalSettingsPage, _(L"Source Code"),
+        listBook->AddPage(generalSettingsPage, _(L"Source Files"),
                           !(static_cast<bool>(m_extraPages & FilePage)), 1);
         }
 

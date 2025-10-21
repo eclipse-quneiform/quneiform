@@ -26,13 +26,13 @@ class I18NArtProvider final : public wxArtProvider
   public:
     I18NArtProvider();
 
+    [[nodiscard]]
+    static wxBitmapBundle GetSVG(const wxString& path);
+
   protected:
     [[nodiscard]]
     wxBitmapBundle CreateBitmapBundle(const wxArtID& id, const wxArtClient& client,
                                       const wxSize& size) final;
-
-    [[nodiscard]]
-    wxBitmapBundle GetSVG(const wxString& path) const;
 
   private:
     std::map<wxArtID, wxString> m_idFileMap;

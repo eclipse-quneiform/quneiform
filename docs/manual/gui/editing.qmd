@@ -27,7 +27,7 @@ Enter a comment that will explain to the translators what "TABLE" means in this 
 Click `r keys("OK")` and your comment with the comment style that you selected (e.g., "// TRANSLATORS: ") will be inserted in front of the function call.
 
 ::: {.notesection data-latex=""}
-This warning is emitted when the option **Check for ambiguous strings that lack a translator comment** (from the **Source Code** settings) is checked.
+This warning is emitted when the option **Check for ambiguous strings that lack a translator comment** (from the **Source Files** settings) is checked.
 :::
 
 ### Encode Extended ASCII Characters {-}

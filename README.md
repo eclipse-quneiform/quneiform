@@ -23,6 +23,7 @@ Refer to the [manual](docs/manual/book/quneiform.pdf) for full documentation.
 - C++ code ('98 and modern C++)
 - Windows resource files (\*.rc)
 - macOS application Info.plist files
+- *Quarto* documentation files
 
 Static analysis and pseudo-translation are available for:
 
@@ -88,6 +89,7 @@ The command line and GUI versions provide the following checks:
   - Dialogs not using "MS Shell Dlg" or "MS Shell Dlg 2."
   - Dialogs with non-standard font sizes.
 - Info.plist files not including any `CFBundleLocalizations` keys.
+- *Quarto* files having multiple sentences on the same line.
 
 Code formatting and other issues can also be checked for, such as:
 

@@ -221,6 +221,7 @@ namespace i18n_check
         m_plist->clear_results();
         m_po->clear_results();
         m_csharp->clear_results();
+        m_quarto->clear_results();
 
         size_t currentFileIndex{ 0 };
 
@@ -261,6 +262,10 @@ namespace i18n_check
                         {
                         (*m_csharp)(fileUtf8Text, file);
                         }
+                    else if (fileType == file_review_type::quarto)
+                        {
+                        (*m_quarto)(fileUtf8Text, file);
+                        }
                     else
                         {
                         (*m_cpp)(fileUtf8Text, file);
@@ -292,6 +297,10 @@ namespace i18n_check
                     else if (fileType == file_review_type::cs)
                         {
                         (*m_csharp)(fileUtf16Text, file);
+                        }
+                    else if (fileType == file_review_type::quarto)
+                        {
+                        (*m_quarto)(fileUtf16Text, file);
                         }
                     else
                         {
@@ -338,6 +347,10 @@ namespace i18n_check
                     else if (fileType == file_review_type::cs)
                         {
                         (*m_csharp)(str, file);
+                        }
+                    else if (fileType == file_review_type::quarto)
+                        {
+                        (*m_quarto)(str, file);
                         }
                     else
                         {
@@ -565,6 +578,15 @@ namespace i18n_check
                         "an array of strings under it; otherwise, no translations will be loaded "
                         "at runtime.")
                    << L"\"\t[suspectI18NUsage]\n";
+            }
+
+        for (const auto& val : m_quarto->get_multi_sentence_lines())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"Line contains more than one sentence. Consider placing each sentence on "
+                        "its own line to simplify resource extraction.")
+                   << L"\"\t[suspectL10NString]\n";
             }
 
         // gettext catalogs

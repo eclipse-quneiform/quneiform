@@ -258,6 +258,8 @@ namespace i18n_check
         cs,
         /// @brief macOS info.plist manifest files.
         infoplist,
+        /// @brief Quarto files.
+        quarto,
         /// @brief Unknown type.
         unknown
         };
@@ -1287,6 +1289,20 @@ namespace i18n_check
                 {
                 // preserve newlines so that line position calculations work later
                 start[i] = (start[i] == L'\r' || start[i] == L'\n') ? start[i] : L' ';
+                }
+            }
+
+        /// @brief Fills a block with blanks.
+        /// @details Useful for excluding an already processed text block.
+        /// @param str The string to clear.
+        /// @param start The starting position.
+        /// @param end The ending position.
+        void clear_section(std::wstring& str, const size_t start, const size_t end) const noexcept
+            {
+            for (auto i = start; i < end && i < str.length(); ++i)
+                {
+                // preserve newlines so that line position calculations work later
+                str[i] = (str[i] == L'\r' || str[i] == L'\n') ? str[i] : L' ';
                 }
             }
 

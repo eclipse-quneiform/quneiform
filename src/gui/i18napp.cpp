@@ -65,7 +65,7 @@ wxBitmapBundle I18NArtProvider::CreateBitmapBundle(const wxArtID& id, const wxAr
     }
 
 //-------------------------------------------------------
-wxBitmapBundle I18NArtProvider::GetSVG(const wxString& path) const
+wxBitmapBundle I18NArtProvider::GetSVG(const wxString& path)
     {
     const wxString imagePath = [&path]()
     {
@@ -81,9 +81,6 @@ wxBitmapBundle I18NArtProvider::GetSVG(const wxString& path) const
     // load bitmap from disk if a local file
     if (wxFile::Exists(imagePath))
         {
-        wxASSERT_MSG(wxBitmapBundle::FromSVGFile(imagePath, wxSize(16, 16)).IsOk(),
-                     L"Failed to load SVG icon!");
-
         const wxVector<wxBitmap> bmps{
             wxBitmapBundle::FromSVGFile(imagePath, wxSize(16, 16)).GetBitmap(wxSize(16, 16)),
             wxBitmapBundle::FromSVGFile(imagePath, wxSize(32, 32)).GetBitmap(wxSize(32, 32)),

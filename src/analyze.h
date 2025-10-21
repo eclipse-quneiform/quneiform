@@ -24,6 +24,7 @@
 #include "info_plist_review.h"
 #include "po_file_review.h"
 #include "pseudo_translate.h"
+#include "quarto_review.h"
 #include "rc_file_review.h"
 #include "unicode_extract_text.h"
 #include "utfcpp/source/utf8.h"
@@ -57,6 +58,10 @@ namespace i18n_check
         else if (file.extension().compare(std::filesystem::path(L".plist")) == 0)
             {
             return file_review_type::infoplist;
+            }
+        else if (file.extension().compare(std::filesystem::path(L".qmd")) == 0)
+            {
+            return file_review_type::quarto;
             }
         else if (file.extension().compare(std::filesystem::path(L".po")) == 0 ||
                  file.extension().compare(std::filesystem::path(L".pot")) == 0)
@@ -99,11 +104,14 @@ namespace i18n_check
             @param[in,out] rc The Windows RC file analyzer to use.
             @param[in,out] po The PO file analyzer to use.
             @param[in,out] csharp The C# file analyzer to use.
-            @param[in,out] infoPlist The Info.plist file analyzer to use.*/
+            @param[in,out] infoPlist The Info.plist file analyzer to use.
+            @param[in,out] quarto The Quarto file analyzer to use.
+        */
         batch_analyze(i18n_check::cpp_i18n_review* cpp, i18n_check::rc_file_review* rc,
                       i18n_check::po_file_review* po, i18n_check::cpp_i18n_review* csharp,
-                      i18n_check::info_plist_file_review* infoPlist)
-            : m_cpp(cpp), m_rc(rc), m_po(po), m_csharp(csharp), m_plist(infoPlist)
+                      i18n_check::info_plist_file_review* infoPlist,
+                      i18n_check::quarto_review* quarto)
+            : m_cpp(cpp), m_rc(rc), m_po(po), m_csharp(csharp), m_plist(infoPlist), m_quarto(quarto)
             {
             }
 
@@ -180,6 +188,7 @@ namespace i18n_check
         i18n_check::po_file_review* m_po{ nullptr };
         i18n_check::cpp_i18n_review* m_csharp{ nullptr };
         i18n_check::info_plist_file_review* m_plist{ nullptr };
+        i18n_check::quarto_review* m_quarto{ nullptr };
 
         std::vector<std::filesystem::path> m_filesThatShouldBeConvertedToUTF8;
         std::vector<std::filesystem::path> m_filesThatContainUTF8Signature;

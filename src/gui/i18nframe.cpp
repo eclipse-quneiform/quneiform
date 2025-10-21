@@ -1578,8 +1578,9 @@ void I18NFrame::Process()
         }
 
     i18n_check::info_plist_file_review infoPlist(m_activeProjectOptions.m_verbose);
+    i18n_check::quarto_review quartoReview;
 
-    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist);
+    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist, &quartoReview);
 
     if (m_activeProjectOptions.m_pseudoTranslationMethod !=
         i18n_check::pseudo_translation_method::none)

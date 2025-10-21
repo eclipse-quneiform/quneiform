@@ -14,7 +14,7 @@ Folder and file paths being ignored must be absolute or relative to the folder b
 
 {{< pagebreak >}}
 
-## Source Code {#source-code-options}
+## Source Files {#source-files-options}
 
 The following options are available for C/C++ source files.
 

@@ -15,7 +15,7 @@ The [**New Project**](#input-settings) dialog will appear:
 First, select which folder (or file) you wish to analysis.
 If analyzing a folder, you can also optionally select subfolders and files that should be ignored.
 
-Next, select which source code checks to perform from the [**Source Code**](#source-code) page.
+Next, select which source code checks to perform from the [**Source Files**](#source-files-options) page.
 
 ![](../images/options-dialog-source.png){width=60% fig-align="center"}
 
