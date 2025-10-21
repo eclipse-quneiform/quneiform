@@ -1,6 +1,6 @@
 # Building
 
-`Quneiform` requires a C++20 compiler and can be built on Windows, macOS, and Linux.
+*Quneiform* requires a C++20 compiler and can be built on Windows, macOS, and Linux.
 
 *Cmake* scripts are included for building both the command-line and GUI (graphical user interface) versions. *Cmake* 3.25 or higher is required.
 
@@ -10,7 +10,7 @@ For the GUI version, [wxWidgets](https://github.com/wxWidgets/wxWidgets) 3.3 or 
 
 ## Command-line Utility
 
-`Quneiform` can be configured and built with *Cmake*.
+*Quneiform* can be configured and built with *Cmake*.
 
 On Unix:
 

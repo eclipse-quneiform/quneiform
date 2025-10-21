@@ -1,6 +1,6 @@
 # Options
 
-`Quneiform` accepts the following arguments:
+*Quneiform* accepts the following arguments:
 
 ## [input] {-}
 
@@ -14,7 +14,8 @@ The following checks can be toggled via the `--enable` argument.
 
 ## \-\-disable {-}
 
-Which checks to not perform. (Refer to options available above.)
+Which checks to not perform.
+(Refer to options available above.)
 This will override any options passed to `--enable`.
 
 ## \-\-log-l10n-allowed {-}

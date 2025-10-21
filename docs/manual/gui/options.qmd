@@ -134,7 +134,8 @@ A string will be considered ambiguous if:
 - A single word in all caps.
 - A single word with multiple punctuation marks embedded in it.
 - It contains placeholder text (e.g., "###").
-- It contains more than one abbreviation. (Abbreviations should be avoided, or at least the full words should be shown in a translator comment.)
+- It contains more than one abbreviation. \
+  (Abbreviations should be avoided, or at least the full words should be shown in a translator comment.)
 - A short string with a `printf` or positional argument (e.g., "%2").
 - A longer string with multiple `printf` or positional arguments.
 
@@ -148,7 +149,7 @@ It is assumed that the label in front of the colon serves as a description for t
 This will detect the usage of functions that are no longer relevant, and provide a suggested replacement.
 
 For example, the `TCHAR` functions and macros used in Win32 programming (e.g., `_TEXT`, `_tcscmp`) to help target Windows 98 and NT are no longer necessary.
-`Quneiform` will recommend how to remove or replace these.
+*Quneiform* will recommend how to remove or replace these.
 
 **printf functions being used to just format a number**: select this to check for `printf()`-like functions being used to just format a number.
 In these situations, it is recommended to use the more modern `std::to_[w]string()` function.
@@ -257,8 +258,8 @@ Setting this to 0% will instruct the program to warn if any translation exceeds 
 This is useful for legacy software where resource-loading routines are using the source strings' hardcoded lengths.
 :::
 
-**Review fuzzy translations**: select this to review fuzzy translations. This should only be selected if you intend to review translations
-that still require approval and are likely unfinished.
+**Review fuzzy translations**: select this to review fuzzy translations.
+This should only be selected if you intend to review translations that still require approval and are likely unfinished.
 ::::
 
 :::: {.optionssection data-latex=""}

@@ -63,7 +63,8 @@ In the above example, the "{}" placeholder is probably being used in multiple co
 The issue with this is that many languages have multiple articles that change based on the noun they relate to [@{celek:2019}21].
 In the case of German, translating "the" as "die," "der," or "das" is bound to be incorrect for some of the instances where this string is used.
 
-This can even be an issue for English. For example, with this resource:
+This can even be an issue for English.
+For example, with this resource:
 
 "A %s is required"
 
@@ -115,7 +116,9 @@ As an example:
 
 "%zu item(s)"
 
-Here a number is being formatted into this message at runtime. It is better to pass singular and plural variations to a pluralizing function instead. For example:
+Here a number is being formatted into this message at runtime.
+It is better to pass singular and plural variations to a pluralizing function instead.
+For example:
 
 ```{Rcpp}
 #| include: true

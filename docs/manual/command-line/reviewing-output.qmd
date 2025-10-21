@@ -6,7 +6,8 @@ After building, go into the "bin" folder and run this command to analyze the sam
 $ quneiform ../samples -o results.txt
 ```
 
-This will produce a "results.txt" file in the "bin" folder which contains tabular results. This file will contain warnings such as:
+This will produce a "results.txt" file in the "bin" folder which contains tabular results.
+This file will contain warnings such as:
 
 - `suspectL10NString`: indicates that the string "*GreaterThanOrEqualTo*" is inside of a `_()` macro, making it available for translation.
 This does not appear to be something appropriate for translation; hence the warning.
@@ -36,7 +37,7 @@ To look for all issues except for deprecated macros:
 $ quneiform ../samples --disable=deprecatedMacros
 ```
 
-By default, `Quneiform` will assume that messages inside of various exceptions should be translatable.
+By default, *Quneiform* will assume that messages inside of various exceptions should be translatable.
 If these messages are not exposed for localization, then a warning will be issued.
 
 To consider exception messages as internal (and suppress warnings about their messages not being localizable) do the following:
@@ -45,7 +46,7 @@ To consider exception messages as internal (and suppress warnings about their me
 $ quneiform ../samples --exceptions-l10n-required=false
 ```
 
-Similarity, `Quneiform` will also consider messages inside of various logging functions to be allowable for translation.
+Similarity, *Quneiform* will also consider messages inside of various logging functions to be allowable for translation.
 The difference is that it will not warn if a message is not exposed for translation.
 This is because log messages can serve a dual role of user-facing messages and internal messages meant for developers.
 

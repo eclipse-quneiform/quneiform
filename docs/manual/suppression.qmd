@@ -15,15 +15,15 @@ if (_debug && allocFailed)
 This will prevent a warning from being emitted about "Allocation failed" not being available for localization.
 
 ::: {.warningsection data-latex=""}
-The comment style of the begin and end tags must match. For example, if using multi-line comments
-(i.e., `/**/`), then both tags must be inside of `/**/` blocks.
+The comment style of the begin and end tags must match.
+For example, if using multi-line comments (i.e., `/**/`), then both tags must be inside of `/**/` blocks.
 :::
 
 ## Individual Strings
 
 To instruct the program that a particular string is not meant for localization, wrap it inside of a `_DT()` or `DONTTRANSLATE()` function call.
-By doing this, the program will not warn about it not being available for localization. For example, both strings in the following will
-be ignored:
+By doing this, the program will not warn about it not being available for localization.
+For example, both strings in the following will be ignored:
 
 ``` {.cpp}
 if (allocFailed)
@@ -41,8 +41,8 @@ You can either include the file "donttranslate.h" (included with *Quneiform*) in
 
 {{< pagebreak >}}
 
-If using the versions provided in "donttranslate.h," additional arguments can be included to explain why strings should not
-be available for translation. For example:
+If using the versions provided in "donttranslate.h," additional arguments can be included to explain why strings should not be available for translation.
+For example:
 
 ``` {.cpp}
 const std::string fileName = "C:\\data\\logreport.txt";
@@ -68,6 +68,6 @@ auto command = _DT("open ") + fileName;
 ```
 
 ::: {.notesection data-latex=""}
-`_DT()` and `DONTTRANSLATE()` do not have any effect on the code and would normally be compiled out. Their purpose is only to inform `Quneiform`
-that their arguments should not be translatable.
+`_DT()` and `DONTTRANSLATE()` do not have any effect on the code and would normally be compiled out.
+Their purpose is only to inform *Quneiform* that their arguments should not be translatable.
 :::

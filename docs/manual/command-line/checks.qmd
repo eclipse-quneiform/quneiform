@@ -79,7 +79,7 @@ This will detect the usage of functions that are no longer relevant, and provide
 
 For example, the `TCHAR` functions and macros [@win32-strings; @win32-strings-guide] used in Win32 programming
 (e.g., `_TEXT`, `_tcscmp`) to help target Windows 98 and NT are no longer necessary.
-`Quneiform` will recommend how to remove or replace these.
+*Quneiform* will recommend how to remove or replace these.
 
 - `nonUTF8File`
 
@@ -151,7 +151,8 @@ This is performed on *gettext* \*.po files and will analyze format strings for t
 
 ::: {.warningsection data-latex=""}
 The checks performed here are strict; all `printf()` commands in translations must match
-their source counterpart exactly. For example, "*%lu*" vs. "*%l*" will emit a warning.
+their source counterpart exactly.
+For example, "*%lu*" vs. "*%l*" will emit a warning.
 Questionable commands such as "*% s*" (space is only meant for numeric formatting) will also emit a warning.
 :::
 

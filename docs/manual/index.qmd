@@ -11,13 +11,12 @@ This book is licensed under the [Creative Commons Attribution-Sharealike 4.0 Int
 
 # Overview
 
-`Quneiform` is a command-line utility and graphical user interface that scans source and resource files to check for
-various i18n and l10n issues. Additionally, the GUI version provides pseudo-translation support for
-*gettext* catalogs (\*.po files).
+*Quneiform* is a command-line utility and graphical user interface that scans source and resource files to check for various i18n and l10n issues.
+Additionally, the GUI version provides pseudo-translation support for *gettext* catalogs (\*.po files).
 
 ## File Support
 
-`Quneiform` supports static analysis for the following:
+*Quneiform* supports static analysis for the following:
 
 - C code
 - C++ code ('98 and modern C++)
@@ -44,7 +43,8 @@ Additionally, it offers specialized support for the following frameworks:
 
 The command line and GUI versions provide the following checks:
 
-- Strings exposed for translation[^1] that probably should not be. This includes (but not limited to):
+- Strings exposed for translation[^1] that probably should not be.
+  This includes (but not limited to):
   - Filenames
   - Strings only containing `printf()` commands
   - Numbers
@@ -103,9 +103,12 @@ Code formatting and other issues can also be checked for, such as:
 Pseudo-translation includes features such as:
 
 - Multiple methods for character replacement (e.g., replacing characters with accented variations or upper casing them).
-- Increasing the width of the translations. This is useful for ensuring that strings are not being truncated at runtime.
-- Wrapping the translations in braces. This is useful for ensuring that strings are not being pieced together at runtime.
-- Appending a unique ID to each translation. This is useful for finding where a translation is being loaded from.
+- Increasing the width of the translations. \
+  This is useful for ensuring that strings are not being truncated at runtime.
+- Wrapping the translations in braces. \
+  This is useful for ensuring that strings are not being pieced together at runtime.
+- Appending a unique ID to each translation. \
+  This is useful for finding where a translation is being loaded from.
 
 When pseudo-translating, a copy of all string catalogs will be created and have their translations filled
 with mutations of their respective source strings.
