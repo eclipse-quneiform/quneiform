@@ -81,6 +81,7 @@ The command line and GUI versions provide the following checks:
   - Dialogs with non-standard font sizes.
 - Info.plist files not including any `CFBundleLocalizations` keys.
 - *Quarto* files having multiple sentences on the same line.
+- *Quarto* files having sentences split across multiple lines.
 
 Code formatting and other issues can also be checked for, such as:
 

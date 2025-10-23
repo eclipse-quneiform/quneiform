@@ -21,6 +21,8 @@ namespace i18n_check
         m_file_name = fileName;
         m_file_start = nullptr;
 
+        clear_results();
+
         if (srcText.empty())
             {
             return;
@@ -95,6 +97,43 @@ namespace i18n_check
                 m_sentencesOnSameLine.emplace_back(
                     mlEntry.second.length() > 32 ? mlEntry.second.substr(0, 29) + _DT(L"...") :
                                                    mlEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
+
+        std::wregex splitLineSentenceRE(LR"(([A-Za-z]+)\r?\n([A-Za-z])([A-Za-z]| ))",
+                                        std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_l10n_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> splitSentenceEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, splitLineSentenceRE))
+                {
+                currentBlockOffset += stPositions.position();
+                currentTextBlock = currentTextBlock.substr(stPositions.position());
+
+                splitSentenceEntries.emplace_back(
+                    currentBlockOffset,
+                    currentTextBlock.substr(0, stPositions.position() + stPositions.length()));
+
+                currentBlockOffset += stPositions.length();
+
+                currentTextBlock = currentTextBlock.substr(stPositions.length());
+                }
+
+            for (const auto& ssEntry : splitSentenceEntries)
+                {
+                const auto filePos = get_line_and_column(ssEntry.first, filteredContent);
+                m_sentencesSplitOnDifferentLines.emplace_back(
+                    ssEntry.second.length() > 32 ? ssEntry.second.substr(0, 29) + _DT(L"...") :
+                                                   ssEntry.second,
                     string_info::usage_info(string_info::usage_info::usage_type::orphan,
                                             std::wstring{}, std::wstring{}, std::wstring{}),
                     m_file_name, filePos);

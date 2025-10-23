@@ -48,15 +48,24 @@ namespace i18n_check
             return m_sentencesOnSameLine;
             }
 
+        /// @returns Lines where a sentence is split into multiple lines.
+        [[nodiscard]]
+        const std::vector<string_info>& get_multi_line_sentences() const noexcept
+            {
+            return m_sentencesSplitOnDifferentLines;
+            }
+
         /// @brief Clears the results.
         void clear_results() final
             {
             i18n_review::clear_results();
             m_sentencesOnSameLine.clear();
+            m_sentencesSplitOnDifferentLines.clear();
             }
 
       private:
         std::vector<string_info> m_sentencesOnSameLine;
+        std::vector<string_info> m_sentencesSplitOnDifferentLines;
         };
 
     } // namespace i18n_check
