@@ -21,8 +21,6 @@ namespace i18n_check
         m_file_name = fileName;
         m_file_start = nullptr;
 
-        clear_results();
-
         if (srcText.empty())
             {
             return;
