@@ -150,6 +150,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(wxBUILD_STRIPPED_RELEASE ON CACHE BOOL "Strip symbols from wxWidgets Release builds" FORCE)
 endif()
 find_directory("wxWidgets" wxWidgets_BASEDIR)
+if(NOT EXISTS "${wxWidgets_BASEDIR}")
+    message(FATAL_ERROR "wxWidgets base directory not found: ${wxWidgets_BASEDIR}")
+endif()
 add_subdirectory(${wxWidgets_BASEDIR} ${CMAKE_CURRENT_SOURCE_DIR}/wxWidgets_lib)
 set(wxWidgets_LIBRARIES wx::core wx::base wx::xrc wx::propgrid wx::xml wx::aui wx::ribbon wx::qa wx::stc wx::net wx::richtext)
 message(STATUS "Adding wxWidgets libraries: ${wxWidgets_LIBRARIES}")
@@ -189,19 +192,23 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC wxDEBUG_LEVEL=${PROJECT_WX_DEB
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE _CRT_SECURE_NO_WARNINGS
     $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
-    target_compile_options(${PROJECT_NAME} PUBLIC /Zc:__cplusplus /MP /W3 /WX /wd6211
+    target_compile_options(${PROJECT_NAME} PUBLIC /Zc:__cplusplus /MP /W3 /WX /wd6211 /permissive- /sdl
                             $<$<CONFIG:Debug>:/Od>
                             $<$<CONFIG:Release>:/O2>)
 elseif(MINGW OR MSYS)
     target_compile_definitions(${PROJECT_NAME} PUBLIC __WXMSW__ _UNICODE _CRT_SECURE_NO_WARNINGS
             $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
     target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic -Wshadow -Werror
+                           $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fstack-protector-strong>
+                           $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-D_FORTIFY_SOURCE=2>
                            $<$<CONFIG:Debug>:-Og>
                            $<$<CONFIG:Release>:-O2>)
 elseif(APPLE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC __WXOSX__
         $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
     target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic -Wshadow -Werror
+                           $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fstack-protector-strong>
+                           $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-D_FORTIFY_SOURCE=2>
                            $<$<CONFIG:Debug>:-Og>
                            $<$<CONFIG:Release>:-O2>)
 elseif(UNIX)
@@ -209,8 +216,12 @@ elseif(UNIX)
     target_compile_definitions(${PROJECT_NAME} PUBLIC __WXGTK__
         $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
     target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic -Wshadow -Werror
+                           $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fstack-protector-strong>
+                           $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-D_FORTIFY_SOURCE=2>
                            $<$<CONFIG:Debug>:-Og -g3>
                            $<$<CONFIG:Release>:-O2>)
+    target_link_options(${PROJECT_NAME} PUBLIC
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wl,-z,relro,-z,now>)
 endif()
 
 # Link required libraries to the executable
