@@ -591,11 +591,12 @@ namespace i18n_check
 
         for (const auto& val : m_quarto->get_multi_line_sentences())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"Sentence is split across multiple lines. Consider placing each sentence on "
-                        "its own line to simplify resource extraction.")
-                   << L"\"\t[suspectL10NString]\n";
+            report
+                << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
+                << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                << _(L"Sentence is split across multiple lines. Consider placing each sentence on "
+                     "its own line to simplify resource extraction.")
+                << L"\"\t[suspectL10NString]\n";
             }
 
         // gettext catalogs
