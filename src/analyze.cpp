@@ -599,6 +599,15 @@ namespace i18n_check
                 << L"\"\t[suspectL10NString]\n";
             }
 
+        for (const auto& val : m_quarto->get_malformed_content())
+            {
+            report
+                << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
+                << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                << _(L"Shortcodes should have a blank line between them and any following content.")
+                << L"\"\t[malformedString]\n";
+            }
+
         // gettext catalogs
         for (const auto& catEntry : m_po->get_catalog_entries())
             {

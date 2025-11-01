@@ -54,6 +54,13 @@ namespace i18n_check
             {
             return m_sentencesSplitOnDifferentLines;
             }
+        
+        /// @returns Malformed Quarto content.
+        [[nodiscard]]
+        const std::vector<string_info>& get_malformed_content() const noexcept
+            {
+            return m_malformedContent;
+            }
 
         /// @brief Clears the results.
         void clear_results() final
@@ -61,11 +68,13 @@ namespace i18n_check
             i18n_review::clear_results();
             m_sentencesOnSameLine.clear();
             m_sentencesSplitOnDifferentLines.clear();
+            m_malformedContent.clear();
             }
 
       private:
         std::vector<string_info> m_sentencesOnSameLine;
         std::vector<string_info> m_sentencesSplitOnDifferentLines;
+        std::vector<string_info> m_malformedContent;
         };
 
     } // namespace i18n_check

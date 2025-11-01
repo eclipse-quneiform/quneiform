@@ -84,7 +84,7 @@ namespace i18n_check
                     {
                     multiSentenceEntries.emplace_back(
                         currentBlockOffset,
-                        currentTextBlock.substr(0, stPositions.position() + stPositions.length()));
+                        currentTextBlock.substr(stPositions.position(), stPositions.length()));
                     }
 
                 currentBlockOffset += stPositions.length();
@@ -119,15 +119,15 @@ namespace i18n_check
                                      stPositions, splitLineSentenceRE))
                 {
                 currentBlockOffset += stPositions.position();
-                currentTextBlock = currentTextBlock.substr(stPositions.position());
 
                 splitSentenceEntries.emplace_back(
                     currentBlockOffset,
-                    currentTextBlock.substr(0, stPositions.position() + stPositions.length()));
+                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
 
                 currentBlockOffset += stPositions.length();
 
-                currentTextBlock = currentTextBlock.substr(stPositions.length());
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position()  + stPositions.length());
                 }
 
             for (const auto& ssEntry : splitSentenceEntries)
@@ -136,6 +136,43 @@ namespace i18n_check
                 m_sentencesSplitOnDifferentLines.emplace_back(
                     ssEntry.second.length() > 32 ? ssEntry.second.substr(0, 29) + _DT(L"...") :
                                                    ssEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
+
+        std::wregex malformedContentRE(
+            LR"((\{\{\s*[<%][^}\r\n]*[>%]\s*\}\})(?=\r?\n(?!$)[^\S\r\n]*\S))",
+            std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> malformedEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, malformedContentRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                malformedEntries.emplace_back(
+                    currentBlockOffset,
+                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
+
+                currentBlockOffset += stPositions.length();
+
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
+                }
+
+            for (const auto& mcEntry : malformedEntries)
+                {
+                const auto filePos = get_line_and_column(mcEntry.first, filteredContent);
+                m_malformedContent.emplace_back(
+                    mcEntry.second,
                     string_info::usage_info(string_info::usage_info::usage_type::orphan,
                                             std::wstring{}, std::wstring{}, std::wstring{}),
                     m_file_name, filePos);

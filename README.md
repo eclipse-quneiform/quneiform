@@ -89,8 +89,10 @@ The command line and GUI versions provide the following checks:
   - Dialogs not using "MS Shell Dlg" or "MS Shell Dlg 2."
   - Dialogs with non-standard font sizes.
 - Info.plist files not including any `CFBundleLocalizations` keys.
-- *Quarto* files having multiple sentences on the same line.
-- *Quarto* files having sentences split across multiple lines.
+- *Quarto* files containing:
+  - Multiple sentences on the same line.
+  - Sentences split across multiple lines.
+  - Malformed shortcodes.
 
 Code formatting and other issues can also be checked for, such as:
 
