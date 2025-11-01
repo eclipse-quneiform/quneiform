@@ -45,21 +45,25 @@ namespace i18n_check
         std::wregex multiSentenceLineRE(
             LR"(([A-Za-zÀ-ÖØ-öø-ÿ]+(?:\.[A-Za-zÀ-ÖØ-öø-ÿ]+)*\.)[”’"'»)\]]*[ \t]+[“"'(]*[A-ZÀ-ÖØ-Þ0-9])",
             std::regex_constants::ECMAScript);
-        std::wregex abbrevRE(L"\\b(?:(?:"
-                             // English
-                             "(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Mt|vs|etc|e\\.g|i\\.e|Jan|Feb|Mar|Apr|"
-                             "Jun|Jul|Aug|Sep|Oct|Nov|Dec|a\\.m|p\\.m)"
-                             "|"
-                             // French
-                             "(?:Mme|Mlle|M\\.|p\\.ex|c\\.à\\.d|env|av|apr|approx|No|n°|vol|ch)"
-                             "|"
-                             // Spanish
-                             "(?:Sr|Sra|Srta|Ud|Uds|Dña|p\\.ej|etc)"
-                             "|"
-                             // German
-                             "(?:Hr|Fr|Dr|Prof|bzw|z\\.B|u\\.a|usw|ca)"
-                             ")\\.)",
-                             std::regex_constants::ECMAScript | std::regex_constants::icase);
+        std::wregex abbrevRE(
+            L"\\b(?:(?:"
+            // Country / organization abbreviations
+            "(?:U\\.S\\.A|U\\.S|U\\.K|E\\.U|U\\.N|N\\.A\\.T\\.O|F\\.B\\.I|C\\.I\\.A|A\\.T\\.M)"
+            "|"
+            // English
+            "(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|Mt|vs|etc|e\\.g|i\\.e|Jan|Feb|Mar|Apr|"
+            "Jun|Jul|Aug|Sep|Oct|Nov|Dec|a\\.m|p\\.m)"
+            "|"
+            // French
+            "(?:Mme|Mlle|M\\.|p\\.ex|c\\.à\\.d|env|av|apr|approx|No|n°|vol|ch)"
+            "|"
+            // Spanish
+            "(?:Sr|Sra|Srta|Ud|Uds|Dña|p\\.ej|etc)"
+            "|"
+            // German
+            "(?:Hr|Fr|Dr|Prof|bzw|z\\.B|u\\.a|usw|ca)"
+            ")\\.)",
+            std::regex_constants::ECMAScript | std::regex_constants::icase);
 
         if ((get_style() & check_l10n_strings) != 0U)
             {
@@ -72,9 +76,8 @@ namespace i18n_check
                                      stPositions, multiSentenceLineRE))
                 {
                 currentBlockOffset += stPositions.position();
-                currentTextBlock = currentTextBlock.substr(stPositions.position());
 
-                const auto lastWord = (stPositions.size() > 1) ? stPositions[1].str() : L"";
+                const std::wstring lastWord = (stPositions.size() > 1) ? stPositions[1].str() : L"";
 
                 // flag if not an abbreviation, meaning that this is really the end of a sentence
                 if (!std::regex_match(lastWord, abbrevRE))
@@ -86,7 +89,8 @@ namespace i18n_check
 
                 currentBlockOffset += stPositions.length();
 
-                currentTextBlock = currentTextBlock.substr(stPositions.length());
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
                 }
 
             for (const auto& mlEntry : multiSentenceEntries)
