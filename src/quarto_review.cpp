@@ -42,6 +42,36 @@ namespace i18n_check
             startPos = filteredContent.find(L"```", endPos);
             }
 
+        // remove suppression blocks
+        const std::wregex suppressBegin(L"<!--\\s*quneiform-suppress-begin!\\s*-->",
+                                        std::regex_constants::ECMAScript);
+        const std::wregex suppressEnd(L"<!--\\s*quneiform-suppress-end!\\s*-->",
+                                      std::regex_constants::ECMAScript);
+
+        std::size_t searchFrom{ 0 };
+        std::wsmatch matchBegin, matchEnd;
+        while (std::regex_search(filteredContent.cbegin() + searchFrom, filteredContent.cend(),
+                                 matchBegin, suppressBegin))
+            {
+            const std::size_t begin_start =
+                searchFrom + static_cast<std::size_t>(matchBegin.position(0));
+            const std::size_t begin_end =
+                begin_start + static_cast<std::size_t>(matchBegin.length(0));
+
+            if (!std::regex_search(filteredContent.cbegin() + begin_end, filteredContent.cend(),
+                                   matchEnd, suppressEnd))
+                {
+                break;
+                }
+
+            const std::size_t endStart = begin_end + static_cast<std::size_t>(matchEnd.position(0));
+            const std::size_t endEnd = endStart + static_cast<std::size_t>(matchEnd.length(0));
+
+            clear_section(filteredContent, begin_start, endEnd);
+
+            searchFrom = begin_start;
+            }
+
         std::wregex multiSentenceLineRE(
             LR"(([A-Za-zÀ-ÖØ-öø-ÿ]{2,}(?:\.[A-Za-zÀ-ÖØ-öø-ÿ]+)*\.)[”’"'»)\]]*[ \t]+[“"'(]*[A-ZÀ-ÖØ-Þ0-9])",
             std::regex_constants::ECMAScript);
