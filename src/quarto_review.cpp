@@ -127,7 +127,7 @@ namespace i18n_check
                 currentBlockOffset += stPositions.length();
 
                 currentTextBlock =
-                    currentTextBlock.substr(stPositions.position()  + stPositions.length());
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
                 }
 
             for (const auto& ssEntry : splitSentenceEntries)
@@ -143,7 +143,7 @@ namespace i18n_check
             }
 
         std::wregex malformedContentRE(
-            LR"((\{\{\s*[<%][^}\r\n]*[>%]\s*\}\})(?=\r?\n(?!$)[^\S\r\n]*\S))",
+            LR"((\{\{\s*[<%]\s*(?:pagebreak|include|video|embed|placeholder|lipsum)\b[^}\r\n]*[>%]\s*\}\})(?=\r?\n(?!$)[^\S\r\n]*\S))",
             std::regex_constants::ECMAScript);
 
         if ((get_style() & check_malformed_strings) != 0U)
