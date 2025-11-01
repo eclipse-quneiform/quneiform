@@ -43,7 +43,7 @@ namespace i18n_check
             }
 
         std::wregex multiSentenceLineRE(
-            LR"(([A-Za-zÀ-ÖØ-öø-ÿ]+(?:\.[A-Za-zÀ-ÖØ-öø-ÿ]+)*\.)[”’"'»)\]]*[ \t]+[“"'(]*[A-ZÀ-ÖØ-Þ0-9])",
+            LR"(([A-Za-zÀ-ÖØ-öø-ÿ]{2,}(?:\.[A-Za-zÀ-ÖØ-öø-ÿ]+)*\.)[”’"'»)\]]*[ \t]+[“"'(]*[A-ZÀ-ÖØ-Þ0-9])",
             std::regex_constants::ECMAScript);
         std::wregex abbrevRE(
             L"\\b(?:(?:"
