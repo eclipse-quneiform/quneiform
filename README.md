@@ -122,24 +122,33 @@ When pseudo-translating, a copy of all *gettext* \*.po and \*.pot files will be 
 with mutations of the respective source strings. These files (which will have a "pseudo_" prefix) can then be compiled into \*.mo files and
 loaded by your application for integration testing.
 
-[![Linux Build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/linux-build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/linux-build.yml)
-[![macOS build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macOS%20build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macOS%20build.yml)
-[![Windows build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-build.yml)
+| Platforms     | Result        |
+| ------------- | ------------- |
+| Linux    | [![Linux Build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/linux-build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/linux-build.yml) |
+| macOS    | [![macOS build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macOS%20build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macOS%20build.yml) |
+| Windows  | [![Windows build](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-build.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-build.yml) |
 
-[![unit-tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/unit-tests.yml)
-[![macOS unit tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macos-unit-test.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macos-unit-test.yml)
-[![Windows unit tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-unit-tests.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-unit-tests.yml)
+| Unit Tests    | Result        |
+| ------------- | ------------- |
+| Linux    | [![unit-tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/unit-tests.yml) |
+| macOS    | [![macOS unit tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macos-unit-test.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/macos-unit-test.yml) |
+| Windows  | [![Windows unit tests](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-unit-tests.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msw-unit-tests.yml) |
 
-[![cppcheck](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml)
-[![CodeQL](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml)
-[![Microsoft C++ Code Analysis](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml)
-[![Quneiform](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml)
-[!clang-tidy]([![clang-tidy](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-tidy.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-tidy.yml))
+| Code Analyses | Result        |
+| ------------- | ------------- |
+| cppcheck   | [![cppcheck](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/cppcheck.yml) |
+| CodeQL     | [![CodeQL](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/codeql.yml) |
+| MS PREfast | [![Microsoft C++ Code Analysis](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/msvc.yml) |
+| Quneiform  | [![Quneiform](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/i18n-check.yml) |
+| clang-tidy | [![clang-tidy](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-tidy.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-tidy.yml) |
 
-[![doxygen](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml)
-[![Check Spelling (codespell)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml)
-[![Spell Check (Typos)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/typos.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/typos.yml)
-[![test-clang-format](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-format-check.yml)
+
+| Documentation & Formatting | Result   |
+| --------------------  | ------------- |
+| Doxygen | [![doxygen](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/doxygen.yml) |
+| Spellcheck | [![Check Spelling (codespell)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/spell-check.yml) |
+| Typos | [![Spell Check (Typos)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/typos.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/typos.yml) |
+| clang-format | [![test-clang-format](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/eclipse-quneiform/quneiform/actions/workflows/clang-format-check.yml) |
 
 # Usage
 
