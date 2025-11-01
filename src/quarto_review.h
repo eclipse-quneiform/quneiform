@@ -54,7 +54,7 @@ namespace i18n_check
             {
             return m_sentencesSplitOnDifferentLines;
             }
-        
+
         /// @returns Malformed Quarto content.
         [[nodiscard]]
         const std::vector<string_info>& get_malformed_content() const noexcept
