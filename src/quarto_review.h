@@ -61,7 +61,7 @@ namespace i18n_check
             {
             return m_malformedContent;
             }
-        
+
         /// @returns Smart quotes in Quarto content.
         [[nodiscard]]
         const std::vector<string_info>& get_smart_quotes() const noexcept
