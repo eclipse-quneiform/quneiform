@@ -26,6 +26,7 @@ InsertWarningSuppressionDlg::InsertWarningSuppressionDlg(
 
     m_suppressionTags.Add(_DT(L"Quneiform (C/C++)"));
     m_suppressionTags.Add(_DT(L"Quneiform (Markdown/Quarto)"));
+    m_suppressionTags.Add(_DT(L"md2po (translate-off/on)"));
     m_suppressionTags.Add(_DT(L"Clang-format"));
     // last two options are expected to use the warning text window,
     // and last one should be Cpp-check
@@ -124,10 +125,15 @@ wxString InsertWarningSuppressionDlg::GetFormattedOutput()
         }
     if (m_selectedTag == 2)
         {
+        return _DT(L"<!-- translate:off -->\n") + padding + m_stringToFormat + "\n" +
+               padding + _DT(L"<!-- translate:on -->");
+        }
+    if (m_selectedTag == 3)
+        {
         return _DT(L"// clang-format off\n") + padding + m_stringToFormat + "\n" + padding +
                _DT(L"// clang-format on");
         }
-    if (m_selectedTag == 3)
+    if (m_selectedTag == 4)
         {
         return (m_warnings.empty() ?
                     _DT(L"// NOLINTBEGIN\n") + padding + m_stringToFormat + "\n" + padding +
@@ -135,7 +141,7 @@ wxString InsertWarningSuppressionDlg::GetFormattedOutput()
                     wxString::Format(_DT(L"// NOLINTBEGIN(%s)\n"), m_warnings) + padding +
                         m_stringToFormat + "\n" + padding + _DT(L"// NOLINTEND"));
         }
-    if (m_selectedTag == 4)
+    if (m_selectedTag == 5)
         {
         return wxString::Format(_DT(L"// cppcheck-suppress %s\n"), m_warnings) + padding +
                m_stringToFormat;
