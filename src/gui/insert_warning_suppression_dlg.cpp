@@ -24,8 +24,11 @@ InsertWarningSuppressionDlg::InsertWarningSuppressionDlg(
     SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
-    m_suppressionTags.Add(_DT(L"Quneiform"));
+    m_suppressionTags.Add(_DT(L"Quneiform (C/C++)"));
+    m_suppressionTags.Add(_DT(L"Quneiform (Markdown/Quarto)"));
     m_suppressionTags.Add(_DT(L"Clang-format"));
+    // last two options are expected to use the warning text window,
+    // and last one should be Cpp-check
     m_suppressionTags.Add(_DT(L"Clang-tidy"));
     m_suppressionTags.Add(_DT(L"Cpp-check"));
 
@@ -76,7 +79,8 @@ void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommand
     TransferDataFromWindow();
     if (m_warningsTextCtrl != nullptr)
         {
-        m_warningsTextCtrl->Enable(m_selectedTag >= 2);
+        m_warningsTextCtrl->Enable(
+            std::cmp_greater_equal(m_selectedTag, (m_suppressionTags.size() - 2)));
         }
     }
 
@@ -84,7 +88,7 @@ void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommand
 void InsertWarningSuppressionDlg::OnOK([[maybe_unused]] wxCommandEvent&)
     {
     TransferDataFromWindow();
-    if (m_selectedTag == 3 && m_warnings.empty())
+    if (std::cmp_equal(m_selectedTag, (m_suppressionTags.size() - 1)) && m_warnings.empty())
         {
         wxMessageBox(_(L"Cpp-check requires a list of warning IDs to suppress."),
                      _(L"Missing Warnings"));
@@ -113,12 +117,17 @@ wxString InsertWarningSuppressionDlg::GetFormattedOutput()
         return _DT(L"// quneiform-suppress-begin\n") + padding + m_stringToFormat + "\n" + padding +
                _DT(L"// quneiform-suppress-end");
         }
-    else if (m_selectedTag == 1)
+    if (m_selectedTag == 1)
+        {
+        return _DT(L"<!-- quneiform-suppress-begin -->\n") + padding + m_stringToFormat + "\n" +
+               padding + _DT(L"<!-- quneiform-suppress-end -->");
+        }
+    if (m_selectedTag == 2)
         {
         return _DT(L"// clang-format off\n") + padding + m_stringToFormat + "\n" + padding +
                _DT(L"// clang-format on");
         }
-    else if (m_selectedTag == 2)
+    if (m_selectedTag == 3)
         {
         return (m_warnings.empty() ?
                     _DT(L"// NOLINTBEGIN\n") + padding + m_stringToFormat + "\n" + padding +
@@ -126,14 +135,11 @@ wxString InsertWarningSuppressionDlg::GetFormattedOutput()
                     wxString::Format(_DT(L"// NOLINTBEGIN(%s)\n"), m_warnings) + padding +
                         m_stringToFormat + "\n" + padding + _DT(L"// NOLINTEND"));
         }
-    else if (m_selectedTag == 3)
+    if (m_selectedTag == 4)
         {
         return wxString::Format(_DT(L"// cppcheck-suppress %s\n"), m_warnings) + padding +
                m_stringToFormat;
         }
-    else
-        {
-        // shouldn't happen
-        return m_stringToFormat;
-        }
+    // shouldn't happen
+    return m_stringToFormat;
     }
