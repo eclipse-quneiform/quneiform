@@ -43,9 +43,9 @@ namespace i18n_check
             }
 
         // remove suppression blocks
-        const std::wregex suppressBegin(L"<!--\\s*quneiform-suppress-begin!\\s*-->",
+        const std::wregex suppressBegin(L"<!--\\s*quneiform-suppress-begin\\s*-->",
                                         std::regex_constants::ECMAScript);
-        const std::wregex suppressEnd(L"<!--\\s*quneiform-suppress-end!\\s*-->",
+        const std::wregex suppressEnd(L"<!--\\s*quneiform-suppress-end\\s*-->",
                                       std::regex_constants::ECMAScript);
 
         std::size_t searchFrom{ 0 };
