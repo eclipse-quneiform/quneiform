@@ -19,8 +19,7 @@ Check for suspect usage of i18n functions.
 
 Check for translatable strings that contain URLs, email addresses, or phone numbers.
 
-It is recommended to dynamically format these into the string so that translators
-do not have to manage them.
+It is recommended to dynamically format these into the string so that translators do not have to manage them.
 
 - `excessiveNonL10NContent`
 
@@ -33,8 +32,7 @@ This is generally accomplished by detecting strings that have leading or trailin
 (This is limited to actual space characters, and does not include tabs or newlines.)
 
 ::: {.notesection data-latex=""}
-An exception is made for strings ending with ": "; here, it is assumed that this is formatting tabular data, rather than
-piecing a message together.
+An exception is made for strings ending with ": "; here, it is assumed that this is formatting tabular data, rather than piecing a message together.
 :::
 
 - `literalL10NStringCompare`
@@ -45,8 +43,7 @@ Check for literal, localizable strings being compared or searched for.
 
 Check for ambiguous strings that lack a translator comment.
 
-Translator comments can be added to *gettext* functions by either inserting a tagged comment in front of them or by using
-a variant with a context parameter (e.g., `wxTRANSLATE_IN_CONTEXT()`). For example:
+Translator comments can be added to *gettext* functions by either inserting a tagged comment in front of them or by using a variant with a context parameter (e.g., `wxTRANSLATE_IN_CONTEXT()`). For example:
 
 ``` {.cpp}
 ListFiles(wxString::Format(
@@ -54,8 +51,7 @@ ListFiles(wxString::Format(
         get_selected_dir()));
 ```
 
-By default, *gettext* will extract comments beginning with "TRANSLATORS:" in front of a resource function as
-a comment for the translator.
+By default, *gettext* will extract comments beginning with "TRANSLATORS:" in front of a resource function as a comment for the translator.
 
 Strings are considered to be ambiguous if they meet any of the following criteria:
 
@@ -135,8 +131,7 @@ This will also check for smart quotes and malformed shortcodes in *Quarto* files
 
 Check for font issues.
 
-This is performed on Windows *.rc files and checks for dialogs that use unusual font sizes
-or are not using \'MS Shell Dlg\'.[@ms-shell-dlg]
+This is performed on Windows *.rc files and checks for dialogs that use unusual font sizes or are not using \'MS Shell Dlg\'.[@ms-shell-dlg]
 
 - `allL10N`
 
@@ -151,8 +146,7 @@ This is performed on *gettext* \*.po files and will analyze format strings for t
 - C/C++
 
 ::: {.warningsection data-latex=""}
-The checks performed here are strict; all `printf()` commands in translations must match
-their source counterpart exactly.
+The checks performed here are strict; all `printf()` commands in translations must match their source counterpart exactly.
 For example, "*%lu*" vs. "*%l*" will emit a warning.
 Questionable commands such as "*% s*" (space is only meant for numeric formatting) will also emit a warning.
 :::

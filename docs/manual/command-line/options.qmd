@@ -21,8 +21,7 @@ This will override any options passed to `--enable`.
 ## \-\-log-l10n-allowed {-}
 
 Whether it is acceptable to pass translatable strings to logging functions.
-Setting this to `false` will emit warnings when a translatable string is
-passed to functions such as `wxLogMessage`, `g_message`, or `qCWarning`.
+Setting this to `false` will emit warnings when a translatable string is passed to functions such as `wxLogMessage`, `g_message`, or `qCWarning`.
 
 (Default is `true`.)
 
@@ -39,9 +38,7 @@ being available for localization.
 
 Whether to verify that exception messages are available for translation.
 
-Setting this to `true` will emit warnings when untranslatable strings are
-passed to various exception constructors or functions
-(e.g., `AfxThrowOleDispatchException`).
+Setting this to `true` will emit warnings when untranslatable strings are passed to various exception constructors or functions (e.g., `AfxThrowOleDispatchException`).
 
 (Default is `true`.)
 

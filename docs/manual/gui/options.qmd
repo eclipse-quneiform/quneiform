@@ -68,8 +68,7 @@ Run the following checks (*continued...*)
 (This is limited to actual space characters, and does not include tabs or newlines.)
 
 These may be strings that are concatenated at runtime, which does not follow best i18n practices.
-It is recommended to format separate values into a single string via a `printf` formatting function, rather than
-piecing them together.
+It is recommended to format separate values into a single string via a `printf` formatting function, rather than piecing them together.
 
 ::: {.notesection data-latex=""}
 An exception is made for strings that end with a colon followed by a space (": ").
@@ -318,13 +317,11 @@ If surrounding brackets or tracking IDs are being included, then their lengths w
 Windows RC files
 :::
 
-**Check for font issues**: select this to check for dialogs that use unusual font sizes
-or are not using \'MS Shell Dlg\'.\index{Windows!resource file issues}
+**Check for font issues**: select this to check for dialogs that use unusual font sizes or are not using \'MS Shell Dlg\'.\index{Windows!resource file issues}
 ::::
 
 ::: {.notesection data-latex=""}
-Some static analysis options from the **Source Files** section will also be used while analyzing the source strings
-in these resource files.
+Some static analysis options from the **Source Files** section will also be used while analyzing the source strings in these resource files.
 :::
 
 {{< pagebreak >}}

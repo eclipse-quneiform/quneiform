@@ -85,7 +85,8 @@ The command line and GUI versions provide the following checks:
   - Multiple sentences on the same line.
   - Sentences split across multiple lines.
   - Malformed shortcodes.
-  - Smart quotes. (Pandoc prefers straight quotes.)
+  - Smart quotes.
+    (Pandoc prefers straight quotes.)
 
 Code formatting and other issues can also be checked for, such as:
 
@@ -115,8 +116,7 @@ Pseudo-translation includes features such as:
 - Appending a unique ID to each translation. \
   This is useful for finding where a translation is being loaded from.
 
-When pseudo-translating, a copy of all string catalogs will be created and have their translations filled
-with mutations of their respective source strings.
+When pseudo-translating, a copy of all string catalogs will be created and have their translations filled with mutations of their respective source strings.
 These files (which will have a "pseudo\_" prefix) can then be compiled and loaded by your application for integration testing.
 
 ::: {.notesection data-latex=""}
