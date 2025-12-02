@@ -210,7 +210,7 @@ namespace i18n_check
             }
 
         std::wregex smartQuotesRE(
-            LR"((("|“|‘)?(([A-Za-z0-9_-]+)([\u2018\u2019\u201C\u201D])([A-Za-z0-9_-]*)|([A-Za-z0-9_-]*)([\u2018\u2019\u201C\u201D])([A-Za-z0-9_-]+))(”|’|")?))",
+            LR"(("|')?([A-Za-z0-9_-]*[\u2018\u2019\u201C\u201D][A-Za-z0-9_-]*)("|')?)",
             std::regex_constants::ECMAScript);
 
         if ((get_style() & check_malformed_strings) != 0U)
@@ -225,9 +225,16 @@ namespace i18n_check
                 {
                 currentBlockOffset += stPositions.position();
 
-                smartQuotesEntries.emplace_back(
-                    currentBlockOffset,
-                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
+                auto token{ currentTextBlock.substr(stPositions.position(), stPositions.length()) };
+
+                const bool isSingleQuoteChar =
+                    token.length() == 3 && (token.starts_with(L"'") || token.starts_with(L"\"")) &&
+                    (token.ends_with(L"'") || token.ends_with(L"\""));
+
+                if (!isSingleQuoteChar)
+                    {
+                    smartQuotesEntries.emplace_back(currentBlockOffset, token);
+                    }
 
                 currentBlockOffset += stPositions.length();
 

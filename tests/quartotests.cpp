@@ -36,8 +36,9 @@ Genre: rock’n’roll music.
         qr(code, L"rock.qmd");
 
         const auto& issues = qr.get_smart_quotes();
-        REQUIRE(issues.size() == 1);
-        CHECK(issues[0].m_string == std::wstring{ L"rock’n’" });
+        REQUIRE(issues.size() == 2);
+        CHECK(issues[0].m_string == std::wstring{ L"rock’n" });
+        CHECK(issues[1].m_string == std::wstring{ L"’roll" });
         }
 
     SECTION("Quoted entity “quoted-word”")
@@ -52,8 +53,9 @@ Here is “quoted-word” inside text.
         qr(code, L"quoted.qmd");
 
         const auto& issues = qr.get_smart_quotes();
-        REQUIRE(issues.size() == 1);
-        CHECK(issues[0].m_string == std::wstring{ L"“quoted-word”" });
+        REQUIRE(issues.size() == 2);
+        CHECK(issues[0].m_string == std::wstring{ L"“quoted-word" });
+        CHECK(issues[1].m_string == std::wstring{ L"”" });
         }
 
     SECTION("Ignore lonely smart quote inside straight quotes")
@@ -70,8 +72,9 @@ But detect this one: “kept”
         qr(code, L"ignore.qmd");
 
         const auto& issues = qr.get_smart_quotes();
-        REQUIRE(issues.size() == 1);
-        CHECK(issues[0].m_string == std::wstring{ L"“kept”" });
+        REQUIRE(issues.size() == 2);
+        CHECK(issues[0].m_string == std::wstring{ L"“kept" });
+        CHECK(issues[1].m_string == std::wstring{ L"”" });
         }
 
     SECTION("Mixed line with multiple entities")
@@ -86,12 +89,15 @@ Test “cat” and aren’t and “rock’n’roll”.
         qr(code, L"multiple.qmd");
 
         const auto& issues = qr.get_smart_quotes();
-        REQUIRE(issues.size() == 4);
+        REQUIRE(issues.size() == 7);
 
-        CHECK(issues[0].m_string == std::wstring{ L"“cat”" });
-        CHECK(issues[1].m_string == std::wstring{ L"aren’t" });
-        CHECK(issues[2].m_string == std::wstring{ L"“rock’n’" });
-        CHECK(issues[3].m_string == std::wstring{ L"roll”" });
+        CHECK(issues[0].m_string == std::wstring{ L"“cat" });
+        CHECK(issues[1].m_string == std::wstring{ L"”" });
+        CHECK(issues[2].m_string == std::wstring{ L"aren’t" });
+        CHECK(issues[3].m_string == std::wstring{ L"“rock" });
+        CHECK(issues[4].m_string == std::wstring{ L"’n" });
+        CHECK(issues[5].m_string == std::wstring{ L"’roll" });
+        CHECK(issues[6].m_string == std::wstring{ L"”" });
         }
 
     SECTION("Code blocks should be ignored")
@@ -108,8 +114,9 @@ Outside “yes”.
         qr(code, L"code.qmd");
 
         const auto& issues = qr.get_smart_quotes();
-        REQUIRE(issues.size() == 1);
-        CHECK(issues[0].m_string == std::wstring{ L"“yes”" });
+        REQUIRE(issues.size() == 2);
+        CHECK(issues[0].m_string == std::wstring{ L"“yes" });
+        CHECK(issues[1].m_string == std::wstring{ L"”" });
         }
 
     SECTION("Suppression blocks should be ignored")
@@ -128,8 +135,9 @@ But detect “good”.
         qr(code, L"suppress.qmd");
 
         const auto& issues = qr.get_smart_quotes();
-        REQUIRE(issues.size() == 1);
-        CHECK(issues[0].m_string == L"“good”");
+        REQUIRE(issues.size() == 2);
+        CHECK(issues[0].m_string == L"“good");
+        CHECK(issues[1].m_string == L"”");
         }
     }
 
