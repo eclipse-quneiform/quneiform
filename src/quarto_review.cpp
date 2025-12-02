@@ -210,7 +210,7 @@ namespace i18n_check
             }
 
         std::wregex smartQuotesRE(
-            LR"(("|')?([A-Za-z0-9_-]*[\u2018\u2019\u201C\u201D][A-Za-z0-9_-]*)("|')?)",
+            LR"(([A-Za-z0-9_"'-]*[\u2018\u2019\u201C\u201D][A-Za-z0-9_"'-]*))",
             std::regex_constants::ECMAScript);
 
         if ((get_style() & check_malformed_strings) != 0U)
