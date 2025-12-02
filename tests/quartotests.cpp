@@ -125,9 +125,9 @@ Outside “yes”.
         qr.set_style(check_malformed_strings);
 
         const wchar_t* code = LR"(
-<!-- quneiform-suppress-begin! -->
+<!-- quneiform-suppress-begin -->
 Ignore this “bad”.
-<!-- quneiform-suppress-end! -->
+<!-- quneiform-suppress-end -->
 
 But detect “good”.
 )";
