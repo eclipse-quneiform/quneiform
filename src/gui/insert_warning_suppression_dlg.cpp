@@ -125,8 +125,8 @@ wxString InsertWarningSuppressionDlg::GetFormattedOutput()
         }
     if (m_selectedTag == 2)
         {
-        return _DT(L"<!-- translate:off -->\n") + padding + m_stringToFormat + "\n" +
-               padding + _DT(L"<!-- translate:on -->");
+        return _DT(L"<!-- translate:off -->\n") + padding + m_stringToFormat + "\n" + padding +
+               _DT(L"<!-- translate:on -->");
         }
     if (m_selectedTag == 3)
         {
