@@ -77,12 +77,12 @@ class InsertTransCommentDlg final : public wxDialog
         return m_selectedTag;
         }
 
-    /// @returns @c true if the selected comment is multiline.
+    /// @returns @c true if the selected comment is multiline (unless user comment isn't used).
     [[nodiscard]]
     bool IsMultilineComment()
         {
         TransferDataFromWindow();
-        return m_selectedTag.starts_with(L"/*");
+        return m_selectedTag != L"/* xgettext:no-c-format */" && m_selectedTag.starts_with(L"/*");
         }
 
   private:
@@ -114,12 +114,18 @@ class InsertTransCommentDlg final : public wxDialog
         OnHelpClicked(cmd);
         }
 
+    void EnableExtraControls();
+
     wxString m_selectedTag;
     wxString m_comment;
 
     int m_linePosition{ 0 };
 
+    wxTextCtrl* m_commentTextCtrl{ nullptr };
+
     wxArrayString m_translatorTags;
+
+    constexpr static int ID_MACRO_COMBO = wxID_HIGHEST;
     };
 
     /** @}*/

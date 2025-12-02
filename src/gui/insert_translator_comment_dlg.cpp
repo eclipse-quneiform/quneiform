@@ -31,11 +31,14 @@ InsertTransCommentDlg::InsertTransCommentDlg(
     // Qt
     m_translatorTags.Add(L"//:");
     m_translatorTags.Add(L"/*: */");
+    // no-c-format (xgettext)
+    m_translatorTags.Add(L"/* xgettext:no-c-format */");
 
     // bind events
     Bind(wxEVT_HELP, &InsertTransCommentDlg::OnContextHelp, this);
     Bind(wxEVT_BUTTON, &InsertTransCommentDlg::OnHelpClicked, this, wxID_HELP);
     Bind(wxEVT_BUTTON, &InsertTransCommentDlg::OnOK, this, wxID_OK);
+    Bind(wxEVT_CHOICE, [this](wxCommandEvent&) { EnableExtraControls(); }, ID_MACRO_COMBO);
 
     CreateControls();
     Centre();
@@ -54,31 +57,41 @@ void InsertTransCommentDlg::CreateControls()
         {
         m_selectedTag = m_translatorTags[0];
         }
-    functionComboSzr->Add(new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    functionComboSzr->Add(new wxChoice(this, ID_MACRO_COMBO, wxDefaultPosition, wxDefaultSize,
                                        m_translatorTags, 0, wxGenericValidator(&m_selectedTag)),
                           wxSizerFlags{}.Left().CenterVertical().Border(wxLEFT));
     mainDlgSizer->Add(functionComboSzr, wxSizerFlags{}.Expand().Border());
 
     mainDlgSizer->Add(new wxStaticText(this, wxID_STATIC, _(L"Explanation for translators:")),
                       wxSizerFlags{}.Border());
-    wxTextCtrl* commentTextCtrl =
+    m_commentTextCtrl =
         new wxTextCtrl(this, wxID_ANY, wxString{}, wxDefaultPosition, FromDIP(wxSize{ 500, 150 }),
                        wxTE_RICH2 | wxTE_MULTILINE | wxBORDER_THEME | wxTE_BESTWRAP,
                        wxGenericValidator(&m_comment));
 #if wxUSE_SPELLCHECK
-    commentTextCtrl->EnableProofCheck(
+    m_commentTextCtrl->EnableProofCheck(
         wxTextProofOptions::Default().GrammarCheck(true).SpellCheck(true));
 #endif
-    mainDlgSizer->Add(commentTextCtrl, wxSizerFlags{ 1 }.Expand().Border());
+    mainDlgSizer->Add(m_commentTextCtrl, wxSizerFlags{ 1 }.Expand().Border());
 
     mainDlgSizer->Add(CreateSeparatedButtonSizer(wxOK | wxCANCEL | wxHELP),
                       wxSizerFlags{}.Expand().Border());
 
-    commentTextCtrl->SetFocus();
+    m_commentTextCtrl->SetFocus();
 
     TransferDataToWindow();
 
+    EnableExtraControls();
+
     SetSizerAndFit(mainDlgSizer);
+    }
+
+//-------------------------------------------------------------
+void InsertTransCommentDlg::EnableExtraControls()
+    {
+    TransferDataFromWindow();
+
+    m_commentTextCtrl->Enable(m_selectedTag != L"/* xgettext:no-c-format */");
     }
 
 //-------------------------------------------------------------
@@ -119,21 +132,22 @@ wxString InsertTransCommentDlg::GetFormattedOutput()
         {
         return m_selectedTag + L" " + m_comment;
         }
-    else if (m_selectedTag == _DT(L"/* TRANSLATORS: */"))
+    if (m_selectedTag == _DT(L"/* TRANSLATORS: */"))
         {
         return _DT(L"/* TRANSLATORS: ") + formattedComment + L" */";
         }
-    else if (m_selectedTag == _DT(L"//:"))
+    if (m_selectedTag == _DT(L"//:"))
         {
         return m_selectedTag + L" " + m_comment;
         }
-    else if (m_selectedTag == _DT(L"/*: */"))
+    if (m_selectedTag == _DT(L"/*: */"))
         {
         return _DT(L"/*: ") + formattedComment + L" */";
         }
-    else
+    if (m_selectedTag == _DT(L"/*: */"))
         {
-        // shouldn't happen
-        return wxString{};
+        return _DT(L"/* xgettext:no-c-format */");
         }
+    // shouldn't happen
+    return {};
     }
