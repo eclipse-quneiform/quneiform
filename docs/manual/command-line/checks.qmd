@@ -129,6 +129,7 @@ This is turned off by default.
 - `malformedString`
 
 Check for malformed syntax in strings (e.g., malformed HTML tags).
+This will also check for smart quotes and malformed shortcodes in *Quarto* files.
 
 - `fontIssue`
 

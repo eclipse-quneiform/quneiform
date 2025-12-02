@@ -608,6 +608,16 @@ namespace i18n_check
                 << L"\"\t[malformedString]\n";
             }
 
+        for (const auto& val : m_quarto->get_smart_quotes())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"Prefer straight quotes instead of smart quotes. "
+                        "Pandoc will automatically convert them to "
+                        "language-appropriate quotation marks.")
+                   << L"\"\t[malformedString]\n";
+            }
+
         // gettext catalogs
         for (const auto& catEntry : m_po->get_catalog_entries())
             {

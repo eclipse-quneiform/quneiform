@@ -93,6 +93,7 @@ The command line and GUI versions provide the following checks:
   - Multiple sentences on the same line.
   - Sentences split across multiple lines.
   - Malformed shortcodes.
+  - Smart quotes. (Pandoc prefers straight quotes.)
 
 Code formatting and other issues can also be checked for, such as:
 

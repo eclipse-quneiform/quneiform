@@ -208,5 +208,42 @@ namespace i18n_check
                     m_file_name, filePos);
                 }
             }
+
+        std::wregex smartQuotesRE(
+            LR"((("|“|‘)?(([A-Za-z0-9_-]+)([\u2018\u2019\u201C\u201D])([A-Za-z0-9_-]*)|([A-Za-z0-9_-]*)([\u2018\u2019\u201C\u201D])([A-Za-z0-9_-]+))(”|’|")?))",
+            std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> smartQuotesEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, smartQuotesRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                smartQuotesEntries.emplace_back(
+                    currentBlockOffset,
+                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
+
+                currentBlockOffset += stPositions.length();
+
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
+                }
+
+            for (const auto& sqEntry : smartQuotesEntries)
+                {
+                const auto filePos = get_line_and_column(sqEntry.first, filteredContent);
+                m_smartQuotes.emplace_back(
+                    sqEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
         }
     } // namespace i18n_check

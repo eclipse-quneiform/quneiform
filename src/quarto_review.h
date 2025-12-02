@@ -61,6 +61,13 @@ namespace i18n_check
             {
             return m_malformedContent;
             }
+        
+        /// @returns Smart quotes in Quarto content.
+        [[nodiscard]]
+        const std::vector<string_info>& get_smart_quotes() const noexcept
+            {
+            return m_smartQuotes;
+            }
 
         /// @brief Clears the results.
         void clear_results() final
@@ -69,12 +76,14 @@ namespace i18n_check
             m_sentencesOnSameLine.clear();
             m_sentencesSplitOnDifferentLines.clear();
             m_malformedContent.clear();
+            m_smartQuotes.clear();
             }
 
       private:
         std::vector<string_info> m_sentencesOnSameLine;
         std::vector<string_info> m_sentencesSplitOnDifferentLines;
         std::vector<string_info> m_malformedContent;
+        std::vector<string_info> m_smartQuotes;
         };
 
     } // namespace i18n_check
