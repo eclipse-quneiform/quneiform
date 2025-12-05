@@ -90,11 +90,6 @@ message(STATUS "Published by: ${PUBLISHER}")
 message(STATUS "Homepage: ${quneiform_HOMEPAGE_URL}")
 message(STATUS "Output program file: ${CMAKE_PROJECT_NAME}")
 message(STATUS "Writing program info to build peripheral files")
-if(WIN32)
-    set(CJK_FONT "MS Gothic")
-elseif(UNIX)
-    set(CJK_FONT "Noto Serif CJK SC")
-endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/resource.h.in"
                "${CMAKE_CURRENT_SOURCE_DIR}/resource.h")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"

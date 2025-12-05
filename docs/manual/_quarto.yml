@@ -63,6 +63,10 @@ format:
     cite-method: biblatex
     lot: false
     code-block-bg: false
-    CJKmainfont: "MS Gothic"
+    CJKmainfont: NotoSerifJP
+    CJKoptions:
+      - Path=./fonts/NotoSerifJP/
+      - Extension=.ttf
+      - UprightFont=*-VariableFontwght
     linkcolor: black
     citecolor: black
