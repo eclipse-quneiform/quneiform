@@ -50,7 +50,7 @@ if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     message(STATUS "macOS deployment target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
-project(quneiform VERSION 2025.0.0.0 DESCRIPTION "Eclipse Quneiform")
+project(quneiform VERSION 2026.0.0.0 DESCRIPTION "Eclipse Quneiform")
 set(PROGRAM_LONGNAME ${quneiform_DESCRIPTION})
 set(PROGRAM_NUMBERED_VERSION 1.0)
 set(PUBLISHER "Eclipse Foundation AISBL")
