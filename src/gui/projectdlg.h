@@ -77,6 +77,18 @@ class NewProjectDialog final : public wxDialog
     /// @private
     NewProjectDialog& operator=(const NewProjectDialog&) = delete;
 
+    /// @returns The supported files, for use in an Open File dialog.
+    [[nodiscard]]
+    static wxString GetFileFilter()
+        {
+        return _(L"All Supported Files|*.cpp;*.c;*.h;*.hpp;*.po;*.pot;*.rc;*.plist;*.qmd|"
+                 "Source Files (*.cpp; *.c; *.h; *.hpp)|*.cpp;*.c;*.h;*.hpp|"
+                 "gettext Catalogs (*.po; *.pot)|*.po;*.pot|"
+                 "macOS Info.plist (Info.plist)|Info.plist|"
+                 "Quarto Files (*.qmd)|*.qmd|"
+                 "Windows Resource Files (*.rc)|*.rc");
+        }
+
     [[nodiscard]]
     I18NOptions GetAllOptions() noexcept
         {
@@ -117,7 +129,7 @@ class NewProjectDialog final : public wxDialog
 
     void SetAllOptions(const I18NOptions& options);
 
-    /// @returns The path of the selected folder.
+    /// @returns The path of the selected folder or file.
     [[nodiscard]]
     const wxString& GetPath() const noexcept
         {

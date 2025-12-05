@@ -1178,20 +1178,43 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent&)
 
     wxFileDialog dialog(
         this, _(L"Select Project to Open"), wxString{}, wxString{},
-        wxString::Format(_(L"%s Project Files (*.qfn)|*.qfn"), wxGetApp().GetAppName()),
+        wxString::Format(_(L"%s Project Files (*.qfn)|*.qfn|") + NewProjectDialog::GetFileFilter(),
+                         wxGetApp().GetAppName()),
         wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
     if (dialog.ShowModal() != wxID_OK)
         {
         return;
         }
 
-    m_activeProjectFilePath = dialog.GetPath();
-    m_projectDirty = false;
+    if (wxFileName{ dialog.GetPath() }.GetExt().CmpNoCase(L"qfn") != 0)
+        {
+        NewProjectDialog projDlg(this, wxID_ANY, _(L"New Project"), FilePage);
+        projDlg.SetAllOptions(wxGetApp().m_defaultOptions);
+        projDlg.SetPath(dialog.GetPath());
 
-    m_activeProjectOptions.Load(m_activeProjectFilePath);
+        if (projDlg.ShowModal() == wxID_CANCEL)
+            {
+            return;
+            }
 
-    SetTitle(wxGetApp().GetAppName() + L" - " +
-             wxFileName{ m_activeProjectFilePath }.GetFullName());
+        m_activeProjectFilePath.clear();
+        m_projectDirty = true;
+
+        m_activeProjectOptions = projDlg.GetAllOptions();
+        CopyProjectOptionsToGlobalOptions();
+
+        SetTitle(projDlg.GetPath());
+        }
+    else
+        {
+        m_activeProjectFilePath = dialog.GetPath();
+        m_projectDirty = false;
+
+        m_activeProjectOptions.Load(m_activeProjectFilePath);
+
+        SetTitle(wxGetApp().GetAppName() + L" - " +
+                 wxFileName{ m_activeProjectFilePath }.GetFullName());
+        }
 
     Process();
     }
