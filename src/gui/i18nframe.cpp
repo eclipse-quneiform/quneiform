@@ -1188,22 +1188,13 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent&)
 
     if (wxFileName{ dialog.GetPath() }.GetExt().CmpNoCase(L"qfn") != 0)
         {
-        NewProjectDialog projDlg(this, wxID_ANY, _(L"New Project"), FilePage);
-        projDlg.SetAllOptions(wxGetApp().m_defaultOptions);
-        projDlg.SetPath(dialog.GetPath());
-
-        if (projDlg.ShowModal() == wxID_CANCEL)
-            {
-            return;
-            }
-
         m_activeProjectFilePath.clear();
         m_projectDirty = true;
 
-        m_activeProjectOptions = projDlg.GetAllOptions();
+        m_activeProjectOptions = wxGetApp().m_defaultOptions;
         CopyProjectOptionsToGlobalOptions();
 
-        SetTitle(projDlg.GetPath());
+        SetTitle(dialog.GetPath());
         }
     else
         {
