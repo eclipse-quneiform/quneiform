@@ -69,6 +69,13 @@ namespace i18n_check
             return m_smartQuotes;
             }
 
+        /// @returns Numeric ranges using hyphens instead of en dashes.
+        [[nodiscard]]
+        const std::vector<string_info>& get_range_dash_issues() const noexcept
+            {
+            return m_rangeDashIssues;
+            }
+
         /// @brief Clears the results.
         void clear_results() final
             {
@@ -77,6 +84,7 @@ namespace i18n_check
             m_sentencesSplitOnDifferentLines.clear();
             m_malformedContent.clear();
             m_smartQuotes.clear();
+            m_rangeDashIssues.clear();
             }
 
       private:
@@ -84,6 +92,7 @@ namespace i18n_check
         std::vector<string_info> m_sentencesSplitOnDifferentLines;
         std::vector<string_info> m_malformedContent;
         std::vector<string_info> m_smartQuotes;
+        std::vector<string_info> m_rangeDashIssues;
         };
 
     } // namespace i18n_check

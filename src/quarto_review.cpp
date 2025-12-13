@@ -107,10 +107,10 @@ namespace i18n_check
             searchFrom = begin_start;
             }
 
-        std::wregex multiSentenceLineRE(
+        const std::wregex multiSentenceLineRE(
             LR"(([A-Za-zÀ-ÖØ-öø-ÿ]{2,}(?:\.[A-Za-zÀ-ÖØ-öø-ÿ]+)*\.)[”’"'»)\]]*[ \t]+[“"'(]*[A-ZÀ-ÖØ-Þ0-9])",
             std::regex_constants::ECMAScript);
-        std::wregex abbrevRE(
+        const std::wregex abbrevRE(
             L"\\b(?:(?:"
             // Country / organization abbreviations
             "(?:U\\.S\\.A|U\\.S|U\\.K|E\\.U|U\\.N|N\\.A\\.T\\.O|F\\.B\\.I|C\\.I\\.A|A\\.T\\.M)"
@@ -170,8 +170,8 @@ namespace i18n_check
                 }
             }
 
-        std::wregex splitLineSentenceRE(LR"(([A-Za-z]+)\r?\n([A-Za-z])([A-Za-z]| ))",
-                                        std::regex_constants::ECMAScript);
+        const std::wregex splitLineSentenceRE(LR"(([A-Za-z]+)\r?\n([A-Za-z])([A-Za-z]| ))",
+                                              std::regex_constants::ECMAScript);
 
         if ((get_style() & check_l10n_strings) != 0U)
             {
@@ -207,7 +207,7 @@ namespace i18n_check
                 }
             }
 
-        std::wregex malformedContentRE(
+        const std::wregex malformedContentRE(
             LR"((\{\{\s*[<%]\s*(?:pagebreak|include|video|embed|placeholder|lipsum)\b[^}\r\n]*[>%]\s*\}\})(?=\r?\n(?!$)[^\S\r\n]*\S))",
             std::regex_constants::ECMAScript);
 
@@ -244,7 +244,7 @@ namespace i18n_check
                 }
             }
 
-        std::wregex smartQuotesRE(
+        const std::wregex smartQuotesRE(
             LR"(([A-Za-z0-9_"'-]*[\u2018\u2019\u201C\u201D][A-Za-z0-9_"'-]*))",
             std::regex_constants::ECMAScript);
 
@@ -282,6 +282,123 @@ namespace i18n_check
                 const auto filePos = get_line_and_column(sqEntry.first, filteredContent);
                 m_smartQuotes.emplace_back(
                     sqEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
+
+        const std::wregex numericRangeHyphenRE(LR"(\b([0-9]{1,4})-([0-9]{1,4})\b)",
+                                               std::regex_constants::ECMAScript);
+        const std::wregex phoneRE(LR"(\b\d{3}-\d{4}\b)", std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> numericRangeEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, numericRangeHyphenRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                numericRangeEntries.emplace_back(
+                    currentBlockOffset,
+                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
+
+                currentBlockOffset += stPositions.length();
+
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
+                }
+
+            for (const auto& nrEntry : numericRangeEntries)
+                {
+                // ignore phone numbers
+                if (std::regex_match(nrEntry.second, phoneRE))
+                    {
+                    continue;
+                    }
+                const auto filePos = get_line_and_column(nrEntry.first, filteredContent);
+                m_rangeDashIssues.emplace_back(
+                    nrEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
+
+        const std::wregex alphaRangeHyphenRE(LR"(\b([A-Z])-([A-Z])\b)",
+                                             std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> alphaRangeEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, alphaRangeHyphenRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                alphaRangeEntries.emplace_back(
+                    currentBlockOffset,
+                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
+
+                currentBlockOffset += stPositions.length();
+
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
+                }
+
+            for (const auto& arEntry : alphaRangeEntries)
+                {
+                const auto filePos = get_line_and_column(arEntry.first, filteredContent);
+                m_rangeDashIssues.emplace_back(
+                    arEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
+
+        const std::wregex k12RangeHyphenRE(LR"(\b(Pre-K|K)-(8|12)\b)",
+                                           std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> k12RangeEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, k12RangeHyphenRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                k12RangeEntries.emplace_back(
+                    currentBlockOffset,
+                    currentTextBlock.substr(stPositions.position(), stPositions.length()));
+
+                currentBlockOffset += stPositions.length();
+
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
+                }
+
+            for (const auto& k12Entry : k12RangeEntries)
+                {
+                const auto filePos = get_line_and_column(k12Entry.first, filteredContent);
+                m_rangeDashIssues.emplace_back(
+                    k12Entry.second,
                     string_info::usage_info(string_info::usage_info::usage_type::orphan,
                                             std::wstring{}, std::wstring{}, std::wstring{}),
                     m_file_name, filePos);

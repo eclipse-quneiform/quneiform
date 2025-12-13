@@ -94,6 +94,7 @@ The command line and GUI versions provide the following checks:
   - Sentences split across multiple lines.
   - Malformed shortcodes.
   - Smart quotes. (Pandoc prefers straight quotes.)
+  - Hyphens being used as range separators.
 
 Code formatting and other issues can also be checked for, such as:
 
