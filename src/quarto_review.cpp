@@ -42,6 +42,41 @@ namespace i18n_check
             startPos = filteredContent.find(L"```", endPos);
             }
 
+        // remove math blocks ($$ ... $$ first)
+        auto mathStart = filteredContent.find(L"$$");
+        while (mathStart != std::wstring::npos)
+            {
+            auto mathEnd = filteredContent.find(L"$$", mathStart + 2);
+            if (mathEnd == std::wstring::npos)
+                {
+                break;
+                }
+            mathEnd += 2;
+            clear_section(filteredContent, mathStart, mathEnd);
+            mathStart = filteredContent.find(L"$$", mathEnd);
+            }
+
+        // remove inline math ($ ... $)
+        mathStart = filteredContent.find(L"$");
+        while (mathStart != std::wstring::npos)
+            {
+            // skip escaped \$
+            if (mathStart > 0 && filteredContent[mathStart - 1] == L'\\')
+                {
+                mathStart = filteredContent.find(L"$", mathStart + 1);
+                continue;
+                }
+
+            auto mathEnd = filteredContent.find(L"$", mathStart + 1);
+            if (mathEnd == std::wstring::npos)
+                {
+                break;
+                }
+
+            clear_section(filteredContent, mathStart, mathEnd + 1);
+            mathStart = filteredContent.find(L"$", mathEnd + 1);
+            }
+
         // remove suppression blocks
         const std::wregex suppressBegin(L"<!--\\s*quneiform-suppress-begin\\s*-->",
                                         std::regex_constants::ECMAScript);
