@@ -27,7 +27,7 @@ Run the following checks
 
 **Ignore strings assigned to variables named**: when finding strings not exposed for translation, strings can be ignored if assigned to variables from this list.
 For example, if a list of color names are assigned to a variable named `colorMode` that you wish to ignore, then add "colorMode" to this list.
-You can enter variable names (e.g., "`colorMode`") or regular expressions (e.g., "`(RELEASE|DEBUG)check[0-9]?`") here.
+You can enter variable names (e.g., "`colorMode`") or regular expressions (e.g., "`(RELEASE|DEBUG)check[0–9]?`") here.
 
 ::: {.notesection data-latex=""}
 Adding a new entry here for a project will also add it to the global settings.

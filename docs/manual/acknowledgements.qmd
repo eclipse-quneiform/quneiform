@@ -24,7 +24,7 @@ Boost Software License 1.0
 
 A stable and powerful open source framework for developing native cross-platform GUI applications in C++.
 
-Copyright (c) 1998-2005 Julian Smart, Robert Roebling et al
+Copyright (c) 1998–2005 Julian Smart, Robert Roebling et al
 
 wxWindows Library Licence, Version 3.1
 

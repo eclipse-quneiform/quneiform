@@ -291,6 +291,8 @@ namespace i18n_check
         const std::wregex numericRangeHyphenRE(LR"(\b([0-9]{1,4})-([0-9]{1,4})\b)",
                                                std::regex_constants::ECMAScript);
         const std::wregex phoneRE(LR"(\b\d{3}-\d{4}\b)", std::regex_constants::ECMAScript);
+        const std::wregex codePageRE(LR"(^8859-(?:[1-9]|1[0-6])$)",
+                                     std::regex_constants::ECMAScript);
 
         if ((get_style() & check_malformed_strings) != 0U)
             {
@@ -317,8 +319,9 @@ namespace i18n_check
 
             for (const auto& nrEntry : numericRangeEntries)
                 {
-                // ignore phone numbers
-                if (std::regex_match(nrEntry.second, phoneRE))
+                // ignore phone numbers and code pages
+                if (std::regex_match(nrEntry.second, phoneRE) ||
+                    std::regex_match(nrEntry.second, codePageRE))
                     {
                     continue;
                     }

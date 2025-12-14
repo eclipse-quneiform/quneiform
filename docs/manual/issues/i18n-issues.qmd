@@ -223,7 +223,7 @@ static wxString GetPredClozeLabel()
 
 ## Multipart Strings {#sec-multipart-strings}
 
-Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@{madden:2019}65-66].
+Multipart strings (or "mega strings") are single string resources that are split at runtime into smaller strings [@{madden:2019}65–66].
 
 For example, consider a resource string such as:
 
