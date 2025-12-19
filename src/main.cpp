@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
                 }
             else if (r == "pluralization")
                 {
-                rs |= i18n_check::review_style::check_pluaralization;
+                rs |= i18n_check::review_style::check_pluralization;
                 }
             else if (r == "articleOrPronoun")
                 {
@@ -432,7 +432,7 @@ int main(int argc, char* argv[])
                 }
             else if (r == "pluralization")
                 {
-                rs = rs & ~i18n_check::review_style::check_pluaralization;
+                rs = rs & ~i18n_check::review_style::check_pluralization;
                 }
             else if (r == "articleOrPronoun")
                 {
