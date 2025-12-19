@@ -71,6 +71,20 @@ namespace i18n_check
             return m_rangeDashIssues;
             }
 
+        /// @returns Malformed image links.
+        [[nodiscard]]
+        const std::vector<string_info>& get_malformed_image_links() const noexcept
+            {
+            return m_malformedImageLinks;
+            }
+
+        /// @returns Absolute path links.
+        [[nodiscard]]
+        const std::vector<string_info>& get_absolute_path_links() const noexcept
+            {
+            return m_absolute_path_links;
+            }
+
         /// @brief Clears the results.
         void clear_results() final
             {
@@ -80,6 +94,8 @@ namespace i18n_check
             m_malformedContent.clear();
             m_smartQuotes.clear();
             m_rangeDashIssues.clear();
+            m_malformedImageLinks.clear();
+            m_absolute_path_links.clear();
             }
 
       private:
@@ -88,6 +104,8 @@ namespace i18n_check
         std::vector<string_info> m_malformedContent;
         std::vector<string_info> m_smartQuotes;
         std::vector<string_info> m_rangeDashIssues;
+        std::vector<string_info> m_malformedImageLinks;
+        std::vector<string_info> m_absolute_path_links;
         };
 
     } // namespace i18n_check

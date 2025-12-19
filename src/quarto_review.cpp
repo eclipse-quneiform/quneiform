@@ -408,5 +408,123 @@ namespace i18n_check
                     m_file_name, filePos);
                 }
             }
+
+        const std::wregex malformedImageRE(
+            LR"((!\[(?![^\]]*\]\[)[^\]]*$)|(!\[(?![^\]]*\]\[)[^\]]*\]\(\s*(['"])[^'\\"\r\n]+\3\s*\))|(!\[(?![^\]]*\]\[)[^\]]*\]\([^\)\r\n]*(?=\r?\n|$)))",
+            std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> malformedImageEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, malformedImageRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                const auto start = stPositions.position();
+                auto length = stPositions.length();
+
+                // stop at end-of-line
+                const auto eol = currentTextBlock.find_first_of(L"\r\n", start);
+                if (eol != std::wstring::npos && std::cmp_less(eol, start + length))
+                    {
+                    length = eol - start;
+                    }
+
+                malformedImageEntries.emplace_back(currentBlockOffset,
+                                                   currentTextBlock.substr(start, length));
+
+                currentBlockOffset += length;
+                currentTextBlock = currentTextBlock.substr(start + length);
+                }
+
+            for (const auto& imgEntry : malformedImageEntries)
+                {
+                const auto filePos = get_line_and_column(imgEntry.first, filteredContent);
+                m_malformedImageLinks.emplace_back(
+                    imgEntry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
+
+        const std::wregex absolutePathRE(LR"(!?\[[^\]]*\]\((/[^)\r\n]*|[A-Za-z]:/[^)\r\n]*)\))",
+                                         std::regex_constants::ECMAScript);
+
+        if ((get_style() & check_malformed_strings) != 0U)
+            {
+            auto currentTextBlock{ filteredContent };
+
+            std::vector<std::pair<size_t, std::wstring>> absolutePathEntries;
+            std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
+            size_t currentBlockOffset{ 0 };
+
+            while (std::regex_search(currentTextBlock.cbegin(), currentTextBlock.cend(),
+                                     stPositions, absolutePathRE))
+                {
+                currentBlockOffset += stPositions.position();
+
+                const auto fullMatch =
+                    currentTextBlock.substr(stPositions.position(), stPositions.length());
+
+                const auto path = stPositions[1].str(); // captured (/foo/bar)
+
+                bool shouldFlag = false;
+
+                // site-root relative paths
+                if (!path.empty() && path[0] == L'/')
+                    {
+                    // protocol-relative URLs: //cdn.example.com
+                    if (path.size() > 1 && path[1] == L'/')
+                        {
+                        shouldFlag = false;
+                        }
+
+                    // anchors: /#section
+                    else if (path.size() > 1 && path[1] == L'#')
+                        {
+                        shouldFlag = false;
+                        }
+
+                    else
+                        {
+                        shouldFlag = true;
+                        }
+                    }
+
+                // Windows drive paths: C:/...
+                else if (path.size() > 2 && (std::iswalpha(path[0]) != 0) && path[1] == L':' &&
+                         path[2] == L'/')
+                    {
+                    shouldFlag = true;
+                    }
+
+                if (shouldFlag)
+                    {
+                    absolutePathEntries.emplace_back(currentBlockOffset, fullMatch);
+                    }
+
+                currentBlockOffset += stPositions.length();
+                currentTextBlock =
+                    currentTextBlock.substr(stPositions.position() + stPositions.length());
+                }
+
+            for (const auto& entry : absolutePathEntries)
+                {
+                const auto filePos = get_line_and_column(entry.first, filteredContent);
+
+                m_absolute_path_links.emplace_back(
+                    entry.second,
+                    string_info::usage_info(string_info::usage_info::usage_type::orphan,
+                                            std::wstring{}, std::wstring{}, std::wstring{}),
+                    m_file_name, filePos);
+                }
+            }
         }
     } // namespace i18n_check

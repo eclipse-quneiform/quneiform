@@ -90,11 +90,13 @@ The command line and GUI versions provide the following checks:
   - Dialogs with non-standard font sizes.
 - Info.plist files not including any `CFBundleLocalizations` keys.
 - *Quarto* files containing:
+  - Malformed shortcodes.
+  - Malformed image links.
+  - Absolute paths in links.
+  - Smart quotes.
+  - Hyphens being used as range separators.
   - Multiple sentences on the same line.
   - Sentences split across multiple lines.
-  - Malformed shortcodes.
-  - Smart quotes. (Pandoc prefers straight quotes.)
-  - Hyphens being used as range separators.
 
 Code formatting and other issues can also be checked for, such as:
 

@@ -63,8 +63,7 @@ The command line and GUI versions provide the following checks:
   (It is recommended that files be UTF-8 encoded for portability between compilers.)
 - Strings that contain extended ASCII characters that are not encoded.
   ("Danke schön" instead of "Danke sch\\U000000F6n".)<br />
-  Encoding extended ASCII characters is recommended for
-  best portability between compilers.
+  Encoding extended ASCII characters is recommended for best portability between compilers.
 - UTF-8 encoded files which start with a BOM/UTF-8 signature.<br />
   It is recommended to save without the file signature for best compiler portability.
 - `printf()`-like functions being used to just format an integer to a string.<br />
@@ -80,15 +79,14 @@ The command line and GUI versions provide the following checks:
   - Dialogs not using "MS Shell Dlg" or "MS Shell Dlg 2."
   - Dialogs with non-standard font sizes.
 - Info.plist files not including any `CFBundleLocalizations` keys.
-- *Quarto* files having multiple sentences on the same line.
 - *Quarto* files containing:
+  - Malformed shortcodes.
+  - Malformed image links.
+  - Absolute paths in links.
+  - Smart quotes (Pandoc prefers straight quotes).
+  - Hyphens being used as range separators (en dashes should be used.)
   - Multiple sentences on the same line.
   - Sentences split across multiple lines.
-  - Malformed shortcodes.
-  - Smart quotes.
-    (Pandoc prefers straight quotes.)
-  - Hyphens being used as range separators.
-    (En dashes should be used.)
 
 Code formatting and other issues can also be checked for, such as:
 

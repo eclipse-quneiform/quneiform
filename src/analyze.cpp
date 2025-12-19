@@ -400,10 +400,10 @@ namespace i18n_check
                                                                              L"")
                 << (((m_cpp->get_style() & check_suspect_l10n_string_usage) != 0) ?
                         L"suspectL10NUsage\n" :
-                                                                               L"")
+                        L"")
                 << (((m_cpp->get_style() & check_mismatching_printf_commands) != 0) ?
                         L"printfMismatch\n" :
-                                                                   L"")
+                        L"")
                 << (((m_cpp->get_style() & check_accelerators) != 0) ? L"acceleratorMismatch\n" :
                                                                        L"")
                 << (((m_cpp->get_style() & check_consistency) != 0) ? L"transInconsistency\n" : L"")
@@ -432,12 +432,12 @@ namespace i18n_check
                         L"")
                 << (((m_cpp->get_style() & check_not_available_for_l10n) != 0) ?
                         L"notL10NAvailable\n" :
-                                                                          L"")
+                        L"")
                 << (((m_cpp->get_style() & check_deprecated_macros) != 0) ? L"deprecatedMacro\n" :
-                                                                        L"")
+                                                                            L"")
                 << (((m_cpp->get_style() & check_utf8_encoded) != 0) ? L"nonUTF8File\n" : L"")
                 << (((m_cpp->get_style() & check_utf8_with_signature) != 0) ? L"UTF8FileWithBOM\n" :
-                                                                         L"")
+                                                                              L"")
                 << (((m_cpp->get_style() & check_unencoded_ext_ascii) != 0) ?
                         L"unencodedExtASCII\n" :
                         L"")
@@ -451,7 +451,7 @@ namespace i18n_check
                         L"dupValAssignedToIds\n" :
                         L"")
                 << (((m_cpp->get_style() & check_malformed_strings) != 0) ? L"malformedString\n" :
-                                                                       L"")
+                                                                            L"")
                 << (((m_cpp->get_style() & check_fonts) != 0) ? L"fontIssue\n" : L"")
                 << (((m_cpp->get_style() & check_trailing_spaces) != 0) ? L"trailingSpaces\n" : L"")
                 << (((m_cpp->get_style() & check_tabs) != 0) ? L"tabs\n" : L"")
@@ -646,6 +646,21 @@ namespace i18n_check
             report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
                    << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                    << _(L"Use an en dash (–) for ranges (e.g., 141–48, A–Z).")
+                   << L"\"\t[malformedString]\n";
+            }
+
+        for (const auto& val : m_quarto->get_malformed_image_links())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"Image link is malformed.") << L"\"\t[malformedString]\n";
+            }
+
+        for (const auto& val : m_quarto->get_absolute_path_links())
+            {
+            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
+                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                   << _(L"Use relative paths instead of absolute or site-root paths.")
                    << L"\"\t[malformedString]\n";
             }
 
