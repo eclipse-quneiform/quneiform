@@ -99,6 +99,21 @@ namespace i18n_check
             }
 
       private:
+        [[nodiscard]]
+        std::vector<string_info> LoadSentencesOnSameLine(const std::wstring& filteredContent) const;
+        [[nodiscard]]
+        std::vector<string_info> LoadSplitSentences(const std::wstring& filteredContent) const;
+        [[nodiscard]]
+        std::vector<string_info> LoadMalformedContent(const std::wstring& filteredContent) const;
+        [[nodiscard]]
+        std::vector<string_info> LoadSmartQuotes(const std::wstring& filteredContent) const;
+        [[nodiscard]]
+        std::vector<string_info> LoadRanges(const std::wstring& filteredContent) const;
+        [[nodiscard]]
+        std::vector<string_info> LoadMalformedImages(const std::wstring& filteredContent) const;
+        [[nodiscard]]
+        std::vector<string_info> LoadAbsolutePaths(const std::wstring& filteredContent) const;
+
         std::vector<string_info> m_sentencesOnSameLine;
         std::vector<string_info> m_sentencesSplitOnDifferentLines;
         std::vector<string_info> m_malformedContent;
