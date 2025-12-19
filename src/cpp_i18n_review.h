@@ -15,16 +15,13 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __CPP_I18N_REVIEW_H__
-#define __CPP_I18N_REVIEW_H__
+#ifndef CPP_I18N_REVIEW_H
+#define CPP_I18N_REVIEW_H
 
 #include "i18n_review.h"
 #include <map>
-#include <set>
 #include <span>
 #include <string>
-#include <utility>
-#include <vector>
 
 /// @brief Classes for checking source code for internationalization/localization issues.
 namespace i18n_check
@@ -66,8 +63,8 @@ namespace i18n_check
             return std::wcsstr(text, L")\"");
             }
 
-        /// @returns How many characters a to step into/out of a raw string.
-        ///     In other words, how many characters are inside of the string marking the
+        /// @returns How many characters to step into/out of a raw string.
+        ///     In other words, how many characters are inside the string marking the
         ///     sentinel boundaries of the raw content.
         /// @param chr The tag indicating what type of raw string this is.
         [[nodiscard]]
@@ -112,11 +109,11 @@ namespace i18n_check
         /// @param asmStart The start of the asm section.
         /// @returns The end of the current asm block.
         [[nodiscard]]
-        wchar_t* process_assembly_block(wchar_t* asmStart);
+        wchar_t* process_assembly_block(wchar_t* asmStart) const;
 
         /// @returns @c true if text is an inline assembly block.
         [[nodiscard]]
-        bool is_assembly_block(std::wstring_view text) const noexcept
+        static bool is_assembly_block(std::wstring_view text) noexcept
             {
             assert(!text.empty());
             if (text.empty())
@@ -125,11 +122,11 @@ namespace i18n_check
                 }
             return (text.starts_with(L"asm ") || text.starts_with(L"__asm ") ||
                     (text.length() >= 7 && text.starts_with(L"__asm__") &&
-                     (std::iswspace(text[7]) || text[7] == L'(')));
+                     ((std::iswspace(text[7]) != 0) || text[7] == L'(')));
             }
         };
     } // namespace i18n_check
 
 /** @}*/
 
-#endif //__CPP_I18N_REVIEW_H__
+#endif // CPP_I18N_REVIEW_H

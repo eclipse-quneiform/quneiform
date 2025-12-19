@@ -83,7 +83,7 @@ namespace i18n_check
                         return;
                         }
                     // move to next character
-                    while (std::next(cppText) < endSentinel && std::iswspace(*cppText))
+                    while (std::next(cppText) < endSentinel && (std::iswspace(*cppText) != 0))
                         {
                         std::advance(cppText, 1);
                         }
@@ -116,9 +116,9 @@ namespace i18n_check
                         // something like "//--------" is OK
                         *std::next(cppText, 2) != L'-')
                         {
-                        m_comments_missing_space.push_back(
-                            string_info(std::wstring{}, string_info::usage_info{}, m_file_name,
-                                        get_line_and_column((cppText - m_file_start))));
+                        m_comments_missing_space.emplace_back(
+                            std::wstring{}, string_info::usage_info{}, m_file_name,
+                            get_line_and_column((cppText - m_file_start)));
                         }
                     // move to the end of the line
                     if (const size_t endOfLine = std::wcscspn(cppText, L"\n\r");
@@ -129,7 +129,7 @@ namespace i18n_check
                         std::advance(cppText, endOfLine);
                         }
                     // move to next character
-                    while (std::next(cppText) < endSentinel && std::iswspace(*cppText))
+                    while (std::next(cppText) < endSentinel && (std::iswspace(*cppText) != 0))
                         {
                         std::advance(cppText, 1);
                         }
@@ -148,9 +148,9 @@ namespace i18n_check
                                 // something like "//--------" is OK
                                 *std::next(cppText, 2) != L'-')
                                 {
-                                m_comments_missing_space.push_back(string_info(
+                                m_comments_missing_space.emplace_back(
                                     std::wstring{}, string_info::usage_info{}, m_file_name,
-                                    get_line_and_column((cppText - m_file_start))));
+                                    get_line_and_column((cppText - m_file_start)));
                                 }
                             // move to the end of the line
                             if (const size_t endOfLine = std::wcscspn(cppText, L"\n\r");
@@ -160,7 +160,8 @@ namespace i18n_check
                                     cppText, std::next(cppText, static_cast<ptrdiff_t>(endOfLine)));
                                 std::advance(cppText, endOfLine);
                                 }
-                            while (std::next(cppText) < endSentinel && std::iswspace(*cppText))
+                            while (std::next(cppText) < endSentinel &&
+                                   (std::iswspace(*cppText) != 0))
                                 {
                                 std::advance(cppText, 1);
                                 }
@@ -307,7 +308,7 @@ namespace i18n_check
                                 std::advance(connectedQuote, 1);
                                 }
                             // if a \ at the end of the line, then step over that and
-                            // restart stepping over an more spaces on the next line
+                            // restart stepping over any more spaces on the next line
                             if (std::next(connectedQuote) < endSentinel &&
                                 *connectedQuote == L'\\' &&
                                 (*std::next(connectedQuote) == L'\r' ||
@@ -375,15 +376,16 @@ namespace i18n_check
                             const std::wregex intPrintfMacro{
                                 LR"(PR[IN][uidoxX](8|16|32|64|FAST8|FAST16|FAST32|FAST64|LEAST8|LEAST16|LEAST32|LEAST64|MAX|PTR))"
                             };
-                            constexpr size_t int64PrintfMacroLength{ 6 };
-                            if (std::next(connectedQuote, int64PrintfMacroLength) < endSentinel &&
+                            constexpr size_t INT64_PRINTF_MACRO_LENGTH{ 6 };
+                            if (std::next(connectedQuote, INT64_PRINTF_MACRO_LENGTH) <
+                                    endSentinel &&
                                 std::regex_match(
-                                    std::wstring{ connectedQuote, int64PrintfMacroLength },
+                                    std::wstring{ connectedQuote, INT64_PRINTF_MACRO_LENGTH },
                                     intPrintfMacro))
                                 {
                                 clear_section(connectedQuote,
-                                              std::next(connectedQuote, int64PrintfMacroLength));
-                                std::advance(connectedQuote, int64PrintfMacroLength);
+                                              std::next(connectedQuote, INT64_PRINTF_MACRO_LENGTH));
+                                std::advance(connectedQuote, INT64_PRINTF_MACRO_LENGTH);
                                 while (connectedQuote < endSentinel &&
                                        static_cast<bool>(std::iswspace(*connectedQuote)))
                                     {
@@ -422,7 +424,7 @@ namespace i18n_check
                     {
                     const wchar_t* nextChar = std::next(
                         end, (isRawString ? get_raw_step_size(currentRawStringMarker) + 1 : 1));
-                    while (std::next(nextChar) < endSentinel && std::iswspace(*nextChar))
+                    while (std::next(nextChar) < endSentinel && (std::iswspace(*nextChar) != 0))
                         {
                         ++nextChar;
                         }
@@ -459,9 +461,8 @@ namespace i18n_check
                 {
                 if (static_cast<bool>(m_review_styles & check_tabs) && *cppText == L'\t')
                     {
-                    m_tabs.push_back(string_info(std::wstring{}, string_info::usage_info{},
-                                                 m_file_name,
-                                                 get_line_and_column((cppText - m_file_start))));
+                    m_tabs.emplace_back(std::wstring{}, string_info::usage_info{}, m_file_name,
+                                        get_line_and_column((cppText - m_file_start)));
                     }
                 else if (static_cast<bool>(m_review_styles & check_trailing_spaces) &&
                          *cppText == L' ' && std::next(cppText) < endSentinel &&
@@ -480,9 +481,8 @@ namespace i18n_check
                         std::next(m_file_start, static_cast<ptrdiff_t>(prevLineStart)),
                         (cppText - std::next(m_file_start, static_cast<ptrdiff_t>(prevLineStart))));
                     string_util::ltrim(codeLine);
-                    m_trailing_spaces.push_back(
-                        string_info(codeLine, string_info::usage_info{}, m_file_name,
-                                    get_line_and_column((cppText - m_file_start))));
+                    m_trailing_spaces.emplace_back(codeLine, string_info::usage_info{}, m_file_name,
+                                                   get_line_and_column((cppText - m_file_start)));
                     }
                 else if (static_cast<bool>(m_review_styles & check_line_width) &&
                          (*cppText == L'\n' || *cppText == L'\r') && cppText > m_file_start)
@@ -495,7 +495,7 @@ namespace i18n_check
                         previousNewLine = 0;
                         }
                     const size_t currentLineLength{ currentPos - (++previousNewLine) };
-                    if (currentLineLength > m_max_line_length)
+                    if (currentLineLength > MAX_LINE_LENGTH)
                         {
                         // ...also, only warn if the current line doesn't have a raw
                         // string in it--those can make it complicated to break a line
@@ -563,24 +563,20 @@ namespace i18n_check
     //--------------------------------------------------
     void cpp_i18n_review::remove_decorations(std::wstring& str) const
         {
-        while (str.length() > 0 && str.back() == L'&')
+        while (!str.empty() && str.back() == L'&')
             {
             str.pop_back();
             }
-        if (str.length() > 0 && str.back() == L'>')
+        if (!str.empty() && str.back() == L'>')
             {
             const auto templateStart = str.find_last_of(L'<');
             if (templateStart != std::wstring::npos)
                 {
                 // if constructing a shared_ptr, then use the type that it is constructing
-                if (std::wstring_view{ str }
-                            .substr(0, templateStart)
-                            .compare(L"std::make_shared") == 0 ||
-                    std::wstring_view{ str }.substr(0, templateStart).compare(L"make_shared") ==
-                        0 ||
-                    std::wstring_view{ str }.substr(0, templateStart).compare(L"std::shared_ptr") ==
-                        0 ||
-                    std::wstring_view{ str }.substr(0, templateStart).compare(L"shared_ptr") == 0)
+                if (std::wstring_view{ str }.substr(0, templateStart) == L"std::make_shared" ||
+                    std::wstring_view{ str }.substr(0, templateStart) == L"make_shared" ||
+                    std::wstring_view{ str }.substr(0, templateStart) == L"std::shared_ptr" ||
+                    std::wstring_view{ str }.substr(0, templateStart) == L"shared_ptr")
                     {
                     str.erase(0, templateStart + 1);
                     str.pop_back();
@@ -595,7 +591,7 @@ namespace i18n_check
         // Strip off colons in front of string (e.g., the common practice of typing "::" in front
         // of items in the global namespace).
         // Also get rid of any accessors (e.g., '>' (from "->") or '.').
-        if (str.length() > 0 && (str.front() == L':' || str.front() == L'>' || str.front() == L'.'))
+        if (!str.empty() && (str.front() == L':' || str.front() == L'>' || str.front() == L'.'))
             {
             const auto colonEnd = str.find_first_not_of(L":>.");
             str.erase(0, (colonEnd == std::wstring::npos) ? str.length() : colonEnd);
@@ -609,41 +605,41 @@ namespace i18n_check
         }
 
     //--------------------------------------------------
-    wchar_t* cpp_i18n_review::process_assembly_block(wchar_t* asmStart)
+    wchar_t* cpp_i18n_review::process_assembly_block(wchar_t* asmStart) const
         {
         assert(asmStart);
-        const std::wstring_view asmCommand1{ L"asm" };
-        const std::wstring_view asmCommand2{ L"__asm__" };
-        const std::wstring_view asmCommand3{ L"__asm" };
+        constexpr std::wstring_view ASM_COMMAND1{ L"asm" };
+        constexpr std::wstring_view ASM_COMMAND2{ L"__asm__" };
+        constexpr std::wstring_view ASM_COMMAND3{ L"__asm" };
         wchar_t* const originalStart = asmStart;
         // GCC
-        if (std::wcsncmp(asmStart, asmCommand1.data(), asmCommand1.length()) == 0 ||
-            std::wcsncmp(asmStart, asmCommand2.data(), asmCommand2.length()) == 0)
+        if (std::wcsncmp(asmStart, ASM_COMMAND1.data(), ASM_COMMAND1.length()) == 0 ||
+            std::wcsncmp(asmStart, ASM_COMMAND2.data(), ASM_COMMAND2.length()) == 0)
             {
             std::advance(asmStart,
-                         (std::wcsncmp(asmStart, asmCommand1.data(), asmCommand1.length()) == 0) ?
-                             asmCommand1.length() :
-                             asmCommand2.length());
+                         (std::wcsncmp(asmStart, ASM_COMMAND1.data(), ASM_COMMAND1.length()) == 0) ?
+                             ASM_COMMAND1.length() :
+                             ASM_COMMAND2.length());
             // step over spaces between __asm and its content
             while (*asmStart != 0 && static_cast<bool>(std::iswspace(*asmStart)))
                 {
                 std::advance(asmStart, 1);
                 }
-            const std::wstring_view volatileCommand1{ L"volatile" };
-            const std::wstring_view volatileCommand2{ L"__volatile__" };
+            constexpr std::wstring_view VOLATILE_COMMAND1{ L"volatile" };
+            constexpr std::wstring_view VOLATILE_COMMAND2{ L"__volatile__" };
             // skip (optional) volatile modifier
-            if (std::wcsncmp(asmStart, volatileCommand1.data(), volatileCommand1.length()) == 0)
+            if (std::wcsncmp(asmStart, VOLATILE_COMMAND1.data(), VOLATILE_COMMAND1.length()) == 0)
                 {
-                std::advance(asmStart, volatileCommand1.length());
+                std::advance(asmStart, VOLATILE_COMMAND1.length());
                 while (*asmStart != 0 && static_cast<bool>(std::iswspace(*asmStart)))
                     {
                     std::advance(asmStart, 1);
                     }
                 }
-            else if (std::wcsncmp(asmStart, volatileCommand2.data(), volatileCommand2.length()) ==
+            else if (std::wcsncmp(asmStart, VOLATILE_COMMAND2.data(), VOLATILE_COMMAND2.length()) ==
                      0)
                 {
-                std::advance(asmStart, volatileCommand2.length());
+                std::advance(asmStart, VOLATILE_COMMAND2.length());
                 while (*asmStart != 0 && static_cast<bool>(std::iswspace(*asmStart)))
                     {
                     std::advance(asmStart, 1);
@@ -671,9 +667,9 @@ namespace i18n_check
             return nullptr;
             }
         // MSVC
-        if (std::wcsncmp(asmStart, asmCommand3.data(), asmCommand3.length()) == 0)
+        if (std::wcsncmp(asmStart, ASM_COMMAND3.data(), ASM_COMMAND3.length()) == 0)
             {
-            std::advance(asmStart, asmCommand3.length());
+            std::advance(asmStart, ASM_COMMAND3.length());
             // step over spaces between __asm and its content
             while (*asmStart != 0 && static_cast<bool>(std::iswspace(*asmStart)))
                 {
@@ -712,43 +708,43 @@ namespace i18n_check
         const std::wregex releaseRE{ L"[_]*RELEASE[_]*" };
         const auto findSectionEnd = [](wchar_t* sectionStart) -> wchar_t*
         {
-            const std::wstring_view elifCommand{ L"#elif" };
-            const std::wstring_view endifCommand{ L"#endif" };
+            constexpr std::wstring_view ELIF_COMMAND{ L"#elif" };
+            constexpr std::wstring_view ENDIF_COMMAND{ L"#endif" };
             const auto* closingElIf =
-                string_util::find_matching_close_tag(sectionStart, L"#if", elifCommand);
+                string_util::find_matching_close_tag(sectionStart, L"#if", ELIF_COMMAND);
             const auto* closingEndIf =
-                string_util::find_matching_close_tag(sectionStart, L"#if", endifCommand);
+                string_util::find_matching_close_tag(sectionStart, L"#if", ENDIF_COMMAND);
             if (closingElIf != nullptr && closingEndIf != nullptr)
                 {
                 if (closingElIf < closingEndIf)
                     {
                     auto pDiff{ closingElIf - sectionStart };
                     return std::next(sectionStart,
-                                     pDiff + static_cast<ptrdiff_t>(elifCommand.length()));
+                                     pDiff + static_cast<ptrdiff_t>(ELIF_COMMAND.length()));
                     }
                 auto pDiff{ closingEndIf - sectionStart };
                 return std::next(sectionStart,
-                                 pDiff + static_cast<ptrdiff_t>(endifCommand.length()));
+                                 pDiff + static_cast<ptrdiff_t>(ENDIF_COMMAND.length()));
                 }
             if (closingElIf != nullptr)
                 {
                 auto pDiff{ closingElIf - sectionStart };
                 return std::next(sectionStart,
-                                 pDiff + static_cast<ptrdiff_t>(elifCommand.length()));
+                                 pDiff + static_cast<ptrdiff_t>(ELIF_COMMAND.length()));
                 }
             if (closingEndIf != nullptr)
                 {
                 auto pDiff{ closingEndIf - sectionStart };
                 return std::next(sectionStart,
-                                 pDiff + static_cast<ptrdiff_t>(endifCommand.length()));
+                                 pDiff + static_cast<ptrdiff_t>(ENDIF_COMMAND.length()));
                 }
             return nullptr;
         };
 
-        const std::wstring_view ifndefCommand{ L"ifndef" };
-        if (std::wstring_view{ directiveStart }.starts_with(ifndefCommand))
+        constexpr std::wstring_view IFNDEF_COMMAND{ L"ifndef" };
+        if (std::wstring_view{ directiveStart }.starts_with(IFNDEF_COMMAND))
             {
-            std::advance(directiveStart, ifndefCommand.length());
+            std::advance(directiveStart, IFNDEF_COMMAND.length());
             while (static_cast<bool>(std::iswspace(*directiveStart)))
                 {
                 std::advance(directiveStart, 1);
@@ -766,10 +762,10 @@ namespace i18n_check
                        findSectionEnd(defSymbolEnd) :
                        nullptr;
             }
-        const std::wstring_view ifdefCommand{ L"ifdef" };
-        if (std::wstring_view{ directiveStart }.starts_with(ifdefCommand))
+        constexpr std::wstring_view IFDEF_COMMAND{ L"ifdef" };
+        if (std::wstring_view{ directiveStart }.starts_with(IFDEF_COMMAND))
             {
-            std::advance(directiveStart, ifdefCommand.length());
+            std::advance(directiveStart, IFDEF_COMMAND.length());
             while (static_cast<bool>(std::iswspace(*directiveStart)))
                 {
                 std::advance(directiveStart, 1);
@@ -783,10 +779,10 @@ namespace i18n_check
                                           static_cast<size_t>(defSymbolEnd - directiveStart) };
             return (std::regex_match(defSymbol, debugRE)) ? findSectionEnd(defSymbolEnd) : nullptr;
             }
-        const std::wstring_view ifdefinedCommand{ _DT(L"if defined") };
-        if (std::wstring_view{ directiveStart }.starts_with(ifdefinedCommand))
+        constexpr std::wstring_view IFDEFINED_COMMAND{ _DT(L"if defined") };
+        if (std::wstring_view{ directiveStart }.starts_with(IFDEFINED_COMMAND))
             {
-            std::advance(directiveStart, ifdefinedCommand.length());
+            std::advance(directiveStart, IFDEFINED_COMMAND.length());
             while (static_cast<bool>(std::iswspace(*directiveStart)))
                 {
                 std::advance(directiveStart, 1);
@@ -800,10 +796,10 @@ namespace i18n_check
                                           static_cast<size_t>(defSymbolEnd - directiveStart) };
             return (std::regex_match(defSymbol, debugRE)) ? findSectionEnd(defSymbolEnd) : nullptr;
             }
-        const std::wstring_view ifCommand{ L"if" };
-        if (std::wstring_view{ directiveStart }.starts_with(ifCommand))
+        constexpr std::wstring_view IF_COMMAND{ L"if" };
+        if (std::wstring_view{ directiveStart }.starts_with(IF_COMMAND))
             {
-            std::advance(directiveStart, ifCommand.length());
+            std::advance(directiveStart, IF_COMMAND.length());
             while (static_cast<bool>(std::iswspace(*directiveStart)))
                 {
                 std::advance(directiveStart, 1);
@@ -866,7 +862,7 @@ namespace i18n_check
                     // At end of line?
                     // Make sure this isn't a multi-line directive before stopping.
                     bool multiLine = false;
-                    wchar_t* backTrace = end;
+                    const wchar_t* backTrace = end;
                     while (backTrace > directiveStart)
                         {
                         if (static_cast<bool>(std::iswspace(*backTrace)))
@@ -893,10 +889,10 @@ namespace i18n_check
             bool shouldClearSection{ true };
             // special parsing logic for #define sections
             // (try to review strings in here as best we can)
-            const std::wstring_view defineCommand{ L"define" };
-            if (std::wstring_view{ directiveStart }.starts_with(defineCommand))
+            constexpr std::wstring_view DEFINE_COMMAND{ L"define" };
+            if (std::wstring_view{ directiveStart }.starts_with(DEFINE_COMMAND))
                 {
-                std::advance(directiveStart, defineCommand.length());
+                std::advance(directiveStart, DEFINE_COMMAND.length());
                 while (*directiveStart != 0 && string_util::is_either(*directiveStart, L' ', L'\t'))
                     {
                     std::advance(directiveStart, 1);
@@ -931,9 +927,8 @@ namespace i18n_check
                     std::advance(endOfPossibleFuncName, 1);
                     }
                 if (*endOfPossibleFuncName == L'(' && *directiveStart != 0 &&
-                    m_ctors_to_ignore.find(
-                        std::wstring(directiveStart, endOfPossibleFuncName - directiveStart)) !=
-                        m_ctors_to_ignore.cend())
+                    m_ctors_to_ignore.contains(
+                        std::wstring(directiveStart, endOfPossibleFuncName - directiveStart)))
                     {
                     directiveStart = std::next(endOfPossibleFuncName);
                     }

@@ -20,8 +20,8 @@ namespace i18n_check
     };
 
     //------------------------------------------------
-    void translation_catalog_review::review_strings(analyze_callback_reset resetCallback,
-                                                    analyze_callback callback)
+    void translation_catalog_review::review_strings(const analyze_callback_reset& resetCallback,
+                                                    const analyze_callback& callback)
         {
         std::vector<std::wstring> printfStrings1, printfStrings2;
         std::wstring errorInfo;
@@ -86,7 +86,7 @@ namespace i18n_check
                 {
                 if (const auto [isUntranslatable, translatableContentLength] =
                         is_untranslatable_string(catEntry.second.m_source, false);
-                    (m_review_styles & check_l10n_contains_excessive_nonl10n_content) &&
+                    ((m_review_styles & check_l10n_contains_excessive_nonl10n_content) != 0) &&
                     !isUntranslatable &&
                     catEntry.second.m_source.length() > (translatableContentLength * 3) &&
                     catEntry.second.m_comment.empty())
@@ -97,7 +97,7 @@ namespace i18n_check
 
                 if (const auto [isUntranslatable, translatableContentLength] =
                         is_untranslatable_string(catEntry.second.m_source_plural, false);
-                    (m_review_styles & check_l10n_contains_excessive_nonl10n_content) &&
+                    ((m_review_styles & check_l10n_contains_excessive_nonl10n_content) != 0) &&
                     !isUntranslatable &&
                     catEntry.second.m_source_plural.length() > (translatableContentLength * 3) &&
                     catEntry.second.m_comment.empty())
@@ -138,7 +138,7 @@ namespace i18n_check
                                                           catEntry.second.m_source);
                     }
                 }
-            if (static_cast<bool>(m_review_styles & check_pluaralization))
+            if (static_cast<bool>(m_review_styles & check_pluralization))
                 {
                 if (is_string_faux_plural(catEntry.second.m_source))
                     {
@@ -167,7 +167,7 @@ namespace i18n_check
                         printfStrings2 =
                             load_cpp_printf_commands(catEntry.second.m_translation, errorInfo);
 
-                        if (printfStrings1.size() || printfStrings2.size())
+                        if (!printfStrings1.empty() || !printfStrings2.empty())
                             {
                             if (printfStrings1 != printfStrings2)
                                 {
@@ -186,7 +186,7 @@ namespace i18n_check
                         printfStrings2 = load_cpp_printf_commands(
                             catEntry.second.m_translation_plural, errorInfo);
 
-                        if (printfStrings1.size() || printfStrings2.size())
+                        if (!printfStrings1.empty() || !printfStrings2.empty())
                             {
                             if (printfStrings1 != printfStrings2)
                                 {
@@ -212,7 +212,7 @@ namespace i18n_check
                             printfStrings1 = load_positional_commands(src);
                             printfStrings2 = load_positional_commands(trans);
 
-                            if (printfStrings1.size() || printfStrings2.size())
+                            if (!printfStrings1.empty() || !printfStrings2.empty())
                                 {
                                 if (printfStrings1 != printfStrings2)
                                     {
@@ -236,8 +236,8 @@ namespace i18n_check
             if (static_cast<bool>(m_review_styles & check_accelerators) ||
                 static_cast<bool>(m_review_styles & check_malformed_strings))
                 {
-                const auto reviewAccelerators =
-                    [&catEntry, &srcResults, &transResults, &reMatches, this](auto src, auto trans)
+                const auto reviewAccelerators = [&catEntry, &srcResults, &transResults, &reMatches,
+                                                 this](const auto& src, const auto& trans)
                 {
                     if (!trans.empty())
                         {
@@ -265,9 +265,13 @@ namespace i18n_check
                                 {
                                 catEntry.second.m_issues.emplace_back(
                                     translation_issue::accelerator_issue,
-                                    L"'" + src + _WXTRANS_WSTR(L"' vs. '") + trans + L"'");
+                                    std::wstring{ L"'" }
+                                        .append(src)
+                                        .append(_WXTRANS_WSTR(L"' vs. '"))
+                                        .append(trans)
+                                        .append(L"'"));
                                 }
-                            // if source has an accelerator key but the translation does not
+                            // if source has an accelerator key but the translation does not,
                             // but it does have a %, then that probably was meant to be an &
                             if (static_cast<bool>(m_review_styles & check_malformed_strings) &&
                                 srcResults.size() == 1 && src.find(L'%') == std::wstring::npos &&
@@ -275,7 +279,11 @@ namespace i18n_check
                                 {
                                 catEntry.second.m_issues.emplace_back(
                                     translation_issue::malformed_translation,
-                                    L"'" + src + _WXTRANS_WSTR(L"' vs. '") + trans + L"'");
+                                    std::wstring{ L"'" }
+                                        .append(src)
+                                        .append(_WXTRANS_WSTR(L"' vs. '"))
+                                        .append(trans)
+                                        .append(L"'"));
                                 }
                             }
                         }
@@ -314,8 +322,8 @@ namespace i18n_check
 
             if (static_cast<bool>(m_review_styles & check_halfwidth))
                 {
-                const auto reviewHW =
-                    [&catEntry, &srcResults, &transResults, &unrollStrings](auto src, auto trans)
+                const auto reviewHW = [&catEntry, &srcResults, &transResults,
+                                       &unrollStrings](const auto& src, const auto& trans)
                 {
                     if (!src.empty())
                         {
@@ -359,7 +367,7 @@ namespace i18n_check
                         printfStrings1 = load_numbers(src);
                         printfStrings2 = load_numbers(trans);
 
-                        if (printfStrings1.size() || printfStrings2.size())
+                        if (!printfStrings1.empty() || !printfStrings2.empty())
                             {
                             if (printfStrings1 != printfStrings2)
                                 {
@@ -550,7 +558,7 @@ namespace i18n_check
                             {
                             // if source is an exclamation and the translation is not,
                             // then that is OK
-                            if (!(i18n_string_util::is_exclamation(lastSrcChar) && !transIsStop) &&
+                            if ((!i18n_string_util::is_exclamation(lastSrcChar) || transIsStop) &&
                                 // translation ending with ')' is OK also if source has a full stop
                                 !(srcIsStop &&
                                   i18n_string_util::is_close_parenthesis(lastTransChar)))

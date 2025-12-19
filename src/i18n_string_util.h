@@ -15,19 +15,10 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_EXTRACT_H__
-#define __I18N_EXTRACT_H__
+#ifndef I18N_EXTRACT_H
+#define I18N_EXTRACT_H
 
-#include "char_traits.h"
-#include "string_util.h"
-#include <cassert>
-#include <cctype>
-#include <cstddef>
-#include <cstring>
-#include <cwchar>
-#include <cwctype>
 #include <regex>
-#include <set>
 #include <string>
 #include <string_view>
 
@@ -56,7 +47,7 @@ namespace i18n_string_util
     [[nodiscard]]
     constexpr static bool is_numeric_7bit(const wchar_t ch) noexcept
         {
-        return (ch >= L'0' && ch <= L'9') ? true : false;
+        return ch >= L'0' && ch <= L'9';
         }
 
     /** @returns @c true if a character is a letter
@@ -79,8 +70,7 @@ namespace i18n_string_util
             true : (ch == 146) ?    // apostrophe
             true : (ch == 180) ?    // apostrophe
             true : (ch == 0xFF07) ? // full-width apostrophe
-            true : (ch == 0x2019) ? // right single apostrophe
-            true : false;
+            true : (ch == 0x2019);  // right single apostrophe
         // clang-format on
         }
 
@@ -97,8 +87,7 @@ namespace i18n_string_util
             true : (ch == 0xFF0E) ? // fullwidth full stop
             true : (ch == 0xFE12) ? // vertical full stop
             true : (ch == 0x06D4) ? // Arabic full stop
-            true : (ch == 0x2026) ? // ellipsis
-            true : false;
+            true : (ch == 0x2026);  // ellipsis
         // clang-format on
         }
 
@@ -112,12 +101,11 @@ namespace i18n_string_util
             true : (ch == 0xFE15) ? // presentation
             true : (ch == 0xFE57) ? // small
             true : (ch == 0x00A1) ? // inverted
-            true : (ch == 0xFF01) ? // fullwidth
-            true : false;
+            true : (ch == 0xFF01);  // fullwidth
         // clang-format on
         }
 
-    /** @returns @c true if a character is an question mark.
+    /** @returns @c true if a character is a question mark.
         @param ch The letter to be reviewed.*/
     [[nodiscard]]
     constexpr static bool is_question(const wchar_t ch) noexcept
@@ -125,8 +113,7 @@ namespace i18n_string_util
         // clang-format off
         return (ch == L'?') ?       // ?
             true : (ch == 0x061F) ? // Arabic
-            true : (ch == 0xFF1F) ? // fullwidth
-            true : false;
+            true : (ch == 0xFF1F);  // fullwidth
         // clang-format on
         }
 
@@ -137,8 +124,7 @@ namespace i18n_string_util
         {
         // clang-format off
         return (ch == L':') ?       // :
-            true : (ch == 0xFF1A) ? // fullwidth
-            true : false;
+            true : (ch == 0xFF1A);  // fullwidth
         // clang-format on
         }
 
@@ -149,8 +135,7 @@ namespace i18n_string_util
         {
         // clang-format off
         return (ch == L')') ?       // )
-            true : (ch == 0xFF09) ? // fullwidth
-            true : false;
+            true : (ch == 0xFF09);  // fullwidth
         // clang-format on
         }
 
@@ -245,7 +230,7 @@ namespace i18n_string_util
             }
         }
 
-    /// @brief Removes escaped unicode values in @c str.
+    /// @brief Removes escaped Unicode values in @c str.
     ///     (e.g., "\u266f" will be replaced with spaces).
     /// @param[out] str The string being escaped.
     void remove_escaped_unicode_values(std::wstring& str);
@@ -269,7 +254,7 @@ namespace i18n_string_util
         }
 
     /// @brief Converts escaped control characters (e.g., "\n")
-    ///     inside of a string into spaces.
+    ///     inside a string into spaces.
     /// @param[out] str The string being escaped.
     template<typename string_typeT>
     void replace_escaped_control_chars(string_typeT& str)
@@ -288,4 +273,4 @@ namespace i18n_string_util
 
 /** @}*/
 
-#endif //__I18N_EXTRACT_H__
+#endif // I18N_EXTRACT_H

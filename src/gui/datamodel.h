@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_DATAMODEL_H__
-#define __I18N_DATAMODEL_H__
+#ifndef I18N_DATAMODEL_H
+#define I18N_DATAMODEL_H
 
 #include <memory>
 #include <unordered_map>
@@ -49,13 +49,17 @@ class I18NResultsTreeModelNode
     // Root node for file.
     // Filename is copied into warning ID so that it gets rendered at the root level.
     I18NResultsTreeModelNode(I18NResultsTreeModelNode* parent, const wxString& fileName)
-        : m_fileName(fileName), m_warningId(fileName), m_container(true), m_parent(parent)
+        : m_fileName(fileName), m_warningId(fileName), m_parent(parent)
         {
         }
 
     ~I18NResultsTreeModelNode() = default;
 
-    bool IsContainer() const { return m_container; }
+    [[nodiscard]]
+    bool IsContainer() const
+        {
+        return m_container;
+        }
 
     I18NResultsTreeModelNode* GetParent() { return m_parent; }
 
@@ -71,7 +75,11 @@ class I18NResultsTreeModelNode
         m_children.push_back(I18NResultsTreeModelNodePtr(child));
         }
 
-    size_t GetChildCount() const { return m_children.size(); }
+    [[nodiscard]]
+    size_t GetChildCount() const
+        {
+        return m_children.size();
+        }
 
     [[nodiscard]]
     bool operator==(const wxString& fileName) const
@@ -79,7 +87,6 @@ class I18NResultsTreeModelNode
         return m_fileName.CmpNoCase(fileName) == 0;
         }
 
-  public:
     wxString m_fileName;
     wxString m_warningId;
     wxString m_issue;
@@ -100,7 +107,7 @@ class I18NResultsTreeModel : public wxDataViewModel
   public:
     I18NResultsTreeModel();
 
-    ~I18NResultsTreeModel() { delete m_root; }
+    ~I18NResultsTreeModel() override { delete m_root; }
 
     /// @brief Sets the base path common to all file path nodes.
     /// @details This will be removed from the file paths when rendered in the display.
@@ -119,6 +126,7 @@ class I18NResultsTreeModel : public wxDataViewModel
                 const int line, const int column);
 
     // override sorting to always sort branches ascendingly
+    [[nodiscard]]
     int Compare(const wxDataViewItem& item1, const wxDataViewItem& item2, unsigned int column,
                 bool ascending) const final;
 
@@ -126,7 +134,9 @@ class I18NResultsTreeModel : public wxDataViewModel
     void GetValue(wxVariant& variant, const wxDataViewItem& item, unsigned int col) const final;
     bool SetValue(const wxVariant& variant, const wxDataViewItem& item, unsigned int col) final;
 
+    [[nodiscard]]
     wxDataViewItem GetParent(const wxDataViewItem& item) const final;
+    [[nodiscard]]
     bool IsContainer(const wxDataViewItem& item) const final;
     unsigned int GetChildren(const wxDataViewItem& parent, wxDataViewItemArray& array) const final;
 
@@ -137,4 +147,4 @@ class I18NResultsTreeModel : public wxDataViewModel
 
     /** @}*/
 
-#endif //__I18N_DATAMODEL_H__
+#endif // I18N_DATAMODEL_H

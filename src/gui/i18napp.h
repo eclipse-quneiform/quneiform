@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_APP_H__
-#define __I18N_APP_H__
+#ifndef I18N_APP_H
+#define I18N_APP_H
 
 #include "i18nframe.h"
 
@@ -53,4 +53,4 @@ class I18NApp : public wxApp
 
     /** @}*/
 
-#endif //__I18N_APP_H__
+#endif // I18N_APP_H

@@ -15,13 +15,14 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_REVIEW_H__
-#define __I18N_REVIEW_H__
+#ifndef I18N_REVIEW_H
+#define I18N_REVIEW_H
 
+#include "char_traits.h"
 #include "donttranslate.h"
 #include "i18n_string_util.h"
+#include "string_util.h"
 #include <filesystem>
-#include <format>
 #include <map>
 #include <optional>
 #include <set>
@@ -125,7 +126,7 @@ namespace i18n_check
         check_multipart_strings = (static_cast<int64_t>(1) << 17),
         /// @brief Check for strings being used for both singular and plural that
         ///     should be use different variations.
-        check_pluaralization = (static_cast<int64_t>(1) << 18),
+        check_pluralization = (static_cast<int64_t>(1) << 18),
         /// @brief Check for strings with an article (e.g., 'the', 'a') in front of a
         ///     formatting placeholder.\n
         ///     Also checks for pronouns being used as individual strings.
@@ -159,7 +160,7 @@ namespace i18n_check
         check_malformed_strings | check_utf8_with_signature | check_fonts |
         check_l10n_concatenated_strings | check_needing_context | check_suspect_i18n_usage |
         check_l10n_contains_excessive_nonl10n_content | check_multipart_strings |
-        check_pluaralization | check_articles_proceeding_placeholder |
+        check_pluralization | check_articles_proceeding_placeholder |
         check_literal_l10n_string_comparison),
 
         /// @brief Check for mismatching printf commands between source strings and their
@@ -357,8 +358,8 @@ namespace i18n_check
                 usage_info() = default;
 
                 /// @private
-                usage_info(const usage_type& type, std::wstring val, std::wstring varType,
-                           std::wstring varOperator)
+                usage_info(const usage_type& type, std::wstring val, const std::wstring& varType,
+                           const std::wstring& varOperator)
                     : m_type(type), m_value(std::move(val)),
                       m_variableInfo(std::wstring{}, varType, varOperator)
                     {
@@ -369,8 +370,8 @@ namespace i18n_check
                     }
 
                 /// @private
-                usage_info(const usage_type& type, std::wstring val, std::wstring varType,
-                           std::wstring varOperator, bool hasContext)
+                usage_info(const usage_type& type, std::wstring val, const std::wstring& varType,
+                           const std::wstring& varOperator, const bool hasContext)
                     : m_type(type), m_value(std::move(val)),
                       m_variableInfo(std::wstring{}, varType, varOperator), m_hasContext(hasContext)
                     {
@@ -399,7 +400,7 @@ namespace i18n_check
                 @param fileName The filename.
                 @param lineAndColumn The line and column number.*/
             string_info(std::wstring str, usage_info usage, std::filesystem::path fileName,
-                        const std::pair<size_t, size_t> lineAndColumn)
+                        const std::pair<size_t, size_t>& lineAndColumn)
                 : m_string(std::move(str)), m_usage(std::move(usage)),
                   m_file_name(std::move(fileName)), m_line(lineAndColumn.first),
                   m_column(lineAndColumn.second)
@@ -436,7 +437,7 @@ namespace i18n_check
                 @param str The string resource.
                 @param message Diagnostic message.*/
             parse_messages(std::filesystem::path filename,
-                           const std::pair<size_t, size_t> positionInFile, std::wstring str,
+                           const std::pair<size_t, size_t>& positionInFile, std::wstring str,
                            std::wstring message)
                 : m_file_name(std::move(filename)), m_resourceString(std::move(str)),
                   m_message(std::move(message)), m_line(positionInFile.first),
@@ -458,10 +459,10 @@ namespace i18n_check
 
         /// @brief Constructor.
         /// @param verbose @c true to include verbose warnings.
-        i18n_review(const bool verbose);
+        explicit i18n_review(const bool verbose);
 
         /// @private
-        virtual ~i18n_review() {}
+        virtual ~i18n_review() = default;
 
         /** @brief Adds a function to be considered as internal (e.g., debug functions).
             @details Strings passed to this function will not be considered translatable.
@@ -495,11 +496,11 @@ namespace i18n_check
             }
 
         /** @brief Main interface for extracting resource text from C++ source code.
-            @param file_text The text to review.
-            @param file_name The (optional) name of source file being analyzed.*/
+            @param fileText The text to review.
+            @param fileName The (optional) name of source file being analyzed.*/
         virtual void
-        operator()(std::wstring_view file_text,
-                   const std::filesystem::path& file_name = std::filesystem::path{}) = 0;
+        operator()(std::wstring_view fileText,
+                   const std::filesystem::path& fileName = std::filesystem::path{}) = 0;
 
         /** @brief Finalizes the review process after all files have been loaded.
             @details Reviews any strings that are available for translation that are suspect,
@@ -511,8 +512,8 @@ namespace i18n_check
                 Returning @c false indicates that the user cancelled the analysis.
             @note This should be called after you are finished processing all
                 of your files via `operator()`.*/
-        virtual void review_strings([[maybe_unused]] analyze_callback_reset resetCallback,
-                                    [[maybe_unused]] analyze_callback callback);
+        virtual void review_strings([[maybe_unused]] const analyze_callback_reset& resetCallback,
+                                    [[maybe_unused]] const analyze_callback& callback);
 
         /// @returns The strings in the code that are set to be extracted as translatable.
         [[nodiscard]]
@@ -856,7 +857,7 @@ namespace i18n_check
         /// @details For example, `100` would mean that the translation can be 100% longer than the
         ///     source string (i.e., double its size). `0` would mean that the translation
         ///     must be the same length (or shorter) than the source string.
-        /// @param threshold The maximum percent before an warning is emitted.
+        /// @param threshold The maximum percent before a warning is emitted.
         void set_translation_length_threshold(const uint16_t threshold) noexcept
             {
             m_translation_length_threshold = threshold;
@@ -881,7 +882,7 @@ namespace i18n_check
         [[nodiscard]]
         static bool is_font_name(const string_util::case_insensitive_wstring& str)
             {
-            return m_font_names.find(str) != m_font_names.cend();
+            return m_font_names.contains(str);
             }
 
         /// @returns @c true if string is a known file extension.
@@ -889,7 +890,7 @@ namespace i18n_check
         [[nodiscard]]
         static bool is_file_extension(const string_util::case_insensitive_wstring& str)
             {
-            return m_file_extensions.find(str) != m_file_extensions.cend();
+            return m_file_extensions.contains(str);
             }
 
         /** @brief Loads all `printf` format commands from a string.
@@ -1003,7 +1004,7 @@ namespace i18n_check
 
         // traditionally, 80 chars is the recommended line width,
         // but 120 is a bit more reasonable
-        constexpr static auto m_max_line_length{ 120 };
+        constexpr static auto MAX_LINE_LENGTH{ 120 };
 
         /// @private
         struct exclusion_block_find_info
@@ -1027,7 +1028,7 @@ namespace i18n_check
                 {
                 return false;
                 }
-            else if (str.m_string == L"%" || str.m_string == L"%)" || str.m_string == L"$")
+            if (str.m_string == L"%" || str.m_string == L"%)" || str.m_string == L"$")
                 {
                 if (str.m_usage.m_variableInfo.m_operator == L"=" ||
                     str.m_usage.m_variableInfo.m_operator == L"+" ||
@@ -1036,18 +1037,16 @@ namespace i18n_check
                     {
                     return true;
                     }
-                else if (str.m_usage.m_type == string_info::usage_info::usage_type::function &&
-                         (str.m_usage.m_value == L"append" || str.m_usage.m_value == L"Append" ||
-                          str.m_usage.m_value == L"prepend" || str.m_usage.m_value == L"Prepend"))
+                if (str.m_usage.m_type == string_info::usage_info::usage_type::function &&
+                    (str.m_usage.m_value == L"append" || str.m_usage.m_value == L"Append" ||
+                     str.m_usage.m_value == L"prepend" || str.m_usage.m_value == L"Prepend"))
                     {
                     return true;
                     }
                 return false;
                 }
-            else
-                {
-                return false;
-                }
+
+            return false;
             }
 
         /// @returns @c true if @c str is a search or comparison function.
@@ -1055,13 +1054,13 @@ namespace i18n_check
         [[nodiscard]]
         static bool is_search_or_comparison_function(const std::wstring& str)
             {
-            static std::set<std::wstring_view> strFunctions{
+            static const std::set<std::wstring_view> strFunctions{
                 _DT(L"find"),        L"find_first_of", L"find_last_of", L"find_first_not_of",
                 L"find_last_not_of", _DT(L"rfind"),    L"starts_with",  L"ends_with",
                 L"StartsWith",       L"EndsWith",      _DT(L"Cmp"),     L"CmpNoCase",
                 _DT(L"compare")
             };
-            return (strFunctions.find(str) != strFunctions.cend());
+            return (strFunctions.contains(str));
             }
 
         /// @returns @c true if there is a comparison operator in front of string.
@@ -1124,7 +1123,7 @@ namespace i18n_check
                 function or variable being assigned to.
             @param functionName If this quote is inside of function, the function name.
             @param variableInfo If being assigned to a variable, the variable's information.
-            @param deprecatedMacroEncountered If the quote is inside of a deprecated
+            @param deprecatedMacroEncountered If the quote is inside a deprecated
                 macro, then name of this macro.
             @param parameterPosition The string's position in the function call (if applicable).
             @param isFollowedByComma Whether the quote is followed by a comma.*/
@@ -1139,16 +1138,15 @@ namespace i18n_check
         /// @details If so, then it will be added to the queue of non-localizable strings;
         ///     otherwise, it will be considered an internal string.
         /// @param str The string to review.
-        void classify_non_localizable_string(string_info str);
+        void classify_non_localizable_string(const string_info& str);
 
         /// @returns @c true if a function name is a translation extraction function.
         /// @param functionName The function name to review.
         [[nodiscard]]
         bool is_i18n_function(std::wstring_view functionName) const
             {
-            return m_localization_functions.find(functionName) != m_localization_functions.cend() ||
-                   m_localization_functions.find(extract_base_function(functionName)) !=
-                       m_localization_functions.cend();
+            return m_localization_functions.contains(functionName) ||
+                   m_localization_functions.contains(extract_base_function(functionName));
             }
 
         /// @returns @c true if a function name is a translation extraction function that takes an
@@ -1157,10 +1155,9 @@ namespace i18n_check
         [[nodiscard]]
         bool is_i18n_with_context_function(std::wstring_view functionName) const
             {
-            return m_localization_with_context_functions.find(functionName) !=
-                       m_localization_with_context_functions.cend() ||
-                   m_localization_with_context_functions.find(extract_base_function(
-                       functionName)) != m_localization_with_context_functions.cend();
+            return m_localization_with_context_functions.contains(functionName) ||
+                   m_localization_with_context_functions.contains(
+                       extract_base_function(functionName));
             }
 
         /// @returns @c true if a function name is a translation noop function.
@@ -1168,10 +1165,8 @@ namespace i18n_check
         [[nodiscard]]
         bool is_non_i18n_function(std::wstring_view functionName) const
             {
-            return m_non_localizable_functions.find(functionName) !=
-                       m_non_localizable_functions.cend() ||
-                   m_non_localizable_functions.find(extract_base_function(functionName)) !=
-                       m_non_localizable_functions.cend();
+            return m_non_localizable_functions.contains(functionName) ||
+                   m_non_localizable_functions.contains(extract_base_function(functionName));
             }
 
         /// @returns @c true if a string is a keyword.
@@ -1181,7 +1176,7 @@ namespace i18n_check
         [[nodiscard]]
         bool is_keyword(std::wstring_view str) const
             {
-            return m_keywords.find(str) != m_keywords.cend();
+            return m_keywords.contains(str);
             }
 
         /** @brief Logs a debug message.
@@ -1191,8 +1186,8 @@ namespace i18n_check
         void log_message(const std::wstring& info, const std::wstring& message,
                          const size_t positionInFile) const
             {
-            m_error_log.push_back(
-                parse_messages(m_file_name, get_line_and_column(positionInFile), info, message));
+            m_error_log.emplace_back(m_file_name, get_line_and_column(positionInFile), info,
+                                     message);
             }
 
         /** @brief Loads ID assignments in the text to see if there are
@@ -1283,7 +1278,7 @@ namespace i18n_check
         /// @details Useful for excluding an already processed text block.
         /// @param start The starting position.
         /// @param end The ending position.
-        void clear_section(wchar_t* start, const wchar_t* end) const noexcept
+        static void clear_section(wchar_t* start, const wchar_t* end) noexcept
             {
             for (ptrdiff_t i = 0; i < end - start; ++i)
                 {
@@ -1297,7 +1292,7 @@ namespace i18n_check
         /// @param str The string to clear.
         /// @param start The starting position.
         /// @param end The ending position.
-        void clear_section(std::wstring& str, const size_t start, const size_t end) const noexcept
+        static void clear_section(std::wstring& str, const size_t start, const size_t end) noexcept
             {
             for (auto i = start; i < end && i < str.length(); ++i)
                 {
@@ -1354,7 +1349,7 @@ namespace i18n_check
         /// @brief Collapses non-raw strings that are multiline.
         void process_strings();
         /// @brief Reviews output integrity to see if there were any parsing errors.
-        void run_diagnostics();
+        void run_diagnostics() const;
 
         const wchar_t* m_file_start{ nullptr };
 
@@ -1471,7 +1466,7 @@ namespace i18n_check
             {
             std::wstring msgId{ msg };
 
-            if (msgId.length() > 0 && msgId.front() == L'"')
+            if (!msgId.empty() && msgId.front() == L'"')
                 {
                 msgId.erase(0, 1);
                 }
@@ -1501,4 +1496,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif //__I18N_REVIEW_H__
+#endif // I18N_REVIEW_H

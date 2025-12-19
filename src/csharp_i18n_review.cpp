@@ -19,13 +19,13 @@ namespace i18n_check
     void csharp_i18n_review::remove_decorations(std::wstring& str) const
         {
         // get rid of any leading accessors (e.g., '>' (from "->") or '.').
-        if (str.length() > 0 && (str.front() == L':' || str.front() == L'>' || str.front() == L'.'))
+        if (!str.empty() && (str.front() == L':' || str.front() == L'>' || str.front() == L'.'))
             {
             const auto colonEnd = str.find_first_not_of(L":>.");
             str.erase(0, (colonEnd == std::wstring::npos) ? str.length() : colonEnd);
             }
         // lop off name of variable from member call
-        const auto accessor = str.find_first_of(L">");
+        const auto accessor = str.find_first_of(L'>');
         if (accessor != std::wstring::npos)
             {
             str.erase(0, accessor + 1);

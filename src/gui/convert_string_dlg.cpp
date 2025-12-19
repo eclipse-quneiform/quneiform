@@ -12,6 +12,8 @@
  ********************************************************************************/
 
 #include "convert_string_dlg.h"
+#include <algorithm>
+#include <wx/valgen.h>
 
 //-------------------------------------------------------------
 ConvertStringDlg::ConvertStringDlg(
@@ -20,7 +22,7 @@ ConvertStringDlg::ConvertStringDlg(
     const wxSize& size /*= wxDefaultSize*/,
     long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
     {
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
+    wxNonOwnedWindow::SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
     // bind events
@@ -36,7 +38,7 @@ ConvertStringDlg::ConvertStringDlg(
             if (wxTheClipboard->Open() && m_outputTextCtrl != nullptr)
                 {
                 wxTheClipboard->Clear();
-                wxDataObjectComposite* obj = new wxDataObjectComposite();
+                auto* obj = new wxDataObjectComposite();
                 obj->Add(new wxTextDataObject(m_outputTextCtrl->GetValue()));
                 wxTheClipboard->SetData(obj);
                 wxTheClipboard->Close();
@@ -56,17 +58,17 @@ ConvertStringDlg::ConvertStringDlg(
 //-------------------------------------------------------------
 void ConvertStringDlg::CreateControls()
     {
-    wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
+    auto* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxBoxSizer* functionComboSzr = new wxBoxSizer(wxHORIZONTAL);
+    auto* functionComboSzr = new wxBoxSizer(wxHORIZONTAL);
     functionComboSzr->Add(new wxStaticText(this, wxID_STATIC, _(L"Convert:")),
                           wxSizerFlags{}.CenterVertical());
 
-    wxArrayString choices = { _(L"7-bit numbers to full-width numbers"),
-                              _(L"7-bit numbers to Devanagari numbers"),
-                              _(L"Full-width numbers to 7-bit numbers"),
-                              _(L"Devanagari numbers to 7-bit numbers"),
-                              _(L"Encode extended ASCII characters") };
+    const wxArrayString choices = { _(L"7-bit numbers to full-width numbers"),
+                                    _(L"7-bit numbers to Devanagari numbers"),
+                                    _(L"Full-width numbers to 7-bit numbers"),
+                                    _(L"Devanagari numbers to 7-bit numbers"),
+                                    _(L"Encode extended ASCII characters") };
 
     functionComboSzr->Add(new wxChoice(this, ID_SELECTIONS, wxDefaultPosition, wxDefaultSize,
                                        choices, 0, wxGenericValidator(&m_selectedConversion)),
@@ -82,7 +84,7 @@ void ConvertStringDlg::CreateControls()
 
     mainDlgSizer->Add(new wxStaticText(this, wxID_STATIC, _(L"Conversion:")),
                       wxSizerFlags{}.Border());
-    wxBoxSizer* outputSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto* outputSizer = new wxBoxSizer(wxHORIZONTAL);
     m_outputTextCtrl = new wxTextCtrl(
         this, wxID_ANY, wxString{}, wxDefaultPosition, FromDIP(wxSize{ 500, 150 }),
         wxTE_RICH2 | wxTE_MULTILINE | wxBORDER_THEME | wxTE_BESTWRAP | wxTE_READONLY);
@@ -111,40 +113,41 @@ void ConvertStringDlg::OnTextChanged([[maybe_unused]] wxCommandEvent& event)
 
     if (m_selectedConversion == 0)
         {
-        std::for_each(tempStr.begin(), tempStr.end(), [](auto& chr)
-                      { chr = i18n_string_util::seven_bit_number_to_full_width(chr); });
+        std::ranges::for_each(tempStr, [](auto& chr)
+                              { chr = i18n_string_util::seven_bit_number_to_full_width(chr); });
         }
     else if (m_selectedConversion == 1)
         {
-        std::for_each(tempStr.begin(), tempStr.end(), [](auto& chr)
-                      { chr = i18n_string_util::seven_bit_number_to_devanagari(chr); });
+        std::ranges::for_each(tempStr, [](auto& chr)
+                              { chr = i18n_string_util::seven_bit_number_to_devanagari(chr); });
         }
     else if (m_selectedConversion == 2)
         {
-        std::for_each(tempStr.begin(), tempStr.end(),
-                      [](auto& chr) { chr = i18n_string_util::full_width_number_to_7bit(chr); });
+        std::ranges::for_each(tempStr, [](auto& chr)
+                              { chr = i18n_string_util::full_width_number_to_7bit(chr); });
         }
     else if (m_selectedConversion == 3)
         {
-        std::for_each(tempStr.begin(), tempStr.end(),
-                      [](auto& chr) { chr = i18n_string_util::devanagari_number_to_7bit(chr); });
+        std::ranges::for_each(tempStr, [](auto& chr)
+                              { chr = i18n_string_util::devanagari_number_to_7bit(chr); });
         }
     else if (m_selectedConversion == 4)
         {
-        std::wstringstream encoded;
-        for (const auto& chr : tempStr)
+        std::wstring encoded;
+        encoded.reserve(tempStr.size() * 10); // worst case: every char → \UXXXXXXXX
+
+        for (const wchar_t ch : tempStr)
             {
-            if (chr > 127)
+            if (ch > 0x7F)
                 {
-                encoded << LR"(\U)" << std::setfill(L'0') << std::setw(8) << std::uppercase
-                        << std::hex << static_cast<int>(chr);
+                encoded += std::format(L"\\U{:08X}", static_cast<std::uint32_t>(ch));
                 }
             else
                 {
-                encoded << chr;
+                encoded.push_back(ch);
                 }
             }
-        tempStr = encoded.str();
+        tempStr = std::move(encoded);
         }
 
     m_outputTextCtrl->SetValue(tempStr);

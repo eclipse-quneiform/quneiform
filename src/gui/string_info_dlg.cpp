@@ -12,6 +12,7 @@
  ********************************************************************************/
 
 #include "string_info_dlg.h"
+#include <wx/valgen.h>
 
 //-------------------------------------------------------------
 StringInfoDlg::StringInfoDlg(
@@ -20,7 +21,7 @@ StringInfoDlg::StringInfoDlg(
     const wxPoint& pos /*= wxDefaultPosition*/, const wxSize& size /*= wxDefaultSize*/,
     long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
     {
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
+    wxNonOwnedWindow::SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
     // bind events
@@ -35,7 +36,7 @@ StringInfoDlg::StringInfoDlg(
 //-------------------------------------------------------------
 void StringInfoDlg::CreateControls()
     {
-    wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
+    auto* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
     mainDlgSizer->Add(new wxTextCtrl(this, ID_SOURCE_TEXT, wxString{}, wxDefaultPosition,
                                      FromDIP(wxSize{ 500, 150 }),
@@ -61,15 +62,17 @@ void StringInfoDlg::OnTextChanged([[maybe_unused]] wxCommandEvent& event)
 
     const wxString strToReview{ m_input };
     wxString extAsciiValues;
-    std::wstringstream encoded;
-    for (const auto& chr : strToReview)
+    std::wstring encoded;
+    encoded.reserve(strToReview.size() * 10); // "\U" + 8 hex digits
+
+    for (const wchar_t ch : strToReview)
         {
-        if (chr > 127)
+        if (ch > 0x7F)
             {
-            extAsciiValues += chr;
+            extAsciiValues.append(ch);
             }
-        encoded << LR"(\U)" << std::setfill(L'0') << std::setw(8) << std::uppercase << std::hex
-                << static_cast<int>(chr);
+
+        encoded += std::format(L"\\U{:08X}", static_cast<std::uint32_t>(ch));
         }
     wxString msg(wxString::Format(_(L"Length: %zu"), strToReview.length()));
     if (!extAsciiValues.empty())
@@ -79,7 +82,7 @@ void StringInfoDlg::OnTextChanged([[maybe_unused]] wxCommandEvent& event)
         // show the underlying hex values if not too long
         if (strToReview.length() < 16)
             {
-            msg.append(L"\n").append(wxString::Format(_(L"Decoded: %s"), encoded.str()));
+            msg.append(L"\n").append(wxString::Format(_(L"Decoded: %s"), encoded));
             }
         }
     else

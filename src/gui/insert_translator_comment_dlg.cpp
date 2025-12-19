@@ -12,17 +12,19 @@
  ********************************************************************************/
 
 #include "insert_translator_comment_dlg.h"
+#include <utility>
+#include <wx/valgen.h>
 
 //-------------------------------------------------------------
 InsertTransCommentDlg::InsertTransCommentDlg(
     wxWindow* parent, wxWindowID id /*= wxID_ANY*/,
-    const wxString& selectedComment /*= _DT(L"// TRANSLATORS:")*/,
+    wxString selectedComment /*= _DT(L"// TRANSLATORS:")*/,
     const wxString& caption /*= _(L"Insert Translator Comment")*/,
     const wxPoint& pos /*= wxDefaultPosition*/, const wxSize& size /*= wxDefaultSize*/,
-    long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
-    : m_selectedTag(selectedComment)
+    const long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
+    : m_selectedTag(std::move(selectedComment))
     {
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
+    wxNonOwnedWindow::SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
     // wxWidgets
@@ -47,9 +49,9 @@ InsertTransCommentDlg::InsertTransCommentDlg(
 //-------------------------------------------------------------
 void InsertTransCommentDlg::CreateControls()
     {
-    wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
+    auto* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxBoxSizer* functionComboSzr = new wxBoxSizer(wxHORIZONTAL);
+    auto* functionComboSzr = new wxBoxSizer(wxHORIZONTAL);
     functionComboSzr->Add(new wxStaticText(this, wxID_STATIC, _(L"Translator comment style:")),
                           wxSizerFlags{}.CenterVertical());
 
@@ -95,7 +97,7 @@ void InsertTransCommentDlg::EnableExtraControls()
     }
 
 //-------------------------------------------------------------
-void InsertTransCommentDlg::OnOK([[maybe_unused]] wxCommandEvent&)
+void InsertTransCommentDlg::OnOK([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
 

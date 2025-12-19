@@ -12,7 +12,17 @@
  ********************************************************************************/
 
 #include "i18nframe.h"
+#include "../csharp_i18n_review.h"
+#include "../input.h"
 #include "i18napp.h"
+#include "insert_translator_comment_dlg.h"
+#include "insert_transmacro_dlg.h"
+#include "insert_warning_suppression_dlg.h"
+#include "projectdlg.h"
+#include "string_info_dlg.h"
+#include <wx/numformatter.h>
+#include <wx/progdlg.h>
+#include <wx/richmsgdlg.h>
 
 wxDECLARE_APP(I18NApp);
 
@@ -31,74 +41,52 @@ wxBitmap I18NFrame::ReadRibbonSvgIcon(const wxString& path)
 //------------------------------------------------------
 void I18NFrame::InitControls()
     {
-    wxRibbonBar* m_ribbon =
+    const auto loadRibbonIcon = [this](const wxString& id)
+    {
+        const auto contentScalingFactor{ GetContentScaleFactor() };
+        wxBitmap bmp = wxArtProvider::GetBitmap(
+            id, wxART_OTHER, FromDIP(wxSize(32 * contentScalingFactor, 32 * contentScalingFactor)));
+        bmp.SetScaleFactor(contentScalingFactor);
+
+        return bmp;
+    };
+
+    auto* ribbon =
         new wxRibbonBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                         wxRIBBON_BAR_FLOW_HORIZONTAL | wxRIBBON_BAR_SHOW_PAGE_LABELS |
                             wxRIBBON_BAR_SHOW_PANEL_EXT_BUTTONS | wxRIBBON_BAR_SHOW_TOGGLE_BUTTON |
                             wxRIBBON_BAR_SHOW_HELP_BUTTON);
         {
-        wxRibbonPage* homePage = new wxRibbonPage(m_ribbon, wxID_ANY, _(L"Home"));
+        auto* homePage = new wxRibbonPage(ribbon, wxID_ANY, _(L"Home"));
 
-        wxRibbonPanel* projectPanel =
+        auto* projectPanel =
             new wxRibbonPanel(homePage, wxID_ANY, _(L"Project"), wxNullBitmap, wxDefaultPosition,
                               wxDefaultSize, wxRIBBON_PANEL_NO_AUTO_MINIMISE);
         m_projectBar = new wxRibbonButtonBar(projectPanel);
-        m_projectBar->AddButton(
-            wxID_NEW, _(L"New"),
-            wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                .ConvertToImage());
-        m_projectBar->AddButton(
-            wxID_OPEN, _(L"Open"),
-            wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                .ConvertToImage());
-        m_projectBar->AddHybridButton(
-            wxID_SAVE, _(L"Save"),
-            wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                .ConvertToImage());
-        m_projectBar->AddButton(
-            wxID_REFRESH, _(L"Refresh"),
-            wxArtProvider::GetBitmap(wxART_REFRESH, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                .ConvertToImage());
-        m_projectBar->AddDropdownButton(
-            XRCID("ID_IGNORE"), _(L"Ignore"),
-            wxArtProvider::GetBitmap(wxART_DELETE, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                .ConvertToImage());
+        m_projectBar->AddButton(wxID_NEW, _(L"New"), loadRibbonIcon(wxART_NEW));
+        m_projectBar->AddButton(wxID_OPEN, _(L"Open"), loadRibbonIcon(wxART_FILE_OPEN));
+        m_projectBar->AddHybridButton(wxID_SAVE, _(L"Save"), loadRibbonIcon(wxART_FILE_SAVE));
+        m_projectBar->AddButton(wxID_REFRESH, _(L"Refresh"), loadRibbonIcon(wxART_REFRESH));
+        m_projectBar->AddDropdownButton(XRCID("ID_IGNORE"), _(L"Ignore"),
+                                        loadRibbonIcon(wxART_DELETE));
         m_projectBar->EnableButton(wxID_SAVE, false);
         m_projectBar->EnableButton(wxID_REFRESH, false);
         m_projectBar->EnableButton(XRCID("ID_IGNORE"), false);
 
             {
-            wxRibbonPanel* editPanel =
+            auto* editPanel =
                 new wxRibbonPanel(homePage, wxID_ANY, _(L"Edit"), wxNullBitmap, wxDefaultPosition,
                                   wxDefaultSize, wxRIBBON_PANEL_NO_AUTO_MINIMISE);
             m_editBar = new wxRibbonButtonBar(editPanel);
 
-            m_editBar->AddButton(
-                wxID_FIND, _(L"Find"),
-                wxArtProvider::GetBitmap(wxART_FIND, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            m_editBar->AddButton(wxID_FIND, _(L"Find"), loadRibbonIcon(wxART_FIND));
 
-            m_editBar->AddButton(
-                wxID_PASTE, _(L"Paste"),
-                wxArtProvider::GetBitmap(wxART_PASTE, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
-            m_editBar->AddButton(
-                wxID_CUT, _(L"Cut"),
-                wxArtProvider::GetBitmap(wxART_CUT, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
-            m_editBar->AddButton(
-                wxID_COPY, _(L"Copy"),
-                wxArtProvider::GetBitmap(wxART_COPY, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            m_editBar->AddButton(wxID_PASTE, _(L"Paste"), loadRibbonIcon(wxART_PASTE));
+            m_editBar->AddButton(wxID_CUT, _(L"Cut"), loadRibbonIcon(wxART_CUT));
+            m_editBar->AddButton(wxID_COPY, _(L"Copy"), loadRibbonIcon(wxART_COPY));
 
-            m_editBar->AddButton(
-                wxID_UNDO, _(L"Undo"),
-                wxArtProvider::GetBitmap(wxART_UNDO, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
-            m_editBar->AddButton(
-                wxID_REDO, _(L"Redo"),
-                wxArtProvider::GetBitmap(wxART_REDO, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            m_editBar->AddButton(wxID_UNDO, _(L"Undo"), loadRibbonIcon(wxART_UNDO));
+            m_editBar->AddButton(wxID_REDO, _(L"Redo"), loadRibbonIcon(wxART_REDO));
 
             m_editBar->AddDropdownButton(XRCID("ID_INSERT"), _(L"Insert"),
                                          ReadRibbonSvgIcon(L"images/insert.svg"));
@@ -110,48 +98,38 @@ void I18NFrame::InitControls()
             }
 
             {
-            wxRibbonPanel* toolsPanel =
+            auto* toolsPanel =
                 new wxRibbonPanel(homePage, wxID_ANY, _(L"Tools"), wxNullBitmap, wxDefaultPosition,
                                   wxDefaultSize, wxRIBBON_PANEL_NO_AUTO_MINIMISE);
-            wxRibbonButtonBar* toolbar = new wxRibbonButtonBar(toolsPanel);
-            toolbar->AddButton(
-                XRCID("ID_STRING_INFO"), _(L"String Info"),
-                wxArtProvider::GetBitmap(L"ID_STRING_INFO", wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            auto* toolbar = new wxRibbonButtonBar(toolsPanel);
+            toolbar->AddButton(XRCID("ID_STRING_INFO"), _(L"String Info"),
+                               loadRibbonIcon(L"ID_STRING_INFO"));
             toolbar->AddButton(XRCID("ID_CONVERT_STRING"), _(L"Convert String"),
                                wxArtProvider::GetBitmap(L"ID_CONVERT_STRING", wxART_OTHER,
                                                         FromDIP(wxSize{ 32, 32 }))
                                    .ConvertToImage());
-            toolbar->AddButton(
-                XRCID("ID_SETTINGS"), _(L"Settings"),
-                wxArtProvider::GetBitmap(L"ID_SETTINGS", wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            toolbar->AddButton(XRCID("ID_SETTINGS"), _(L"Settings"),
+                               loadRibbonIcon(L"ID_SETTINGS"));
             }
 
             {
-            wxRibbonPage* helpPage = new wxRibbonPage(m_ribbon, wxID_ANY, _(L"Help"));
-            wxRibbonPanel* helpPanel = new wxRibbonPanel(
-                helpPage, wxID_ANY, _(L"General"), wxNullBitmap, wxDefaultPosition, wxDefaultSize,
-                wxRIBBON_PANEL_NO_AUTO_MINIMISE);
-            wxRibbonButtonBar* helpbar = new wxRibbonButtonBar(helpPanel);
-            helpbar->AddButton(
-                wxID_HELP, _(L"Help"),
-                wxArtProvider::GetBitmap(wxART_HELP, wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
-            helpbar->AddButton(
-                wxID_ABOUT, _(L"About"),
-                wxArtProvider::GetBitmap(L"ID_ABOUT", wxART_OTHER, FromDIP(wxSize{ 32, 32 }))
-                    .ConvertToImage());
+            auto* helpPage = new wxRibbonPage(ribbon, wxID_ANY, _(L"Help"));
+            auto* helpPanel = new wxRibbonPanel(helpPage, wxID_ANY, _(L"General"), wxNullBitmap,
+                                                wxDefaultPosition, wxDefaultSize,
+                                                wxRIBBON_PANEL_NO_AUTO_MINIMISE);
+            auto* helpBar = new wxRibbonButtonBar(helpPanel);
+            helpBar->AddButton(wxID_HELP, _(L"Help"), loadRibbonIcon(wxART_HELP));
+            helpBar->AddButton(wxID_ABOUT, _(L"About"), loadRibbonIcon(L"ID_ABOUT"));
             }
         }
 
-    m_ribbon->Realize();
+    ribbon->Realize();
 
     wxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-    mainSizer->Add(m_ribbon, wxSizerFlags{}.Expand());
+    mainSizer->Add(ribbon, wxSizerFlags{}.Expand());
 
-    wxSplitterWindow* splitter = new wxSplitterWindow(this);
+    auto* splitter = new wxSplitterWindow(this);
 
     m_resultsDataView = new wxDataViewCtrl(splitter, DATA_VIEW, wxDefaultPosition, wxDefaultSize,
                                            wxDV_ROW_LINES | wxDV_VERT_RULES | wxDV_SINGLE);
@@ -161,21 +139,20 @@ void I18NFrame::InitControls()
     m_resultsDataView->AssociateModel(m_resultsModel.get());
 
     // Warning ID
-    wxDataViewIconTextRenderer* tir = new wxDataViewIconTextRenderer();
+    auto* tir = new wxDataViewIconTextRenderer();
     m_resultsDataView->AppendColumn(
         new wxDataViewColumn(_(L"Warning ID"), tir, 0, FromDIP(200), wxALIGN_LEFT,
                              wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE));
 
     // Value
-    wxDataViewTextRenderer* tr = new wxDataViewTextRenderer();
+    auto* tr = new wxDataViewTextRenderer();
     m_resultsDataView->AppendColumn(
         new wxDataViewColumn(_(L"Value"), tr, 1, FromDIP(150), wxALIGN_LEFT,
                              wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE));
 
     // Line #
-    wxDataViewSpinRenderer* sr =
-        new wxDataViewSpinRenderer(0, std::numeric_limits<int>::max(), wxDATAVIEW_CELL_INERT,
-                                   wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL);
+    auto* sr = new wxDataViewSpinRenderer(0, std::numeric_limits<int>::max(), wxDATAVIEW_CELL_INERT,
+                                          wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL);
     m_resultsDataView->AppendColumn(
         new wxDataViewColumn(_(L"Line"), sr, 2, FromDIP(100), wxALIGN_LEFT,
                              wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE));
@@ -193,7 +170,7 @@ void I18NFrame::InitControls()
         new wxDataViewColumn(_(L"Summary"), tr, 4, FromDIP(200), wxALIGN_LEFT,
                              wxDATAVIEW_COL_SORTABLE | wxDATAVIEW_COL_RESIZABLE));
 
-    wxNotebook* tabstrip =
+    auto* tabstrip =
         new wxNotebook(splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
 
     m_editor = new wxStyledTextCtrl(tabstrip, EDITOR_ID);
@@ -324,15 +301,15 @@ void I18NFrame::InitControls()
 
     SetSizer(mainSizer);
 
-    wxAcceleratorEntry accelEntries[6];
-    accelEntries[0].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP);
-    accelEntries[1].Set(wxACCEL_CMD, static_cast<int>(L'N'), wxID_NEW);
-    accelEntries[2].Set(wxACCEL_CMD, static_cast<int>(L'O'), wxID_OPEN);
-    accelEntries[3].Set(wxACCEL_CMD, static_cast<int>(L'S'), wxID_SAVE);
-    accelEntries[4].Set(wxACCEL_CMD, static_cast<int>(L'F'), wxID_FIND);
-    accelEntries[5].Set(wxACCEL_NORMAL, WXK_F5, wxID_REFRESH);
-    wxAcceleratorTable accelTable(std::size(accelEntries), accelEntries);
-    SetAcceleratorTable(accelTable);
+    const std::array<wxAcceleratorEntry, 6> accelEntries{ { { wxACCEL_NORMAL, WXK_F1, wxID_HELP },
+                                                            { wxACCEL_CMD, 'N', wxID_NEW },
+                                                            { wxACCEL_CMD, 'O', wxID_OPEN },
+                                                            { wxACCEL_CMD, 'S', wxID_SAVE },
+                                                            { wxACCEL_CMD, 'F', wxID_FIND },
+                                                            { wxACCEL_NORMAL, WXK_F5,
+                                                              wxID_REFRESH } } };
+
+    SetAcceleratorTable(wxAcceleratorTable(accelEntries.size(), accelEntries.data()));
 
     Bind(wxEVT_FIND, &I18NFrame::OnFind, this);
     Bind(wxEVT_FIND_NEXT, &I18NFrame::OnFind, this);
@@ -370,10 +347,10 @@ void I18NFrame::InitControls()
         wxEVT_MENU,
         [this]([[maybe_unused]] wxCommandEvent&)
         {
-            wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
+            const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
             if (selectedItem.IsOk())
                 {
-                I18NResultsTreeModelNode* node =
+                const I18NResultsTreeModelNode* node =
                     reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
                 if (node != nullptr)
@@ -385,10 +362,10 @@ void I18NFrame::InitControls()
                         node->m_explanation;
                     if (wxTheClipboard->Open())
                         {
-                        if (rowText.length())
+                        if (!rowText.empty())
                             {
                             wxTheClipboard->Clear();
-                            wxDataObjectComposite* obj = new wxDataObjectComposite();
+                            auto* obj = new wxDataObjectComposite();
                             obj->Add(new wxTextDataObject(rowText));
                             wxTheClipboard->SetData(obj);
                             }
@@ -505,7 +482,7 @@ void I18NFrame::InitControls()
          {
              if (evt.GetWindow()->GetId() == EDITOR_ID)
                  {
-                 I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(
+                 const I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(
                      m_resultsDataView->GetSelection().GetID());
                  if (node != nullptr)
                      {
@@ -532,12 +509,12 @@ void I18NFrame::InitControls()
                  return;
                  }
 
-             I18NResultsTreeModelNode* node =
+             const I18NResultsTreeModelNode* node =
                  reinterpret_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
              if (node != nullptr)
                  {
                  wxMenu menu;
-                 wxMenuItem* menuItem =
+                 auto* menuItem =
                      new wxMenuItem(&menu, XRCID("ID_OPEN_SELECTED"),
                                     wxString::Format(_(L"Open \"%s\""),
                                                      wxFileName{ node->m_fileName }.GetFullName()));
@@ -560,7 +537,7 @@ void I18NFrame::InitControls()
                                                               FromDIP(wxSize{ 16, 16 })));
                  menu.Append(menuItem);
 
-                 // right clicked on a value, not the filename header row
+                 // right-clicked on a value, not the filename header row
                  if (node->m_warningId != node->m_fileName)
                      {
                      menuItem = new wxMenuItem(
@@ -584,7 +561,7 @@ void I18NFrame::InitControls()
         wxEVT_DATAVIEW_SELECTION_CHANGED,
         [this](wxDataViewEvent& event)
         {
-            I18NResultsTreeModelNode* node =
+            const I18NResultsTreeModelNode* node =
                 reinterpret_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
 
             if (node != nullptr)
@@ -757,14 +734,13 @@ void I18NFrame::OnEditButtonClicked(wxRibbonButtonBarEvent& event)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& evt)
     {
-    wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
+    const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
 
     if (selectedItem.IsOk())
         {
-        I18NResultsTreeModelNode* node =
-            reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+        auto* node = reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
         if (node != nullptr)
             {
@@ -804,7 +780,7 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
                         i18n_check::review_style::check_needing_context);
             excludeFlag(L"[urlInL10NString]", i18n_check::review_style::check_l10n_contains_url);
             excludeFlag(L"[multipartString]", i18n_check::review_style::check_multipart_strings);
-            excludeFlag(L"[pluralization]", i18n_check::review_style::check_pluaralization);
+            excludeFlag(L"[pluralization]", i18n_check::review_style::check_pluralization);
             excludeFlag(L"[articleOrPronoun]",
                         i18n_check::review_style::check_articles_proceeding_placeholder);
             excludeFlag(L"[excessiveNonL10NContent]",
@@ -842,13 +818,13 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnOpenSelectedFile([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnOpenSelectedFile([[maybe_unused]] wxCommandEvent& evt)
     {
-    wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
+    const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
 
     if (selectedItem.IsOk())
         {
-        I18NResultsTreeModelNode* node =
+        const I18NResultsTreeModelNode* node =
             reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
         if (node != nullptr)
             {
@@ -861,7 +837,7 @@ void I18NFrame::OnOpenSelectedFile([[maybe_unused]] wxCommandEvent&)
 void I18NFrame::OnSaveMenu(wxRibbonButtonBarEvent& event)
     {
     wxMenu menu;
-    wxMenuItem* menuItem = new wxMenuItem(&menu, wxID_SAVE, _(L"Save Project..."));
+    auto* menuItem = new wxMenuItem(&menu, wxID_SAVE, _(L"Save Project..."));
     menuItem->SetBitmap(
         wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_OTHER, FromDIP(wxSize{ 16, 16 })));
     menu.Append(menuItem);
@@ -878,7 +854,7 @@ void I18NFrame::OnSaveMenu(wxRibbonButtonBarEvent& event)
 void I18NFrame::OnInsert(wxRibbonButtonBarEvent& event)
     {
     wxMenu menu;
-    wxMenuItem* menuItem =
+    auto* menuItem =
         new wxMenuItem(&menu, XRCID("ID_INSERT_TRANSLATOR_COMMENT"), _(L"Translator Comment..."));
     menuItem->SetBitmap(wxArtProvider::GetBitmap(L"ID_INSERT_TRANSLATOR_COMMENT", wxART_OTHER,
                                                  FromDIP(wxSize{ 16, 16 })));
@@ -916,7 +892,7 @@ void I18NFrame::OnInsert(wxRibbonButtonBarEvent& event)
 //------------------------------------------------------
 void I18NFrame::OnIgnore(wxRibbonButtonBarEvent& event)
     {
-    wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
+    const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
     if (selectedItem == m_resultsModel->GetRoot())
         {
         return;
@@ -924,12 +900,12 @@ void I18NFrame::OnIgnore(wxRibbonButtonBarEvent& event)
 
     if (selectedItem.IsOk())
         {
-        I18NResultsTreeModelNode* node =
+        const I18NResultsTreeModelNode* node =
             reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
         if (node != nullptr)
             {
             wxMenu menu;
-            wxMenuItem* menuItem =
+            auto* menuItem =
                 new wxMenuItem(&menu, XRCID("ID_IGNORE_SELECTED_FILE"),
                                wxString::Format(_(L"Ignore \"%s\""),
                                                 wxFileName{ node->m_fileName }.GetFullName()));
@@ -953,7 +929,7 @@ void I18NFrame::OnIgnore(wxRibbonButtonBarEvent& event)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& evt)
     {
     wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
     if (selectedItem == m_resultsModel->GetRoot())
@@ -963,7 +939,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent&)
 
     if (selectedItem.IsOk())
         {
-        I18NResultsTreeModelNode* node =
+        const I18NResultsTreeModelNode* node =
             reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
         if (node != nullptr)
@@ -999,7 +975,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent& evt)
     {
     NewProjectDialog projDlg(this, wxID_ANY, _(L"Default Settings"), EditorPage);
     projDlg.SetAllOptions(wxGetApp().m_defaultOptions);
@@ -1012,7 +988,7 @@ void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnConvertString([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnConvertString([[maybe_unused]] wxCommandEvent& evt)
     {
     ConvertStringDlg csDlg(this);
     csDlg.SetInput(m_editor->GetSelectedText());
@@ -1020,7 +996,7 @@ void I18NFrame::OnConvertString([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnStringInfo([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnStringInfo([[maybe_unused]] wxCommandEvent& evt)
     {
     StringInfoDlg dlg(this);
     dlg.SetValue(m_editor->GetSelectedText());
@@ -1028,9 +1004,9 @@ void I18NFrame::OnStringInfo([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent& evt)
     {
-    wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
+    const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
     if (selectedItem == m_resultsModel->GetRoot())
         {
         return;
@@ -1038,7 +1014,7 @@ void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent&)
 
     if (selectedItem.IsOk())
         {
-        I18NResultsTreeModelNode* node =
+        const I18NResultsTreeModelNode* node =
             reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
         // child node of file parent node
@@ -1052,7 +1028,7 @@ void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnHelp([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnHelp([[maybe_unused]] wxCommandEvent& evt)
     {
     const wxString docPath = []()
     {
@@ -1072,7 +1048,7 @@ void I18NFrame::OnHelp([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent& evt)
     {
     wxDateTime buildDate;
     buildDate.ParseDate(__DATE__);
@@ -1091,7 +1067,7 @@ void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent& evt)
     {
     if (!m_hasOpenProject)
         {
@@ -1120,7 +1096,7 @@ void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnNew([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnNew([[maybe_unused]] wxCommandEvent& evt)
     {
     SaveProjectIfNeeded();
 
@@ -1172,7 +1148,7 @@ void I18NFrame::CopyProjectOptionsToGlobalOptions()
     }
 
 //------------------------------------------------------
-void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent& evt)
     {
     SaveProjectIfNeeded();
 
@@ -1211,7 +1187,7 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent& evt)
     {
     int linePos{ 0 };
     const wxString lineText = m_editor->GetCurLine(&linePos);
@@ -1245,7 +1221,7 @@ void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent& evt)
     {
     const std::wstring selText{ m_editor->GetSelectedText().wc_string() };
     if (selText.empty())
@@ -1290,7 +1266,7 @@ void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent& evt)
     {
     const wxString selText{ m_editor->GetSelectedText() };
     if (selText.empty())
@@ -1314,7 +1290,7 @@ void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent& evt)
     {
     const wxString selText{ m_editor->GetSelectedText() };
     if (selText.empty())
@@ -1335,7 +1311,7 @@ void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent& evt)
     {
     const wxString selText{ m_editor->GetSelectedText() };
     if (selText.empty())
@@ -1356,7 +1332,7 @@ void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnExportResults([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnExportResults([[maybe_unused]] wxCommandEvent& evt)
     {
     const wxFileName projectName{ m_activeProjectOptions.m_filePath };
     const wxString lastFolder =
@@ -1392,7 +1368,7 @@ void I18NFrame::OnExportResults([[maybe_unused]] wxCommandEvent&)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnSave([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnSave([[maybe_unused]] wxCommandEvent& evt)
     {
     SaveSourceFileIfNeeded();
 
@@ -1524,13 +1500,13 @@ void I18NFrame::Process()
     std::vector<std::filesystem::path> excludedPaths;
     for (const auto& currentFile : m_activeProjectOptions.m_excludedPaths)
         {
-        excludedPaths.push_back(std::filesystem::path{ currentFile.wc_string() });
+        excludedPaths.emplace_back(currentFile.wc_string());
         }
 
     // input folder
     const std::vector<std::filesystem::path> filesToAnalyze = [&excludedPaths, &inputFolder]()
     {
-        wxBusyInfo bi{ wxBusyInfoFlags{}.Text(_(L"Gathering files...")) };
+        const wxBusyInfo bi{ wxBusyInfoFlags{}.Text(_(L"Gathering files...")) };
         // paths being ignored
         const i18n_check::excluded_results excludedInfo =
             i18n_check::get_paths_files_to_exclude(inputFolder, excludedPaths);
@@ -1770,7 +1746,7 @@ void I18NFrame::OnClose(wxCloseEvent& event)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnFindCommand([[maybe_unused]] wxCommandEvent&)
+void I18NFrame::OnFindCommand([[maybe_unused]] wxCommandEvent& evt)
     {
     if (m_findDlg == nullptr)
         {
@@ -1799,20 +1775,20 @@ void I18NFrame::OnFind(wxFindDialogEvent& event)
 
     const int flags{ event.GetFlags() };
     int searchFlags{ 0 };
-    if (flags & wxFR_MATCHCASE)
+    if ((flags & wxFR_MATCHCASE) != 0)
         {
         searchFlags = searchFlags | wxSTC_FIND_MATCHCASE;
         }
-    if (flags & wxFR_WHOLEWORD)
+    if ((flags & wxFR_WHOLEWORD) != 0)
         {
         searchFlags = searchFlags | wxSTC_FIND_WHOLEWORD;
         }
 
     m_editor->SearchAnchor();
-    long selStart, selEnd;
+    long selStart{ 0 }, selEnd{ 0 };
     m_editor->GetSelection(&selStart, &selEnd);
     long foundPos{ wxSTC_INVALID_POSITION };
-    if (flags & wxFR_DOWN)
+    if ((flags & wxFR_DOWN) != 0)
         {
         m_editor->SetSelection(selEnd, selEnd);
         m_editor->SearchAnchor();

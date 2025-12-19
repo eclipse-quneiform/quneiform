@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __CSHARP_I18N_REVIEW_H__
-#define __CSHARP_I18N_REVIEW_H__
+#ifndef CSHARP_I18N_REVIEW_H
+#define CSHARP_I18N_REVIEW_H
 
 #include "cpp_i18n_review.h"
 
@@ -43,8 +43,8 @@ namespace i18n_check
         [[nodiscard]]
         wchar_t* find_raw_string_end(wchar_t* text, [[maybe_unused]] const wchar_t chr) const final;
 
-        /// @returns How many characters a to step into/out of a raw string.
-        ///     In other words, how many characters are inside of the string marking the
+        /// @returns How many characters to step into/out of a raw string.
+        ///     In other words, how many characters are inside the string marking the
         ///     sentinel boundaries of the raw content.
         /// @param chr The tag indicating what type of raw string this is.
         [[nodiscard]]
@@ -65,4 +65,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif //__CSHARP_I18N_REVIEW_H__
+#endif // CSHARP_I18N_REVIEW_H

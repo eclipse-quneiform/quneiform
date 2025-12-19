@@ -15,26 +15,18 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __INSERT_TRANS_COMMENT_DLG_H__
-#define __INSERT_TRANS_COMMENT_DLG_H__
+#ifndef INSERT_TRANS_COMMENT_DLG_H
+#define INSERT_TRANS_COMMENT_DLG_H
 
 #include "../i18n_review.h"
 #include "app_options.h"
-#include <wx/artprov.h>
-#include <wx/choice.h>
 #include <wx/combobox.h>
-#include <wx/dirdlg.h>
 #include <wx/editlbox.h>
 #include <wx/filename.h>
-#include <wx/gbsizer.h>
 #include <wx/listbook.h>
-#include <wx/slider.h>
 #include <wx/spinctrl.h>
-#include <wx/statline.h>
 #include <wx/stdpaths.h>
 #include <wx/string.h>
-#include <wx/valgen.h>
-#include <wx/valtext.h>
 #include <wx/wx.h>
 
 /** @brief Prompt for inserting a translator comment.*/
@@ -50,7 +42,7 @@ class InsertTransCommentDlg final : public wxDialog
         @param size The window size.
         @param style The window style (i.e., decorations and flags).*/
     explicit InsertTransCommentDlg(wxWindow* parent, wxWindowID id = wxID_ANY,
-                                   const wxString& selectedComment = _DT(L"// TRANSLATORS:"),
+                                   wxString selectedComment = _DT(L"// TRANSLATORS:"),
                                    const wxString& caption = _(L"Insert Translator Comment"),
                                    const wxPoint& pos = wxDefaultPosition,
                                    const wxSize& size = wxDefaultSize,
@@ -130,4 +122,4 @@ class InsertTransCommentDlg final : public wxDialog
 
     /** @}*/
 
-#endif //__INSERT_TRANS_COMMENT_DLG_H__
+#endif // INSERT_TRANS_COMMENT_DLG_H

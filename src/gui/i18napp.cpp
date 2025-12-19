@@ -12,7 +12,7 @@
  ********************************************************************************/
 
 #include "i18napp.h"
-#include <iostream>
+#include <wx/display.h>
 #include <wx/uilocale.h>
 
 wxIMPLEMENT_APP(I18NApp);
@@ -137,12 +137,20 @@ bool I18NApp::OnInit()
 #endif
 
     // create the main application window
-    I18NFrame* frame = new I18NFrame(GetAppName());
+    auto* frame = new I18NFrame(GetAppName());
     if (m_defaultOptions.m_windowMaximized)
         {
         frame->Maximize();
         }
-    frame->SetSize(frame->FromDIP(m_defaultOptions.m_windowSize));
+    wxSize desiredSize = frame->FromDIP(m_defaultOptions.m_windowSize);
+
+    // get the display the frame will appear on
+    const wxDisplay display(wxDisplay::GetFromWindow(frame));
+    const wxRect workArea = display.GetClientArea(); // excludes taskbar / dock
+    desiredSize.SetWidth(std::min(desiredSize.GetWidth(), workArea.GetWidth()));
+    desiredSize.SetHeight(std::min(desiredSize.GetHeight(), workArea.GetHeight()));
+    frame->SetSize(desiredSize);
+
     frame->InitControls();
     frame->CenterOnScreen();
     frame->Show(true);
@@ -152,8 +160,7 @@ bool I18NApp::OnInit()
         wxArtProvider::GetBitmap(L"ID_ABOUT", wxART_OTHER, frame->FromDIP(wxSize{ 32, 32 })));
     frame->SetIcon(appIcon);
 
-    wxFontEnumerator fe;
-    auto fontNames = fe.GetFacenames();
+    auto fontNames = wxFontEnumerator::GetFacenames();
     for (const auto& fn : fontNames)
         {
         // don't ignore font names that might also be real words

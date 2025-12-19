@@ -12,6 +12,7 @@
  ********************************************************************************/
 
 #include "quarto_review.h"
+#include <utility>
 
 namespace i18n_check
     {
@@ -57,24 +58,24 @@ namespace i18n_check
             }
 
         // remove inline math ($ ... $)
-        mathStart = filteredContent.find(L"$");
+        mathStart = filteredContent.find(L'$');
         while (mathStart != std::wstring::npos)
             {
             // skip escaped \$
             if (mathStart > 0 && filteredContent[mathStart - 1] == L'\\')
                 {
-                mathStart = filteredContent.find(L"$", mathStart + 1);
+                mathStart = filteredContent.find(L'$', mathStart + 1);
                 continue;
                 }
 
-            auto mathEnd = filteredContent.find(L"$", mathStart + 1);
+            auto mathEnd = filteredContent.find(L'$', mathStart + 1);
             if (mathEnd == std::wstring::npos)
                 {
                 break;
                 }
 
             clear_section(filteredContent, mathStart, mathEnd + 1);
-            mathStart = filteredContent.find(L"$", mathEnd + 1);
+            mathStart = filteredContent.find(L'$', mathEnd + 1);
             }
 
         // remove suppression blocks
@@ -88,23 +89,23 @@ namespace i18n_check
         while (std::regex_search(filteredContent.cbegin() + searchFrom, filteredContent.cend(),
                                  matchBegin, suppressBegin))
             {
-            const std::size_t begin_start =
+            const std::size_t beginStart =
                 searchFrom + static_cast<std::size_t>(matchBegin.position(0));
-            const std::size_t begin_end =
-                begin_start + static_cast<std::size_t>(matchBegin.length(0));
+            const std::size_t beginEnd =
+                beginStart + static_cast<std::size_t>(matchBegin.length(0));
 
-            if (!std::regex_search(filteredContent.cbegin() + begin_end, filteredContent.cend(),
+            if (!std::regex_search(filteredContent.cbegin() + beginEnd, filteredContent.cend(),
                                    matchEnd, suppressEnd))
                 {
                 break;
                 }
 
-            const std::size_t endStart = begin_end + static_cast<std::size_t>(matchEnd.position(0));
+            const std::size_t endStart = beginEnd + static_cast<std::size_t>(matchEnd.position(0));
             const std::size_t endEnd = endStart + static_cast<std::size_t>(matchEnd.length(0));
 
-            clear_section(filteredContent, begin_start, endEnd);
+            clear_section(filteredContent, beginStart, endEnd);
 
-            searchFrom = begin_start;
+            searchFrom = beginStart;
             }
 
         const std::wregex multiSentenceLineRE(

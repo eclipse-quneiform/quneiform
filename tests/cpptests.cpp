@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <iomanip>
 #include <set>
 #include <sstream>
@@ -72,7 +71,7 @@ TEST_CASE("Pluarl", "[cpp][i18n]")
     SECTION("tr")
         {
         cpp_i18n_review cpp(false);
-        cpp.set_style(check_pluaralization);
+        cpp.set_style(check_pluralization);
         const wchar_t* code = LR"(var = tr("%n message(s) saved");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
@@ -81,7 +80,7 @@ TEST_CASE("Pluarl", "[cpp][i18n]")
     SECTION("tr ignore")
         {
         cpp_i18n_review cpp(false);
-        cpp.set_style(check_pluaralization);
+        cpp.set_style(check_pluralization);
         const wchar_t* code = LR"(var = tr("%n message(s) saved", "", total);)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
@@ -90,7 +89,7 @@ TEST_CASE("Pluarl", "[cpp][i18n]")
     SECTION("Plural")
         {
         cpp_i18n_review cpp(false);
-        cpp.set_style(check_pluaralization);
+        cpp.set_style(check_pluralization);
         const wchar_t* code = LR"(var = _("%n message(s) saved");)";
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });

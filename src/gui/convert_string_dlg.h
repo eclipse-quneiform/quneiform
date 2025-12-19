@@ -15,28 +15,18 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __CONVERT_DLG_H__
-#define __CONVERT_DLG_H__
+#ifndef CONVERT_DLG_H
+#define CONVERT_DLG_H
 
 #include "../i18n_review.h"
 #include "app_options.h"
-#include <wx/artprov.h>
-#include <wx/bmpbuttn.h>
-#include <wx/choice.h>
 #include <wx/clipbrd.h>
 #include <wx/combobox.h>
-#include <wx/dirdlg.h>
 #include <wx/editlbox.h>
 #include <wx/filename.h>
-#include <wx/gbsizer.h>
 #include <wx/listbook.h>
-#include <wx/slider.h>
-#include <wx/spinctrl.h>
-#include <wx/statline.h>
 #include <wx/stdpaths.h>
 #include <wx/string.h>
-#include <wx/valgen.h>
-#include <wx/valtext.h>
 #include <wx/wx.h>
 
 /** @brief Performs various string conversions.*/
@@ -113,4 +103,4 @@ class ConvertStringDlg final : public wxDialog
 
     /** @}*/
 
-#endif //__CONVERT_DLG_H__
+#endif // CONVERT_DLG_H

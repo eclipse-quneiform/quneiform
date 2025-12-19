@@ -86,7 +86,7 @@ namespace i18n_check
             for (auto& tableEntry : tableEntries)
                 {
                 // strip off trailing quote
-                if (tableEntry.second.length() > 0)
+                if (!tableEntry.second.empty())
                     {
                     tableEntry.second.pop_back();
                     }
@@ -111,7 +111,7 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
-                if (m_review_styles & check_l10n_contains_url)
+                if ((m_review_styles & check_l10n_contains_url) != 0)
                     {
                     std::wsmatch results;
                     if (std::regex_search(tableEntry.second, results, m_url_email_regex))
@@ -126,11 +126,11 @@ namespace i18n_check
                         }
                     }
 
-                if (m_review_styles & check_l10n_contains_excessive_nonl10n_content)
+                if ((m_review_styles & check_l10n_contains_excessive_nonl10n_content) != 0)
                     {
                     const auto [isunTranslatable, translatableContentLength] =
                         is_untranslatable_string(tableEntry.second, false);
-                    if ((m_review_styles & check_l10n_contains_excessive_nonl10n_content) &&
+                    if (((m_review_styles & check_l10n_contains_excessive_nonl10n_content) != 0) &&
                         !isunTranslatable &&
                         tableEntry.second.length() > (translatableContentLength * 3))
                         {
@@ -144,7 +144,7 @@ namespace i18n_check
                         }
                     }
 
-                if (m_review_styles & check_multipart_strings &&
+                if (((m_review_styles & check_multipart_strings) != 0) &&
                     is_string_multipart(tableEntry.second))
                     {
                     m_multipart_strings.emplace_back(
@@ -156,7 +156,7 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
-                if (m_review_styles & check_pluaralization &&
+                if (((m_review_styles & check_pluralization) != 0) &&
                     is_string_faux_plural(tableEntry.second))
                     {
                     m_faux_plural_strings.emplace_back(
@@ -168,7 +168,7 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
-                if (m_review_styles & check_articles_proceeding_placeholder &&
+                if (((m_review_styles & check_articles_proceeding_placeholder) != 0) &&
                     (is_string_article_issue(tableEntry.second) ||
                      is_string_pronoun(tableEntry.second)))
                     {
@@ -181,7 +181,7 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
-                if ((m_review_styles & check_l10n_concatenated_strings) &&
+                if (((m_review_styles & check_l10n_concatenated_strings) != 0) &&
                     has_surrounding_spaces(tableEntry.second))
                     {
                     m_localizable_strings_being_concatenated.emplace_back(
@@ -193,7 +193,7 @@ namespace i18n_check
                                        std::wstring::npos));
                     }
 
-                if ((m_review_styles & check_halfwidth) &&
+                if (((m_review_styles & check_halfwidth) != 0) &&
                     !load_matches(tableEntry.second, m_halfwidth_range_regex).empty())
                     {
                     m_localizable_strings_with_halfwidths.emplace_back(
@@ -260,11 +260,12 @@ namespace i18n_check
                 }();
 
                 // 8 is the standard size, but accept up to 10
-                constexpr int32_t minFontSize{ 8 };
-                constexpr int32_t maxFontSize{ 10 };
-                if (fontSize && (fontSize.value() > maxFontSize || fontSize.value() < minFontSize))
+                constexpr int32_t MIN_FONT_SIZE{ 8 };
+                constexpr int32_t MAX_FONT_SIZE{ 10 };
+                if (fontSize &&
+                    (fontSize.value() > MAX_FONT_SIZE || fontSize.value() < MIN_FONT_SIZE))
                     {
-                    m_badFontSizes.push_back(string_info{
+                    m_badFontSizes.emplace_back(
                         std::to_wstring(fontSize.value()),
                         string_info::usage_info{
 #ifdef wxVERSION_NUMBER
@@ -278,12 +279,12 @@ namespace i18n_check
                         },
                         fileName,
                         std::make_pair(get_line_and_column(fontEntry.first, rcFileText).first,
-                                       std::wstring::npos) });
+                                       std::wstring::npos));
                     }
 
                 if (fontParts[1] != L"MS Shell Dlg" && fontParts[1] != L"MS Shell Dlg 2")
                     {
-                    m_nonSystemFontNames.push_back(string_info{
+                    m_nonSystemFontNames.emplace_back(
                         fontParts[1],
 #ifdef wxVERSION_NUMBER
                         string_info::usage_info{
@@ -298,7 +299,7 @@ namespace i18n_check
 #endif
                         fileName,
                         std::make_pair(get_line_and_column(fontEntry.first, rcFileText).first,
-                                       std::wstring::npos) });
+                                       std::wstring::npos));
                     }
                 }
             }

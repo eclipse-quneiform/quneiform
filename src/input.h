@@ -15,11 +15,10 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_INPUTS_H__
-#define __I18N_INPUTS_H__
+#ifndef I18N_INPUTS_H
+#define I18N_INPUTS_H
 
 #include <filesystem>
-#include <string>
 #include <vector>
 
 namespace i18n_check
@@ -56,4 +55,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif //__I18N_INPUTS_H__
+#endif // I18N_INPUTS_H

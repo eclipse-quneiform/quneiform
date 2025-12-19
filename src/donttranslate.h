@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __DONTTRANSLATE_H__
-#define __DONTTRANSLATE_H__
+#ifndef DONTTRANSLATE_H
+#define DONTTRANSLATE_H
 
 #include <cstdint>
 #include <type_traits>
@@ -96,11 +96,12 @@ enum class DTExplanation
         // a shorthand, _DT(), is also available
         auto command = _DT("open ") + fileName;
     @endcode*/
-template<typename T, std::enable_if_t<is_string_constant_v<T>, bool> = true>
-inline constexpr auto
+template<typename T>
+constexpr auto
 DONTTRANSLATE(T str,
               [[maybe_unused]] const DTExplanation explanation = DTExplanation::NoExplanation,
               [[maybe_unused]] T explanationMessage = nullptr)
+    requires(is_string_constant_v<T>)
     {
     return str;
     }
@@ -112,14 +113,15 @@ DONTTRANSLATE(T str,
     @param explanationMessage An optional message to add explaining why this
         should not be translated.
     @returns The same string.*/
-template<typename T, std::enable_if_t<is_string_constant_v<T>, bool> = true>
-inline constexpr auto
-_DT(T str, [[maybe_unused]] const DTExplanation explanation = DTExplanation::NoExplanation,
-    [[maybe_unused]] T explanationMessage = nullptr)
+template<typename T>
+constexpr auto _DT(T str,
+                   [[maybe_unused]] const DTExplanation explanation = DTExplanation::NoExplanation,
+                   [[maybe_unused]] T explanationMessage = nullptr)
+    requires(is_string_constant_v<T>)
     {
     return str;
     }
 
 /** @}*/
 
-#endif //__DONTTRANSLATE_H__
+#endif // DONTTRANSLATE_H

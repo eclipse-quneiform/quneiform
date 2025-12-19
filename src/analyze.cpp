@@ -12,6 +12,10 @@
  ********************************************************************************/
 
 #include "analyze.h"
+#include "csharp_i18n_review.h"
+#include "i18n_string_util.h"
+#include "unicode_extract_text.h"
+#include "utfcpp/source/utf8.h"
 #include <iostream>
 #ifdef wxVERSION_NUMBER
     #include <wx/file.h>
@@ -23,14 +27,14 @@ namespace i18n_check
     bool valid_utf8_file(const std::filesystem::path& filePath, bool& startsWithBom)
         {
         startsWithBom = false;
-        std::ifstream ifs(filePath);
+        const std::ifstream ifs(filePath);
         if (!ifs)
             {
             return false;
             }
 
         std::istreambuf_iterator<char> it(ifs.rdbuf());
-        std::istreambuf_iterator<char> eos;
+        const std::istreambuf_iterator<char> eos;
 
         if (utf8::starts_with_bom(it, eos))
             {
@@ -58,13 +62,13 @@ namespace i18n_check
         const auto fileLength = fs8.tellg();
         fs8.seekg(0);
         std::vector<char> fileData(static_cast<size_t>(fileLength));
-        fs8.read(&fileData[0], fileLength);
+        fs8.read(fileData.data(), fileLength);
 
-        if (lily_of_the_valley::unicode_extract_text::is_unicode(&fileData[0]))
+        if (lily_of_the_valley::unicode_extract_text::is_unicode(fileData.data()))
             {
             lily_of_the_valley::unicode_extract_text uExtract;
-            uExtract(&fileData[0], fileData.size(),
-                     lily_of_the_valley::unicode_extract_text::is_little_endian(&fileData[0]));
+            uExtract(fileData.data(), fileData.size(),
+                     lily_of_the_valley::unicode_extract_text::is_little_endian(fileData.data()));
             return std::make_pair(true, std::wstring{ uExtract.get_filtered_text() });
             }
         return std::make_pair(false, std::wstring{});
@@ -86,28 +90,28 @@ namespace i18n_check
             return std::make_pair(false, std::wstring{});
             }
 
-        unsigned line_count = 1;
+        unsigned lineCount = 1;
         std::string line;
         std::wstring buffer;
         buffer.reserve(static_cast<size_t>(std::filesystem::file_size(filePath)));
 
         while (std::getline(fs8, line))
             {
-            if (auto end_it = utf8::find_invalid(line.begin(), line.end()); end_it != line.cend())
+            if (auto endIt = utf8::find_invalid(line.begin(), line.end()); endIt != line.cend())
                 {
-                std::cout << "Invalid UTF-8 encoding detected at line " << line_count << "\n";
-                std::cout << "This part is OK: " << std::string(line.begin(), end_it) << "\n";
+                std::cout << "Invalid UTF-8 encoding detected at line " << lineCount << "\n";
+                std::cout << "This part is OK: " << std::string(line.begin(), endIt) << "\n";
                 }
 
             // Convert it to utf-16
-            std::u16string utf16line = utf8::utf8to16(line);
+            const std::u16string utf16line = utf8::utf8to16(line);
             for (const auto& ch : utf16line)
                 {
                 buffer += static_cast<wchar_t>(ch);
                 }
             buffer += L"\n";
 
-            ++line_count;
+            ++lineCount;
             }
 
         return std::make_pair(true, buffer);
@@ -117,13 +121,14 @@ namespace i18n_check
     void batch_analyze::pseudo_translate(const std::vector<std::filesystem::path>& filesToTranslate,
                                          i18n_check::pseudo_translation_method pseudoMethod,
                                          bool addSurroundingBrackets, int8_t widthChange,
-                                         bool addTrackingIds, analyze_callback_reset resetCallback,
-                                         analyze_callback callback)
+                                         bool addTrackingIds,
+                                         const analyze_callback_reset& resetCallback,
+                                         const analyze_callback& callback)
         {
         size_t currentFileIndex{ 0 };
 
         const auto outputFile =
-            [this](const std::filesystem::path filePath, const std::wstring& content)
+            [this](const std::filesystem::path& filePath, const std::wstring& content)
         {
             std::u32string outBuffer;
             outBuffer.reserve(content.size());
@@ -131,10 +136,9 @@ namespace i18n_check
                 {
                 outBuffer += static_cast<char32_t>(chr);
                 }
-            std::string utfBuffer{ utf8::utf32to8(outBuffer) };
+            const std::string utfBuffer{ utf8::utf32to8(outBuffer) };
 
-            std::ofstream out(filePath);
-            if (out.is_open())
+            if (std::ofstream out(filePath); out.is_open())
                 {
                 out.write(utfBuffer.c_str(), utfBuffer.size());
                 m_logReport.append(_WXTRANS_WSTR(L"\nPseudo-translation catalog generated at: "))
@@ -212,7 +216,8 @@ namespace i18n_check
 
     //------------------------------------------------------
     void batch_analyze::analyze(const std::vector<std::filesystem::path>& filesToAnalyze,
-                                analyze_callback_reset resetCallback, analyze_callback callback)
+                                const analyze_callback_reset& resetCallback,
+                                const analyze_callback& callback)
         {
         m_filesThatShouldBeConvertedToUTF8.clear();
         m_filesThatContainUTF8Signature.clear();
@@ -242,7 +247,7 @@ namespace i18n_check
                 if (const auto [readUtf8Ok, fileUtf8Text] = read_utf8_file(file, startsWithBom);
                     readUtf8Ok)
                     {
-                    if (startsWithBom && m_cpp->get_style() & check_utf8_with_signature)
+                    if (startsWithBom && ((m_cpp->get_style() & check_utf8_with_signature) != 0))
                         {
                         m_filesThatContainUTF8Signature.push_back(file);
                         }
@@ -278,7 +283,8 @@ namespace i18n_check
                     // all platforms and compilers.
                     // RC files are usually encoded in ANSI given their age,
                     // so don't check those files.
-                    if (fileType != file_review_type::rc && m_cpp->get_style() & check_utf8_encoded)
+                    if (fileType != file_review_type::rc &&
+                        ((m_cpp->get_style() & check_utf8_encoded) != 0))
                         {
                         m_filesThatShouldBeConvertedToUTF8.push_back(file);
                         }
@@ -309,7 +315,8 @@ namespace i18n_check
                     }
                 else
                     {
-                    if (fileType != file_review_type::rc && m_cpp->get_style() & check_utf8_encoded)
+                    if (fileType != file_review_type::rc &&
+                        ((m_cpp->get_style() & check_utf8_encoded) != 0))
                         {
                         m_filesThatShouldBeConvertedToUTF8.push_back(file);
                         }
@@ -380,7 +387,7 @@ namespace i18n_check
         }
 
     //------------------------------------------------------
-    std::wstringstream batch_analyze::format_summary(const bool verbose)
+    std::wstringstream batch_analyze::format_summary(const bool verbose) const
         {
         std::wstringstream report;
         if (verbose)
@@ -388,54 +395,70 @@ namespace i18n_check
             report
                 << _(L"Checks Performed")
                 << L"\n###################################################\n"
-                << ((m_cpp->get_style() & check_l10n_strings) ? L"suspectL10NString\n" : L"")
-                << ((m_cpp->get_style() & check_suspect_i18n_usage) ? L"suspectI18NUsage\n" : L"")
-                << ((m_cpp->get_style() & check_suspect_l10n_string_usage) ? L"suspectL10NUsage\n" :
+                << (((m_cpp->get_style() & check_l10n_strings) != 0) ? L"suspectL10NString\n" : L"")
+                << (((m_cpp->get_style() & check_suspect_i18n_usage) != 0) ? L"suspectI18NUsage\n" :
                                                                              L"")
-                << ((m_cpp->get_style() & check_mismatching_printf_commands) ? L"printfMismatch\n" :
+                << (((m_cpp->get_style() & check_suspect_l10n_string_usage) != 0) ?
+                        L"suspectL10NUsage\n" :
                                                                                L"")
-                << ((m_cpp->get_style() & check_accelerators) ? L"acceleratorMismatch\n" : L"")
-                << ((m_cpp->get_style() & check_consistency) ? L"transInconsistency\n" : L"")
-                << ((m_cpp->get_style() & check_halfwidth) ? L"halfWidth\n" : L"")
-                << ((m_cpp->get_style() & check_numbers) ? L"numberInconsistency\n" : L"")
-                << ((m_cpp->get_style() & check_length) ? L"lengthInconsistency\n" : L"")
-                << ((m_cpp->get_style() & check_needing_context) ? L"L10NStringNeedsContext\n" :
+                << (((m_cpp->get_style() & check_mismatching_printf_commands) != 0) ?
+                        L"printfMismatch\n" :
                                                                    L"")
-                << ((m_cpp->get_style() & check_l10n_contains_url) ? L"urlInL10NString\n" : L"")
-                << ((m_cpp->get_style() & check_multipart_strings) ? L"multipartString\n" : L"")
-                << ((m_cpp->get_style() & check_pluaralization) ? L"pluralization\n" : L"")
-                << ((m_cpp->get_style() & check_articles_proceeding_placeholder) ?
+                << (((m_cpp->get_style() & check_accelerators) != 0) ? L"acceleratorMismatch\n" :
+                                                                       L"")
+                << (((m_cpp->get_style() & check_consistency) != 0) ? L"transInconsistency\n" : L"")
+                << (((m_cpp->get_style() & check_halfwidth) != 0) ? L"halfWidth\n" : L"")
+                << (((m_cpp->get_style() & check_numbers) != 0) ? L"numberInconsistency\n" : L"")
+                << (((m_cpp->get_style() & check_length) != 0) ? L"lengthInconsistency\n" : L"")
+                << (((m_cpp->get_style() & check_needing_context) != 0) ?
+                        L"L10NStringNeedsContext\n" :
+                        L"")
+                << (((m_cpp->get_style() & check_l10n_contains_url) != 0) ? L"urlInL10NString\n" :
+                                                                            L"")
+                << (((m_cpp->get_style() & check_multipart_strings) != 0) ? L"multipartString\n" :
+                                                                            L"")
+                << (((m_cpp->get_style() & check_pluralization) != 0) ? L"pluralization\n" : L"")
+                << (((m_cpp->get_style() & check_articles_proceeding_placeholder) != 0) ?
                         L"articleOrPronoun\n" :
                         L"")
-                << ((m_cpp->get_style() & check_l10n_contains_excessive_nonl10n_content) ?
+                << (((m_cpp->get_style() & check_l10n_contains_excessive_nonl10n_content) != 0) ?
                         L"excessiveNonL10NContent\n" :
                         L"")
-                << ((m_cpp->get_style() & check_l10n_concatenated_strings) ?
+                << (((m_cpp->get_style() & check_l10n_concatenated_strings) != 0) ?
                         L"concatenatedStrings\n" :
                         L"")
-                << ((m_cpp->get_style() & check_literal_l10n_string_comparison) ?
+                << (((m_cpp->get_style() & check_literal_l10n_string_comparison) != 0) ?
                         L"literalL10NStringCompare\n" :
                         L"")
-                << ((m_cpp->get_style() & check_not_available_for_l10n) ? L"notL10NAvailable\n" :
+                << (((m_cpp->get_style() & check_not_available_for_l10n) != 0) ?
+                        L"notL10NAvailable\n" :
                                                                           L"")
-                << ((m_cpp->get_style() & check_deprecated_macros) ? L"deprecatedMacro\n" : L"")
-                << ((m_cpp->get_style() & check_utf8_encoded) ? L"nonUTF8File\n" : L"")
-                << ((m_cpp->get_style() & check_utf8_with_signature) ? L"UTF8FileWithBOM\n" : L"")
-                << ((m_cpp->get_style() & check_unencoded_ext_ascii) ? L"unencodedExtASCII\n" : L"")
-                << ((m_cpp->get_style() & check_printf_single_number) ? L"printfSingleNumber\n" :
+                << (((m_cpp->get_style() & check_deprecated_macros) != 0) ? L"deprecatedMacro\n" :
                                                                         L"")
-                << ((m_cpp->get_style() & check_number_assigned_to_id) ? L"numberAssignedToId\n" :
+                << (((m_cpp->get_style() & check_utf8_encoded) != 0) ? L"nonUTF8File\n" : L"")
+                << (((m_cpp->get_style() & check_utf8_with_signature) != 0) ? L"UTF8FileWithBOM\n" :
                                                                          L"")
-                << ((m_cpp->get_style() & check_duplicate_value_assigned_to_ids) ?
+                << (((m_cpp->get_style() & check_unencoded_ext_ascii) != 0) ?
+                        L"unencodedExtASCII\n" :
+                        L"")
+                << (((m_cpp->get_style() & check_printf_single_number) != 0) ?
+                        L"printfSingleNumber\n" :
+                        L"")
+                << (((m_cpp->get_style() & check_number_assigned_to_id) != 0) ?
+                        L"numberAssignedToId\n" :
+                        L"")
+                << (((m_cpp->get_style() & check_duplicate_value_assigned_to_ids) != 0) ?
                         L"dupValAssignedToIds\n" :
                         L"")
-                << ((m_cpp->get_style() & check_malformed_strings) ? L"malformedString\n" : L"")
-                << ((m_cpp->get_style() & check_fonts) ? L"fontIssue\n" : L"")
-                << ((m_cpp->get_style() & check_trailing_spaces) ? L"trailingSpaces\n" : L"")
-                << ((m_cpp->get_style() & check_tabs) ? L"tabs\n" : L"")
-                << ((m_cpp->get_style() & check_line_width) ? L"wideLine\n" : L"")
-                << ((m_cpp->get_style() & check_space_after_comment) ? L"commentMissingSpace\n" :
+                << (((m_cpp->get_style() & check_malformed_strings) != 0) ? L"malformedString\n" :
                                                                        L"")
+                << (((m_cpp->get_style() & check_fonts) != 0) ? L"fontIssue\n" : L"")
+                << (((m_cpp->get_style() & check_trailing_spaces) != 0) ? L"trailingSpaces\n" : L"")
+                << (((m_cpp->get_style() & check_tabs) != 0) ? L"tabs\n" : L"")
+                << (((m_cpp->get_style() & check_line_width) != 0) ? L"wideLine\n" : L"")
+                << (((m_cpp->get_style() & check_space_after_comment) != 0) ?
+                        L"commentMissingSpace\n" :
+                        L"")
                 << L"\n";
             }
         report << _(L"Statistics") << L"\n###################################################\n"
@@ -452,7 +475,7 @@ namespace i18n_check
         }
 
     //------------------------------------------------------
-    std::wstringstream batch_analyze::format_results(const bool verbose /*= false*/)
+    std::wstringstream batch_analyze::format_results(const bool verbose /*= false*/) const
         {
         const auto replaceSpecialSpaces = [](const std::wstring& str)
         {

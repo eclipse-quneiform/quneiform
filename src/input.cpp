@@ -32,12 +32,10 @@ namespace i18n_check
                 return input / excludedSubDir;
                 }
             // ...or try combining without inserting a dir separator
-            else
-                {
-                std::filesystem::path newPath{ input };
-                newPath += excludedSubDir;
-                return newPath;
-                }
+
+            std::filesystem::path newPath{ input };
+            newPath += excludedSubDir;
+            return newPath;
         };
 
         for (const auto& excItem : excluded)
@@ -128,8 +126,8 @@ namespace i18n_check
                     {
                     for (const auto& ePath : excludedPaths)
                         {
-                        std::filesystem::path excPath(ePath,
-                                                      std::filesystem::path::format::native_format);
+                        const std::filesystem::path excPath(
+                            ePath, std::filesystem::path::format::native_format);
                         if (p.exists() && std::filesystem::exists(excPath) &&
                             std::filesystem::equivalent(p.path().parent_path(), excPath))
                             {
@@ -142,7 +140,7 @@ namespace i18n_check
                         {
                         for (const auto& eFile : excludedFiles)
                             {
-                            std::filesystem::path excFile(
+                            const std::filesystem::path excFile(
                                 eFile, std::filesystem::path::format::native_format);
                             if (p.exists() && std::filesystem::exists(excFile) &&
                                 std::filesystem::equivalent(p, excFile))

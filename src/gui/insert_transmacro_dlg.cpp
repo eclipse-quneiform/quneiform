@@ -12,6 +12,7 @@
  ********************************************************************************/
 
 #include "insert_transmacro_dlg.h"
+#include <wx/valgen.h>
 
 //-------------------------------------------------------------
 InsertTransMacroDlg::InsertTransMacroDlg(
@@ -19,10 +20,10 @@ InsertTransMacroDlg::InsertTransMacroDlg(
     const wxString& caption /*= _(L"Insert")*/,
     const TransMacroType macroType /*= TransMacroType::MarkForTranslation*/,
     const wxPoint& pos /*= wxDefaultPosition*/, const wxSize& size /*= wxDefaultSize*/,
-    long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
+    const long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
     : m_stringToFormat(std::move(stringToFormat)), m_macroType(macroType)
     {
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
+    wxNonOwnedWindow::SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
     m_transMacros.Add(L"_");
@@ -76,9 +77,9 @@ InsertTransMacroDlg::InsertTransMacroDlg(
 //-------------------------------------------------------------
 void InsertTransMacroDlg::CreateControls()
     {
-    wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
+    auto* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxBoxSizer* macroComboSzr = new wxBoxSizer(wxHORIZONTAL);
+    auto* macroComboSzr = new wxBoxSizer(wxHORIZONTAL);
     macroComboSzr->Add(new wxStaticText(this, wxID_STATIC,
                                         (m_macroType == TransMacroType::MarkForTranslation) ?
                                             _(L"Translation marking function:") :
@@ -95,7 +96,7 @@ void InsertTransMacroDlg::CreateControls()
                        wxSizerFlags{}.Left().CenterVertical().Border(wxLEFT));
     mainDlgSizer->Add(macroComboSzr, wxSizerFlags{}.Expand().Border());
 
-    wxBoxSizer* contextSzr = new wxBoxSizer(wxHORIZONTAL);
+    auto* contextSzr = new wxBoxSizer(wxHORIZONTAL);
     m_contextLabel = new wxStaticText(this, wxID_STATIC,
                                       (m_macroType == TransMacroType::MarkForTranslation) ?
                                           _(L"Context for translators:") :
@@ -119,7 +120,7 @@ void InsertTransMacroDlg::CreateControls()
 
     if (m_macroType == TransMacroType::MarkForTranslation)
         {
-        wxBoxSizer* domainSzr = new wxBoxSizer(wxHORIZONTAL);
+        auto* domainSzr = new wxBoxSizer(wxHORIZONTAL);
         m_domainLabel = new wxStaticText(this, wxID_STATIC, _(L"Message catalog domain:"));
         domainSzr->Add(m_domainLabel, wxSizerFlags{}.CenterVertical());
         m_domainEntry = new wxTextCtrl(this, wxID_ANY, wxString{}, wxDefaultPosition, wxDefaultSize,
@@ -162,7 +163,7 @@ void InsertTransMacroDlg::CreateControls()
     }
 
 //-------------------------------------------------------------
-void InsertTransMacroDlg::OnOK([[maybe_unused]] wxCommandEvent&)
+void InsertTransMacroDlg::OnOK([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
 
@@ -257,41 +258,35 @@ wxString InsertTransMacroDlg::GetFormattedOutput()
             return m_selectedMacro + L"(" + m_stringToFormat + L", " + quoteStart + m_domain +
                    L"\", " + quoteStart + m_context + "\")";
             }
-        else if (RequiresComment(m_selectedMacro))
+        if (RequiresComment(m_selectedMacro))
             {
             return m_selectedMacro + L"(" + quoteStart + m_context + L"\", " + m_stringToFormat +
                    L", " + quoteStart + m_comment + "\")";
             }
-        else if (RequiresContext(m_selectedMacro))
+        if (RequiresContext(m_selectedMacro))
             {
             return m_selectedMacro + L"(" + quoteStart + m_context + L"\", " + m_stringToFormat +
                    ")";
             }
-        else
+
+        // tr() can take an optional disambiguation
+        if (m_selectedMacro == L"tr" && !m_comment.empty())
             {
-            // tr() can take an optional disambiguation
-            if (m_selectedMacro == L"tr" && !m_comment.empty())
-                {
-                return m_selectedMacro + L"(" + m_stringToFormat + L", " + quoteStart + m_comment +
-                       "\")";
-                }
-            else
-                {
-                return m_selectedMacro + L"(" + m_stringToFormat + ")";
-                }
+            return m_selectedMacro + L"(" + m_stringToFormat + L", " + quoteStart + m_comment +
+                   "\")";
             }
+
+        return m_selectedMacro + L"(" + m_stringToFormat + ")";
         }
-    else
+
+    if (!m_comment.empty())
         {
-        if (!m_comment.empty())
-            {
-            return m_selectedMacro + L"(" + m_stringToFormat + L", " + m_context + L", " +
-                   quoteStart + m_comment + "\")";
-            }
-        if (m_context != L"DTExplanation::NoExplanation")
-            {
-            return m_selectedMacro + L"(" + m_stringToFormat + L", " + m_context + L")";
-            }
-        return m_selectedMacro + L"(" + m_stringToFormat + L")";
+        return m_selectedMacro + L"(" + m_stringToFormat + L", " + m_context + L", " + quoteStart +
+               m_comment + "\")";
         }
+    if (m_context != L"DTExplanation::NoExplanation")
+        {
+        return m_selectedMacro + L"(" + m_stringToFormat + L", " + m_context + L")";
+        }
+    return m_selectedMacro + L"(" + m_stringToFormat + L")";
     }

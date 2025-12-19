@@ -15,19 +15,13 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_FRAME_H__
-#define __I18N_FRAME_H__
+#ifndef I18N_FRAME_H
+#define I18N_FRAME_H
 
 #include "../analyze.h"
-#include "../input.h"
 #include "app_options.h"
 #include "convert_string_dlg.h"
 #include "datamodel.h"
-#include "insert_translator_comment_dlg.h"
-#include "insert_transmacro_dlg.h"
-#include "insert_warning_suppression_dlg.h"
-#include "projectdlg.h"
-#include "string_info_dlg.h"
 #include <wx/aboutdlg.h>
 #include <wx/appprogress.h>
 #include <wx/artprov.h>
@@ -37,20 +31,11 @@
 #include <wx/fdrepdlg.h>
 #include <wx/filename.h>
 #include <wx/fontenum.h>
-#include <wx/itemattr.h>
-#include <wx/notebook.h>
-#include <wx/numformatter.h>
-#include <wx/progdlg.h>
 #include <wx/ribbon/bar.h>
 #include <wx/ribbon/buttonbar.h>
-#include <wx/ribbon/gallery.h>
-#include <wx/ribbon/toolbar.h>
-#include <wx/richmsgdlg.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
-#include <wx/stdpaths.h>
 #include <wx/textctrl.h>
-#include <wx/tokenzr.h>
 #include <wx/wx.h>
 #include <wx/xml/xml.h>
 #include <wx/xrc/xmlres.h>
@@ -128,7 +113,7 @@ class I18NFrame : public wxFrame
             {
             title.append(L"*");
             }
-        SetTitle(std::move(title));
+        SetTitle(title);
         }
 
     void SaveSourceFileIfNeeded();
@@ -162,4 +147,4 @@ class I18NFrame : public wxFrame
 
     /** @}*/
 
-#endif //__I18N_FRAME_H__
+#endif // I18N_FRAME_H

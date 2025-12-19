@@ -15,12 +15,11 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_APPOPTIONS_H__
-#define __I18N_APPOPTIONS_H__
+#ifndef I18N_APPOPTIONS_H
+#define I18N_APPOPTIONS_H
 
 #include "../i18n_review.h"
 #include "../pseudo_translate.h"
-#include <wx/font.h>
 #include <wx/wx.h>
 #include <wx/xml/xml.h>
 #include <wx/xrc/xmlres.h>
@@ -61,7 +60,7 @@ struct I18NOptions
     int m_minCppVersion{ 2014 };
     bool m_verbose{ false };
 
-    bool m_windowMaximized{ false };
+    bool m_windowMaximized{ true };
     wxSize m_windowSize{ 1200, 1000 };
     int m_editorHeight{ 200 };
 
@@ -72,4 +71,4 @@ struct I18NOptions
 
     /** @}*/
 
-#endif //__I18N_APPOPTIONS_H__
+#endif // I18N_APPOPTIONS_H

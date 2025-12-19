@@ -12,6 +12,8 @@
  ********************************************************************************/
 
 #include "projectdlg.h"
+#include "wx/numformatter.h"
+#include "wx/valgen.h"
 
 //-------------------------------------------------------------
 NewProjectDialog::NewProjectDialog(
@@ -21,7 +23,7 @@ NewProjectDialog::NewProjectDialog(
     long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
     : m_extraPages(extraPages)
     {
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
+    wxNonOwnedWindow::SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
     m_fontEncodings = {
@@ -197,7 +199,7 @@ void NewProjectDialog::UpdateConsistencyOptions()
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnSampleTextChanged([[maybe_unused]] wxCommandEvent&)
+void NewProjectDialog::OnSampleTextChanged([[maybe_unused]] wxCommandEvent& evt)
     {
     UpdatePseudoTransOptions();
     }
@@ -255,40 +257,49 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     {
     m_options = static_cast<int64_t>(style);
 
-    m_notL10NAvailable = (m_options & i18n_check::review_style::check_not_available_for_l10n);
-    m_suspectL10NString = (m_options & i18n_check::review_style::check_l10n_strings);
-    m_suspectL10NUsage = (m_options & i18n_check::review_style::check_suspect_l10n_string_usage);
-    m_suspectI18NUsage = (m_options & i18n_check::review_style::check_suspect_i18n_usage);
-    m_printfMismatch = (m_options & i18n_check::review_style::check_mismatching_printf_commands);
-    m_acceleratorMismatch = (m_options & i18n_check::review_style::check_accelerators);
-    m_transConsistency = (m_options & i18n_check::review_style::check_consistency);
-    m_halfWidth = (m_options & i18n_check::review_style::check_halfwidth);
-    m_numberInconsistency = (m_options & i18n_check::review_style::check_numbers);
-    m_lengthInconsistency = (m_options & i18n_check::review_style::check_length);
-    m_needsContext = (m_options & i18n_check::review_style::check_needing_context);
-    m_urlInL10NString = (m_options & i18n_check::review_style::check_l10n_contains_url);
-    m_multipartString = (m_options & i18n_check::review_style::check_multipart_strings);
-    m_pluralization = (m_options & i18n_check::review_style::check_pluaralization);
-    m_articles = (m_options & i18n_check::review_style::check_articles_proceeding_placeholder);
+    m_notL10NAvailable =
+        ((m_options & i18n_check::review_style::check_not_available_for_l10n) != 0);
+    m_suspectL10NString = ((m_options & i18n_check::review_style::check_l10n_strings) != 0);
+    m_suspectL10NUsage =
+        ((m_options & i18n_check::review_style::check_suspect_l10n_string_usage) != 0);
+    m_suspectI18NUsage = ((m_options & i18n_check::review_style::check_suspect_i18n_usage) != 0);
+    m_printfMismatch =
+        ((m_options & i18n_check::review_style::check_mismatching_printf_commands) != 0);
+    m_acceleratorMismatch = ((m_options & i18n_check::review_style::check_accelerators) != 0);
+    m_transConsistency = ((m_options & i18n_check::review_style::check_consistency) != 0);
+    m_halfWidth = ((m_options & i18n_check::review_style::check_halfwidth) != 0);
+    m_numberInconsistency = ((m_options & i18n_check::review_style::check_numbers) != 0);
+    m_lengthInconsistency = ((m_options & i18n_check::review_style::check_length) != 0);
+    m_needsContext = ((m_options & i18n_check::review_style::check_needing_context) != 0);
+    m_urlInL10NString = ((m_options & i18n_check::review_style::check_l10n_contains_url) != 0);
+    m_multipartString = ((m_options & i18n_check::review_style::check_multipart_strings) != 0);
+    m_pluralization = ((m_options & i18n_check::review_style::check_pluralization) != 0);
+    m_articles =
+        ((m_options & i18n_check::review_style::check_articles_proceeding_placeholder) != 0);
     m_excessiveNonTranslatableContentInL10NString =
-        (m_options & i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content);
-    m_concatenatedStrings = (m_options & i18n_check::review_style::check_l10n_concatenated_strings);
+        ((m_options & i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content) !=
+         0);
+    m_concatenatedStrings =
+        ((m_options & i18n_check::review_style::check_l10n_concatenated_strings) != 0);
     m_literalL10NStrings =
-        (m_options & i18n_check::review_style::check_literal_l10n_string_comparison);
-    m_deprecatedMacro = (m_options & i18n_check::review_style::check_deprecated_macros);
-    m_nonUTF8File = (m_options & i18n_check::review_style::check_utf8_encoded);
-    m_UTF8FileWithBOM = (m_options & i18n_check::review_style::check_utf8_with_signature);
-    m_unencodedExtASCII = (m_options & i18n_check::review_style::check_unencoded_ext_ascii);
-    m_printfSingleNumber = (m_options & i18n_check::review_style::check_printf_single_number);
-    m_numberAssignedToId = (m_options & i18n_check::review_style::check_number_assigned_to_id);
+        ((m_options & i18n_check::review_style::check_literal_l10n_string_comparison) != 0);
+    m_deprecatedMacro = ((m_options & i18n_check::review_style::check_deprecated_macros) != 0);
+    m_nonUTF8File = ((m_options & i18n_check::review_style::check_utf8_encoded) != 0);
+    m_UTF8FileWithBOM = ((m_options & i18n_check::review_style::check_utf8_with_signature) != 0);
+    m_unencodedExtASCII = ((m_options & i18n_check::review_style::check_unencoded_ext_ascii) != 0);
+    m_printfSingleNumber =
+        ((m_options & i18n_check::review_style::check_printf_single_number) != 0);
+    m_numberAssignedToId =
+        ((m_options & i18n_check::review_style::check_number_assigned_to_id) != 0);
     m_dupValAssignedToIds =
-        (m_options & i18n_check::review_style::check_duplicate_value_assigned_to_ids);
-    m_malformedString = (m_options & i18n_check::review_style::check_malformed_strings);
-    m_trailingSpaces = (m_options & i18n_check::review_style::check_trailing_spaces);
-    m_fontIssue = (m_options & i18n_check::review_style::check_fonts);
-    m_tabs = (m_options & i18n_check::review_style::check_tabs);
-    m_wideLine = (m_options & i18n_check::review_style::check_line_width);
-    m_commentMissingSpace = (m_options & i18n_check::review_style::check_space_after_comment);
+        ((m_options & i18n_check::review_style::check_duplicate_value_assigned_to_ids) != 0);
+    m_malformedString = ((m_options & i18n_check::review_style::check_malformed_strings) != 0);
+    m_trailingSpaces = ((m_options & i18n_check::review_style::check_trailing_spaces) != 0);
+    m_fontIssue = ((m_options & i18n_check::review_style::check_fonts) != 0);
+    m_tabs = ((m_options & i18n_check::review_style::check_tabs) != 0);
+    m_wideLine = ((m_options & i18n_check::review_style::check_line_width) != 0);
+    m_commentMissingSpace =
+        ((m_options & i18n_check::review_style::check_space_after_comment) != 0);
 
     TransferDataToWindow();
 
@@ -315,7 +326,7 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
+void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
 
@@ -388,7 +399,7 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
         }
     if (m_pluralization)
         {
-        m_options |= i18n_check::review_style::check_pluaralization;
+        m_options |= i18n_check::review_style::check_pluralization;
         }
     if (m_articles)
         {
@@ -476,12 +487,12 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent&)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent&)
+void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
     wxDirDialog dirDlg(this, _(L"Select Folder to Analyze"));
     const wxFileName fn{ m_filePath };
-    // wxFileName::IsDir doesn't work under Unix, so look at the extension to see if it a dir
+    // wxFileName::IsDir doesn't work under Unix, so look at the extension to see if it is a dir
     dirDlg.SetPath(fn.GetExt().empty() ? m_filePath : fn.GetPath());
     if (dirDlg.ShowModal() != wxID_OK)
         {
@@ -493,7 +504,7 @@ void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent&)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent&)
+void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
     const wxFileName fn{ m_filePath };
@@ -511,7 +522,7 @@ void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent&)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent&)
+void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
     wxDirDialog dirDlg(this, _(L"Select Subfolders to Ignore"), wxString{},
@@ -533,7 +544,7 @@ void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEve
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent&)
+void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
     const wxFileName fn{ m_filePath };
@@ -609,21 +620,18 @@ void NewProjectDialog::CreateControls()
     {
         if (wxGetMouseState().ShiftDown())
             {
-            wxStaticText* statLabel = new wxStaticText(parent, wxID_STATIC, L"[" + label + L"]");
+            auto* statLabel = new wxStaticText(parent, wxID_STATIC, L"[" + label + L"]");
             statLabel->SetFont(statLabel->GetFont().Bold());
             statLabel->SetForegroundColour(wxSystemSettings::GetAppearance().IsDark() ?
                                                wxColour{ L"#89CFF0" } :
                                                wxColour{ L"#0095B6" });
             return statLabel;
             }
-        else
-            {
-            return new wxStaticText(parent, wxID_STATIC, wxString{}, wxDefaultPosition,
-                                    wxDefaultSize);
-            }
+
+        return new wxStaticText(parent, wxID_STATIC, wxString{}, wxDefaultPosition, wxDefaultSize);
     };
 
-    wxListbook* listBook = new wxListbook(this, wxID_ANY);
+    auto* listBook = new wxListbook(this, wxID_ANY);
     const wxSize imageSize{ 32, 32 };
     wxBookCtrlBase::Images images;
     images.push_back(wxArtProvider::GetBitmapBundle(wxART_FILE_OPEN, wxART_OTHER, imageSize));
@@ -633,23 +641,23 @@ void NewProjectDialog::CreateControls()
     images.push_back(wxArtProvider::GetBitmapBundle(wxART_EDIT, wxART_OTHER, imageSize));
     listBook->SetImages(images);
 
-    wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
+    auto* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
     // input options
     if (static_cast<bool>(m_extraPages & FilePage))
         {
-        wxPanel* inputPage =
+        auto* inputPage =
             new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+        auto* mainSizer = new wxBoxSizer(wxVERTICAL);
 
             {
-            wxStaticBoxSizer* fileBrowseBoxSizer =
+            auto* fileBrowseBoxSizer =
                 new wxStaticBoxSizer(wxHORIZONTAL, inputPage, _(L"Folder/file to analyze"));
 
             mainSizer->Add(fileBrowseBoxSizer, wxSizerFlags{}.Expand().Border());
 
-            wxTextCtrl* filePathEdit = new wxTextCtrl(
+            auto* filePathEdit = new wxTextCtrl(
                 fileBrowseBoxSizer->GetStaticBox(), wxID_ANY, wxString{}, wxDefaultPosition,
                 wxSize{ FromDIP(400), -1 }, wxTE_RICH2 | wxBORDER_THEME | wxTE_BESTWRAP,
                 wxGenericValidator(&m_filePath));
@@ -657,12 +665,12 @@ void NewProjectDialog::CreateControls()
             filePathEdit->AutoCompleteDirectories();
             fileBrowseBoxSizer->Add(filePathEdit, wxSizerFlags{ 1 }.Expand());
 
-            wxBitmapButton* folderBrowseButton =
+            auto* folderBrowseButton =
                 new wxBitmapButton(fileBrowseBoxSizer->GetStaticBox(), ID_FOLDER_BROWSE_BUTTON,
                                    wxArtProvider::GetBitmapBundle(wxART_FOLDER_OPEN, wxART_BUTTON));
             fileBrowseBoxSizer->Add(folderBrowseButton, wxSizerFlags{}.CenterVertical());
 
-            wxBitmapButton* fileBrowseButton =
+            auto* fileBrowseButton =
                 new wxBitmapButton(fileBrowseBoxSizer->GetStaticBox(), ID_FILE_BROWSE_BUTTON,
                                    wxArtProvider::GetBitmapBundle(wxART_NEW, wxART_BUTTON));
             fileBrowseBoxSizer->Add(fileBrowseButton, wxSizerFlags{}.CenterVertical());
@@ -672,7 +680,7 @@ void NewProjectDialog::CreateControls()
 
             // files/folders to ignore
             {
-            wxBoxSizer* fileBrowseBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+            auto* fileBrowseBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
             mainSizer->Add(fileBrowseBoxSizer, wxSizerFlags{ 1 }.Expand().Border());
 
@@ -680,12 +688,12 @@ void NewProjectDialog::CreateControls()
                 new wxEditableListBox(inputPage, wxID_ANY, _(L"Subfolders/files to ignore"));
             fileBrowseBoxSizer->Add(m_exclusionList, wxSizerFlags{ 1 }.Expand());
 
-            wxBitmapButton* folderExcludeBrowseButton =
+            auto* folderExcludeBrowseButton =
                 new wxBitmapButton(inputPage, ID_EXCLUDED_FOLDERS_BROWSE_BUTTON,
                                    wxArtProvider::GetBitmapBundle(wxART_FOLDER_OPEN, wxART_BUTTON));
             fileBrowseBoxSizer->Add(folderExcludeBrowseButton);
 
-            wxBitmapButton* fileExcludeBrowseButton =
+            auto* fileExcludeBrowseButton =
                 new wxBitmapButton(inputPage, ID_EXCLUDED_FILES_BROWSE_BUTTON,
                                    wxArtProvider::GetBitmapBundle(wxART_NEW, wxART_BUTTON));
             fileBrowseBoxSizer->Add(fileExcludeBrowseButton);
@@ -697,15 +705,15 @@ void NewProjectDialog::CreateControls()
 
         // source code options
         {
-        wxPanel* generalSettingsPage =
+        auto* generalSettingsPage =
             new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+        auto* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-        wxStaticBoxSizer* checkOptionsSizer =
+        auto* checkOptionsSizer =
             new wxStaticBoxSizer(wxVERTICAL, generalSettingsPage, _(L"Run the following checks:"));
 
-        wxGridBagSizer* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
+        auto* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
         size_t currentRow{ 0 };
 
         gbSizer->Add(new wxCheckBox(checkOptionsSizer->GetStaticBox(),
@@ -855,7 +863,7 @@ void NewProjectDialog::CreateControls()
                            wxGenericValidator(&m_allowTranslatingPunctuationOnlyStrings)),
             wxSizerFlags{}.Border().Left());
 
-        wxBoxSizer* minWordSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto* minWordSizer = new wxBoxSizer(wxHORIZONTAL);
 
         minWordSizer->Add(new wxStaticText(generalSettingsPage, wxID_STATIC,
                                            _(L"Minimum words for a string to "
@@ -863,7 +871,7 @@ void NewProjectDialog::CreateControls()
                                            wxDefaultPosition, wxDefaultSize),
                           wxSizerFlags{}.CenterVertical().Border());
 
-        wxSpinCtrl* minWordCtrl =
+        auto* minWordCtrl =
             new wxSpinCtrl(generalSettingsPage, wxID_ANY,
                            std::to_wstring(m_minWordsForClassifyingUnavailableString),
                            wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1024);
@@ -872,20 +880,16 @@ void NewProjectDialog::CreateControls()
 
         mainSizer->Add(minWordSizer, wxSizerFlags{}.Expand().Border());
 
-        wxBoxSizer* cppVersionSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto* cppVersionSizer = new wxBoxSizer(wxHORIZONTAL);
 
         cppVersionSizer->Add(new wxStaticText(generalSettingsPage, wxID_STATIC,
                                               _(L"C++ standard when issuing deprecation warnings:"),
                                               wxDefaultPosition, wxDefaultSize),
                              wxSizerFlags{}.CenterVertical().Border());
 
-        wxArrayString cppVersions;
-        cppVersions.Add(L"2011");
-        cppVersions.Add(L"2014");
-        cppVersions.Add(L"2017");
-        cppVersions.Add(L"2020");
-        cppVersions.Add(L"2023");
-        wxChoice* cppVersionRadioBox =
+        const wxArrayString cppVersions{ L"2011", L"2014", L"2017", L"2020", L"2023" };
+
+        auto* cppVersionRadioBox =
             new wxChoice(generalSettingsPage, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                          cppVersions, 0, wxGenericValidator(&m_minCppVersion));
         cppVersionSizer->Add(cppVersionRadioBox, wxSizerFlags{}.Border(wxLEFT).Left());
@@ -904,14 +908,14 @@ void NewProjectDialog::CreateControls()
 
         // resource files
         {
-        wxPanel* transPage =
+        auto* transPage =
             new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 
-        wxStaticBoxSizer* poOptionsSizer =
+        auto* poOptionsSizer =
             new wxStaticBoxSizer(wxVERTICAL, transPage, _(L"Translation catalogs"));
 
             {
-            wxGridBagSizer* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
+            auto* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
             size_t currentRow{ 0 };
 
             gbSizer->Add(
@@ -969,7 +973,7 @@ void NewProjectDialog::CreateControls()
             gbSizer->Add(buildCodeLabel(L"lengthInconsistency", poOptionsSizer->GetStaticBox()),
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
-            wxBoxSizer* transLongerThresholdSizer = new wxBoxSizer(wxHORIZONTAL);
+            auto* transLongerThresholdSizer = new wxBoxSizer(wxHORIZONTAL);
             m_transLongerThresholdLabel = new wxStaticText(
                 poOptionsSizer->GetStaticBox(), wxID_STATIC,
                 _(L"How much translations can expand:"), wxDefaultPosition, wxDefaultSize);
@@ -1015,10 +1019,10 @@ void NewProjectDialog::CreateControls()
                                         wxDefaultSize, 0, wxGenericValidator(&m_fuzzyTranslations)),
                          wxGBPosition(currentRow, 0), wxGBSpan{});
 
-            wxStaticBoxSizer* pseudoTransSizer = new wxStaticBoxSizer(
+            auto* pseudoTransSizer = new wxStaticBoxSizer(
                 wxVERTICAL, poOptionsSizer->GetStaticBox(), _(L"Pseudo-translation"));
 
-            wxBoxSizer* pseudoTransMethodSizer = new wxBoxSizer(wxHORIZONTAL);
+            auto* pseudoTransMethodSizer = new wxBoxSizer(wxHORIZONTAL);
 
             pseudoTransMethodSizer->Add(new wxStaticText(pseudoTransSizer->GetStaticBox(),
                                                          wxID_STATIC, _(L"Method:"),
@@ -1057,7 +1061,7 @@ void NewProjectDialog::CreateControls()
             pseudoTransSizer->Add(m_pseudoTrackCheckbox,
                                   wxSizerFlags{}.Expand().Border(wxLEFT | wxBOTTOM));
 
-            wxBoxSizer* pseudoWidthSizer = new wxBoxSizer(wxHORIZONTAL);
+            auto* pseudoWidthSizer = new wxBoxSizer(wxHORIZONTAL);
 
             m_pseudoSliderLabel =
                 new wxStaticText(pseudoTransSizer->GetStaticBox(), wxID_STATIC,
@@ -1100,7 +1104,7 @@ void NewProjectDialog::CreateControls()
             pseudoTransSizer->Add(pseudoWidthSizer,
                                   wxSizerFlags{}.Expand().Border(wxLEFT | wxBOTTOM | wxRIGHT));
 
-            wxFlexGridSizer* gbPreviewSizer = new wxFlexGridSizer(
+            auto* gbPreviewSizer = new wxFlexGridSizer(
                 2, 2, wxSize{ wxSizerFlags::GetDefaultBorder(), wxSizerFlags::GetDefaultBorder() });
             gbPreviewSizer->AddGrowableCol(1, 1);
             gbPreviewSizer->SetFlexibleDirection(wxHORIZONTAL);
@@ -1135,11 +1139,10 @@ void NewProjectDialog::CreateControls()
             poOptionsSizer->Add(pseudoTransSizer, wxSizerFlags{}.Expand().Border());
             }
 
-        wxStaticBoxSizer* rcOptionsSizer =
-            new wxStaticBoxSizer(wxVERTICAL, transPage, _(L"Windows RC files"));
+        auto* rcOptionsSizer = new wxStaticBoxSizer(wxVERTICAL, transPage, _(L"Windows RC files"));
 
             {
-            wxGridBagSizer* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
+            auto* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
             size_t currentRow{ 0 };
 
             gbSizer->Add(new wxCheckBox(rcOptionsSizer->GetStaticBox(), wxID_ANY,
@@ -1151,7 +1154,7 @@ void NewProjectDialog::CreateControls()
             rcOptionsSizer->Add(gbSizer, wxSizerFlags{}.Expand().Border());
             }
 
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+        auto* mainSizer = new wxBoxSizer(wxVERTICAL);
         mainSizer->Add(poOptionsSizer, wxSizerFlags{}.Expand().Border());
         mainSizer->Add(rcOptionsSizer, wxSizerFlags{}.Expand().Border());
         mainSizer->AddStretchSpacer();
@@ -1166,14 +1169,14 @@ void NewProjectDialog::CreateControls()
 
         // extra checks
         {
-        wxPanel* extraChecksPage =
+        auto* extraChecksPage =
             new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 
-        wxStaticBoxSizer* formattingOptionsSizer =
+        auto* formattingOptionsSizer =
             new wxStaticBoxSizer(wxVERTICAL, extraChecksPage, _(L"Formatting && encoding checks:"));
 
             {
-            wxGridBagSizer* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
+            auto* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
             size_t currentRow{ 0 };
 
             gbSizer->Add(new wxCheckBox(formattingOptionsSizer->GetStaticBox(), wxID_ANY,
@@ -1232,11 +1235,11 @@ void NewProjectDialog::CreateControls()
             formattingOptionsSizer->Add(gbSizer, wxSizerFlags{}.Expand().Border());
             }
 
-        wxStaticBoxSizer* codeOptionsSizer =
+        auto* codeOptionsSizer =
             new wxStaticBoxSizer(wxVERTICAL, extraChecksPage, _(L"Code checks:"));
 
             {
-            wxGridBagSizer* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
+            auto* gbSizer = new wxGridBagSizer(wxSizerFlags::GetDefaultBorder());
             size_t currentRow{ 0 };
 
             gbSizer->Add(new wxCheckBox(codeOptionsSizer->GetStaticBox(), wxID_ANY,
@@ -1258,7 +1261,7 @@ void NewProjectDialog::CreateControls()
             codeOptionsSizer->Add(gbSizer, wxSizerFlags{}.Border());
             }
 
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+        auto* mainSizer = new wxBoxSizer(wxVERTICAL);
         mainSizer->Add(formattingOptionsSizer, wxSizerFlags{}.Expand().Border());
         mainSizer->Add(codeOptionsSizer, wxSizerFlags{}.Expand().Border());
         mainSizer->AddStretchSpacer();
@@ -1270,7 +1273,7 @@ void NewProjectDialog::CreateControls()
     // editor options
     if (static_cast<bool>(m_extraPages & EditorPage))
         {
-        wxPanel* editorPage =
+        auto* editorPage =
             new wxPanel(listBook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 
         wxArrayString encodings;
@@ -1280,15 +1283,15 @@ void NewProjectDialog::CreateControls()
             }
         encodings.Sort();
 
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+        auto* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-        wxBoxSizer* encodingSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto* encodingSizer = new wxBoxSizer(wxHORIZONTAL);
 
         encodingSizer->Add(new wxStaticText(editorPage, wxID_STATIC, _(L"Fallback encoding:"),
                                             wxDefaultPosition, wxDefaultSize),
                            wxSizerFlags{}.CenterVertical().Border());
 
-        wxChoice* encodingRadioBox =
+        auto* encodingRadioBox =
             new wxChoice(editorPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, encodings, 0,
                          wxGenericValidator(&m_fallbackEncodingStr));
         encodingSizer->Add(encodingRadioBox, wxSizerFlags{}.Border(wxLEFT).Left());

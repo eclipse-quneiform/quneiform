@@ -15,12 +15,11 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __TRANS_CAT_FILE_REVIEW_H__
-#define __TRANS_CAT_FILE_REVIEW_H__
+#ifndef TRANS_CAT_FILE_REVIEW_H
+#define TRANS_CAT_FILE_REVIEW_H
 
 #include "i18n_review.h"
 #include <map>
-#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -54,7 +53,7 @@ namespace i18n_check
             }
 
         /// @brief The list of words/phrases that should never be translated.
-        /// @details This is pre-loaded with common product and company names, but can be
+        /// @details This is preloaded with common product and company names, but can be
         ///     extended also by calling this.
         /// @note This uses case-sensitive comparisons.
         /// @returns The list of words/phrases that should never be translated.
@@ -70,12 +69,12 @@ namespace i18n_check
             @param callback Callback function to display the progress.
                 Takes the current file index, overall file count, and the name of the current file.
                 Returning @c false indicates that the user cancelled the analysis.*/
-        void review_strings(analyze_callback_reset resetCallback,
-                            analyze_callback callback) override;
+        void review_strings(const analyze_callback_reset& resetCallback,
+                            const analyze_callback& callback) override;
 
       private:
-        void operator()([[maybe_unused]] std::wstring_view,
-                        [[maybe_unused]] const std::filesystem::path&) override
+        void operator()([[maybe_unused]] std::wstring_view strView,
+                        [[maybe_unused]] const std::filesystem::path& filesPath) override
             {
             }
 
@@ -86,4 +85,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif // __TRANS_CAT_FILE_REVIEW_H__
+#endif // TRANS_CAT_FILE_REVIEW_H

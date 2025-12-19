@@ -15,22 +15,17 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __PSEUDO_FILE_REVIEW_H__
-#define __PSEUDO_FILE_REVIEW_H__
+#ifndef PSEUDO_FILE_REVIEW_H
+#define PSEUDO_FILE_REVIEW_H
 
 #include "i18n_review.h"
-#include <cmath>
 #ifndef CPPCHECK_SKIP_SECTION
     #if __has_include(<format>)
         #include <format>
     #endif
 #endif
 #include <map>
-#include <regex>
-#include <set>
 #include <string>
-#include <utility>
-#include <vector>
 
 namespace i18n_check
     {
@@ -105,4 +100,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif // __PSEUDO_FILE_REVIEW_H__
+#endif // PSEUDO_FILE_REVIEW_H

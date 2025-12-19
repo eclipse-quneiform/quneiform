@@ -15,15 +15,10 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __PO_FILE_REVIEW_H__
-#define __PO_FILE_REVIEW_H__
+#ifndef PO_FILE_REVIEW_H
+#define PO_FILE_REVIEW_H
 
 #include "translation_catalog_review.h"
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace i18n_check
     {
@@ -61,7 +56,7 @@ namespace i18n_check
             @param callback Callback function to display the progress.
                 Takes the current file index, overall file count, and the name of the current file.
                 Returning @c false indicates that the user cancelled the analysis.*/
-        void review_strings(analyze_callback_reset resetCallback, analyze_callback callback) final
+        void review_strings(const analyze_callback_reset& resetCallback, const analyze_callback& callback) final
             {
             translation_catalog_review::review_strings(resetCallback, callback);
             }
@@ -73,4 +68,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif // __PO_FILE_REVIEW_H__
+#endif // PO_FILE_REVIEW_H

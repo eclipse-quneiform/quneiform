@@ -18,10 +18,10 @@ void I18NOptions::Save(const wxString& filePath)
     {
     wxXmlDocument xmlDoc;
 
-    wxXmlNode* root = new wxXmlNode(nullptr, wxXML_ELEMENT_NODE, L"quneiform-settings");
+    auto* root = new wxXmlNode(nullptr, wxXML_ELEMENT_NODE, L"quneiform-settings");
     xmlDoc.SetRoot(root);
 
-    wxXmlNode* node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"path");
+    auto* node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"path");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, m_filePath));
 
     auto* exclPathsNode = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"excluded-paths");
@@ -184,7 +184,7 @@ void I18NOptions::Load(const wxString& filePath)
         return;
         }
 
-    wxXmlNode* child = xmlDoc.GetRoot()->GetChildren();
+    const wxXmlNode* child = xmlDoc.GetRoot()->GetChildren();
     while (child != nullptr)
         {
         if (child->GetName() == L"path")
@@ -193,7 +193,7 @@ void I18NOptions::Load(const wxString& filePath)
             }
         else if (child->GetName() == L"excluded-paths")
             {
-            wxXmlNode* excludedChild = child->GetChildren();
+            const wxXmlNode* excludedChild = child->GetChildren();
             while (excludedChild != nullptr)
                 {
                 if (!excludedChild->GetNodeContent().empty())
@@ -205,7 +205,7 @@ void I18NOptions::Load(const wxString& filePath)
             }
         else if (child->GetName() == L"ignored-variables")
             {
-            wxXmlNode* ignoredVarChild = child->GetChildren();
+            const wxXmlNode* ignoredVarChild = child->GetChildren();
             while (ignoredVarChild != nullptr)
                 {
                 if (!ignoredVarChild->GetNodeContent().empty())
@@ -217,7 +217,7 @@ void I18NOptions::Load(const wxString& filePath)
             }
         else if (child->GetName() == L"untranslatable-names")
             {
-            wxXmlNode* untransNameChild = child->GetChildren();
+            const wxXmlNode* untransNameChild = child->GetChildren();
             while (untransNameChild != nullptr)
                 {
                 if (!untransNameChild->GetNodeContent().empty())

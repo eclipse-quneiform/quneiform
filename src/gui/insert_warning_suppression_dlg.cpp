@@ -12,6 +12,7 @@
  ********************************************************************************/
 
 #include "insert_warning_suppression_dlg.h"
+#include <wx/valgen.h>
 
 //-------------------------------------------------------------
 InsertWarningSuppressionDlg::InsertWarningSuppressionDlg(
@@ -21,7 +22,7 @@ InsertWarningSuppressionDlg::InsertWarningSuppressionDlg(
     long style /*= wxDEFAULT_DIALOG_STYLE | wxCLIP_CHILDREN | wxRESIZE_BORDER*/)
     : m_stringToFormat(std::move(stringToFormat))
     {
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
+    wxNonOwnedWindow::SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS | wxWS_EX_CONTEXTHELP);
     wxDialog::Create(parent, id, caption, pos, size, style);
 
     m_suppressionTags.Add(_DT(L"Quneiform (C/C++)"));
@@ -46,9 +47,9 @@ InsertWarningSuppressionDlg::InsertWarningSuppressionDlg(
 //-------------------------------------------------------------
 void InsertWarningSuppressionDlg::CreateControls()
     {
-    wxBoxSizer* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
+    auto* mainDlgSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxBoxSizer* functionComboSzr = new wxBoxSizer(wxHORIZONTAL);
+    auto* functionComboSzr = new wxBoxSizer(wxHORIZONTAL);
     functionComboSzr->Add(
         new wxStaticText(this, wxID_STATIC, _(L"Program to suppress warnings from:")),
         wxSizerFlags{}.CenterVertical());
@@ -75,7 +76,7 @@ void InsertWarningSuppressionDlg::CreateControls()
     }
 
 //-------------------------------------------------------------
-void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommandEvent&)
+void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
     if (m_warningsTextCtrl != nullptr)
@@ -86,7 +87,7 @@ void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommand
     }
 
 //-------------------------------------------------------------
-void InsertWarningSuppressionDlg::OnOK([[maybe_unused]] wxCommandEvent&)
+void InsertWarningSuppressionDlg::OnOK([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
     if (std::cmp_equal(m_selectedTag, (m_suppressionTags.size() - 1)) && m_warnings.empty())

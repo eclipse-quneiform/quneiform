@@ -15,14 +15,10 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __INFO_PLIST_FILE_REVIEW_H__
-#define __INFO_PLIST_FILE_REVIEW_H__
+#ifndef INFO_PLIST_FILE_REVIEW_H
+#define INFO_PLIST_FILE_REVIEW_H
 
 #include "i18n_review.h"
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
 #include <vector>
 
 /// @brief Class for reviewing a macOS Info.plist file.
@@ -36,7 +32,7 @@ namespace i18n_check
         /// @param verbose @c true to include verbose warnings.
         explicit info_plist_file_review(const bool verbose) : i18n_review(verbose) {}
 
-        /** @brief Main interface for extracting info from a Info.plist.
+        /** @brief Main interface for extracting info from an Info.plist.
             @param infoFileText The Info.plist's text to analyze.
             @param fileName The (optional) name of file being analyzed.*/
         void operator()(const std::wstring_view infoFileText,
@@ -63,4 +59,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif // __INFO_PLIST_FILE_REVIEW_H__
+#endif // INFO_PLIST_FILE_REVIEW_H

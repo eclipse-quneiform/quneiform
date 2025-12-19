@@ -46,8 +46,8 @@ void I18NResultsTreeModel::AddRow(wxString fileName, wxString warningId, wxStrin
     {
         wxASSERT(reinterpret_cast<void*>(parent));
         wxASSERT(reinterpret_cast<void*>(child));
-        wxDataViewItem parentNode(reinterpret_cast<void*>(parent));
-        wxDataViewItem childNode(reinterpret_cast<void*>(child));
+        const wxDataViewItem parentNode(reinterpret_cast<void*>(parent));
+        const wxDataViewItem childNode(reinterpret_cast<void*>(child));
 
         ItemAdded(parentNode, childNode);
     };
@@ -57,7 +57,7 @@ void I18NResultsTreeModel::AddRow(wxString fileName, wxString warningId, wxStrin
         {
         if (*currentNode == fileName)
             {
-            I18NResultsTreeModelNode* childNode =
+            auto* childNode =
                 new I18NResultsTreeModelNode(currentNode.get(), fileName, unquote(warningId),
                                              unquote(issue), unquote(explanation), line, column);
             currentNode->Append(childNode);
@@ -67,11 +67,11 @@ void I18NResultsTreeModel::AddRow(wxString fileName, wxString warningId, wxStrin
         }
 
     // ...otherwise, we are adding a new file and a new node under that
-    auto newFile = new I18NResultsTreeModelNode(m_root, fileName);
+    auto* newFile = new I18NResultsTreeModelNode(m_root, fileName);
     m_root->Append(newFile);
     notifyControl(m_root, newFile);
 
-    I18NResultsTreeModelNode* childNode = new I18NResultsTreeModelNode(
+    auto* childNode = new I18NResultsTreeModelNode(
         newFile, fileName, unquote(warningId), unquote(issue), unquote(explanation), line, column);
     newFile->Append(childNode);
     notifyControl(newFile, childNode);
@@ -80,13 +80,13 @@ void I18NResultsTreeModel::AddRow(wxString fileName, wxString warningId, wxStrin
 //------------------------------------------------------
 void I18NResultsTreeModel::Delete(const wxDataViewItem& item)
     {
-    I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
+    auto* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
     if (node == nullptr)
         {
         return;
         }
 
-    wxDataViewItem parent(node->GetParent());
+    const wxDataViewItem parent(node->GetParent());
     if (!parent.IsOk())
         {
         wxASSERT(node == m_root);
@@ -139,8 +139,8 @@ int I18NResultsTreeModel::Compare(const wxDataViewItem& item1, const wxDataViewI
             }
 
         // items must be different
-        const wxUIntPtr litem1 = reinterpret_cast<wxUIntPtr>(item1.GetID());
-        const wxUIntPtr litem2 = reinterpret_cast<wxUIntPtr>(item2.GetID());
+        const auto litem1 = reinterpret_cast<wxUIntPtr>(item1.GetID());
+        const auto litem2 = reinterpret_cast<wxUIntPtr>(item2.GetID());
 
         return litem1 - litem2;
         }
@@ -150,7 +150,7 @@ int I18NResultsTreeModel::Compare(const wxDataViewItem& item1, const wxDataViewI
 
 //------------------------------------------------------
 void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
-                                    unsigned int col) const
+                                    const unsigned int col) const
     {
     wxASSERT(item.IsOk());
 
@@ -221,7 +221,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
         if (fileOrWarningIdValue.starts_with(m_basePath))
             {
             fileOrWarningIdValue.erase(0, m_basePath.length());
-            if (fileOrWarningIdValue.length() > 0 &&
+            if (!fileOrWarningIdValue.empty() &&
                 fileOrWarningIdValue.at(0) == wxFileName::GetPathSeparator())
                 {
                 fileOrWarningIdValue.erase(0, 1);
@@ -267,7 +267,7 @@ bool I18NResultsTreeModel::SetValue(const wxVariant& variant, const wxDataViewIt
     {
     wxASSERT(item.IsOk());
 
-    I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
+    auto* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
     if (node == nullptr)
         {
         return false;
@@ -305,7 +305,7 @@ wxDataViewItem I18NResultsTreeModel::GetParent(const wxDataViewItem& item) const
         return wxDataViewItem(nullptr);
         }
 
-    I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
+    auto* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
 
     // "I18NResults" also has no parent
     if (node == m_root)
@@ -326,7 +326,8 @@ bool I18NResultsTreeModel::IsContainer(const wxDataViewItem& item) const
         return true;
         }
 
-    I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
+    const I18NResultsTreeModelNode* node =
+        reinterpret_cast<I18NResultsTreeModelNode*>(item.GetID());
     return node->IsContainer();
     }
 
@@ -334,7 +335,7 @@ bool I18NResultsTreeModel::IsContainer(const wxDataViewItem& item) const
 unsigned int I18NResultsTreeModel::GetChildren(const wxDataViewItem& parent,
                                                wxDataViewItemArray& array) const
     {
-    I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(parent.GetID());
+    auto* node = reinterpret_cast<I18NResultsTreeModelNode*>(parent.GetID());
     if (node == nullptr)
         {
         array.Add(wxDataViewItem(reinterpret_cast<void*>(m_root)));

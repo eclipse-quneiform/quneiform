@@ -20,21 +20,13 @@
 
 #include "../i18n_review.h"
 #include "app_options.h"
-#include <wx/artprov.h>
-#include <wx/choice.h>
 #include <wx/combobox.h>
-#include <wx/dirdlg.h>
 #include <wx/editlbox.h>
 #include <wx/filename.h>
-#include <wx/gbsizer.h>
 #include <wx/listbook.h>
-#include <wx/slider.h>
 #include <wx/spinctrl.h>
-#include <wx/statline.h>
 #include <wx/stdpaths.h>
 #include <wx/string.h>
-#include <wx/valgen.h>
-#include <wx/valtext.h>
 #include <wx/wx.h>
 
 /** @brief Prompt for inserting warning suppression blocks into code.*/

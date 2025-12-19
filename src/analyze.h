@@ -15,22 +15,19 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_ANALYZE_H__
-#define __I18N_ANALYZE_H__
+#ifndef I18N_ANALYZE_H
+#define I18N_ANALYZE_H
 
 #include "cpp_i18n_review.h"
 #include "csharp_i18n_review.h"
-#include "i18n_string_util.h"
 #include "info_plist_review.h"
 #include "po_file_review.h"
 #include "pseudo_translate.h"
 #include "quarto_review.h"
 #include "rc_file_review.h"
-#include "unicode_extract_text.h"
 #include "utfcpp/source/utf8.h"
 #include <filesystem>
 #include <fstream>
-#include <functional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -45,7 +42,7 @@ namespace i18n_check
     std::pair<bool, std::wstring> read_utf8_file(const std::filesystem::path& filePath,
                                                  bool& startsWithBom);
 
-    /// @brief Gets the file type of a file based on extension.
+    /// @brief Gets the file type based on extension.
     /// @param file The file path.
     /// @returns The file type, based on extension.
     [[nodiscard]]
@@ -55,34 +52,32 @@ namespace i18n_check
             {
             return file_review_type::rc;
             }
-        else if (file.extension().compare(std::filesystem::path(L".plist")) == 0)
+        if (file.extension().compare(std::filesystem::path(L".plist")) == 0)
             {
             return file_review_type::infoplist;
             }
-        else if (file.extension().compare(std::filesystem::path(L".qmd")) == 0)
+        if (file.extension().compare(std::filesystem::path(L".qmd")) == 0)
             {
             return file_review_type::quarto;
             }
-        else if (file.extension().compare(std::filesystem::path(L".po")) == 0 ||
-                 file.extension().compare(std::filesystem::path(L".pot")) == 0)
+        if (file.extension().compare(std::filesystem::path(L".po")) == 0 ||
+            file.extension().compare(std::filesystem::path(L".pot")) == 0)
             {
             return file_review_type::po;
             }
-        else if (file.extension().compare(std::filesystem::path(L".cs")) == 0)
+        if (file.extension().compare(std::filesystem::path(L".cs")) == 0)
             {
             return file_review_type::cs;
             }
-        else if (file.extension().compare(std::filesystem::path(L".cpp")) == 0 ||
-                 file.extension().compare(std::filesystem::path(L".c")) == 0 ||
-                 file.extension().compare(std::filesystem::path(L".hpp")) == 0 ||
-                 file.extension().compare(std::filesystem::path(L".h")) == 0)
+        if (file.extension().compare(std::filesystem::path(L".cpp")) == 0 ||
+            file.extension().compare(std::filesystem::path(L".c")) == 0 ||
+            file.extension().compare(std::filesystem::path(L".hpp")) == 0 ||
+            file.extension().compare(std::filesystem::path(L".h")) == 0)
             {
             return file_review_type::cpp;
             }
-        else
-            {
-            return file_review_type::unknown;
-            }
+
+        return file_review_type::unknown;
         }
 
     /// @brief Determines if a file is a source file, based on extension.
@@ -128,7 +123,7 @@ namespace i18n_check
                 Takes the current file index, overall file count, and the name of the current file.
                 Returning @c false indicates that the user cancelled the analysis.*/
         void analyze(const std::vector<std::filesystem::path>& filesToAnalyze,
-                     analyze_callback_reset resetCallback, analyze_callback callback);
+                     const analyze_callback_reset& resetCallback, const analyze_callback& callback);
 
         /** @brief Pseudo translates a set of files.
             @details Copies of each file are made in the same folder with
@@ -137,7 +132,7 @@ namespace i18n_check
             @param pseudoMethod How to pseudo-translate the content.
             @param widthChange How much width to increase or decrease the pseudo-translation from
                 the source string. This will pad the string with hyphens.
-            @param addTrackingIds @c true to add unique IDs in front the the strings.
+            @param addTrackingIds @c true to add unique IDs in front the strings.
             @param addSurroundingBrackets @c true to add square brackets and bangs
                 around each translation.
             @param resetCallback Callback function to tell the progress system in @c callback
@@ -148,18 +143,19 @@ namespace i18n_check
         void pseudo_translate(const std::vector<std::filesystem::path>& filesToTranslate,
                               i18n_check::pseudo_translation_method pseudoMethod,
                               bool addSurroundingBrackets, int8_t widthChange, bool addTrackingIds,
-                              analyze_callback_reset resetCallback, analyze_callback callback);
+                              const analyze_callback_reset& resetCallback,
+                              const analyze_callback& callback);
 
         /** @returns A formatted summary of the results.
             @param verbose @c true to include debug output.*/
         [[nodiscard]]
-        std::wstringstream format_results(const bool verbose = false);
+        std::wstringstream format_results(const bool verbose = false) const;
 
         /** @returns A formatted summary of the options used.
             @param verbose Whether to include information about which checks
                 were performed in the summary.*/
         [[nodiscard]]
-        std::wstringstream format_summary(const bool verbose = false);
+        std::wstringstream format_summary(const bool verbose = false) const;
 
         /// @returns The files that should be converted to UTF-8 (from the last call to analyze()).
         [[nodiscard]]
@@ -199,4 +195,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif //__I18N_ANALYZE_H__
+#endif // I18N_ANALYZE_H

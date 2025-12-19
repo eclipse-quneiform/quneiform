@@ -20,19 +20,19 @@ namespace i18n_check
         {
         m_file_name = fileName;
 
-        const std::wstring_view originalPoFileText{ poFileText };
-
         if (poFileText.empty())
             {
             return;
             }
 
-        static const std::wstring_view MSGID{ L"msgid \"" };
-        static const std::wstring_view MSGID_PLURAL{ L"msgid_plural \"" };
-        static const std::wstring_view MSGSTR{ L"msgstr \"" };
-        static const std::wstring_view MSGSTR0{ L"msgstr[0] \"" };
-        static const std::wstring_view MSGSTR1{ L"msgstr[1] \"" };
-        static const std::wstring_view MSGCTXT{ L"msgctxt \"" };
+        const std::wstring originalPoFileText{ poFileText };
+
+        constexpr static std::wstring_view MSGID{ L"msgid \"" };
+        constexpr static std::wstring_view MSGID_PLURAL{ L"msgid_plural \"" };
+        constexpr static std::wstring_view MSGSTR{ L"msgstr \"" };
+        constexpr static std::wstring_view MSGSTR0{ L"msgstr[0] \"" };
+        constexpr static std::wstring_view MSGSTR1{ L"msgstr[1] \"" };
+        constexpr static std::wstring_view MSGCTXT{ L"msgctxt \"" };
         // type of printf formatting the string uses, and its fuzzy status
         static const std::wregex entryLineRegEx{ LR"(^#, ([,a-z \-]+)+$)",
         // MSVC doesn't have the std::regex::multiline flag, but behaves like multiline implicitly.
@@ -176,7 +176,7 @@ namespace i18n_check
                 continue;
                 }
 
-            get_catalog_entries().push_back(std::make_pair(
+            get_catalog_entries().emplace_back(
                 fileName,
                 translation_catalog_entry{
                     std::move(msgId), std::move(msgPluralId),
@@ -184,7 +184,7 @@ namespace i18n_check
                     // singular and plural translations are kept
                     msgStr.empty() ? std::move(msg0Str) : std::move(msgStr), std::move(msg1Str),
                     pofs, std::vector<std::pair<translation_issue, std::wstring>>{},
-                    get_line_and_column(currentPos, originalPoFileText).first, comment }));
+                    get_line_and_column(currentPos, originalPoFileText).first, comment });
             }
         }
     } // namespace i18n_check

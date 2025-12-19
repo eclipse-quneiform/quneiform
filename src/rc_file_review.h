@@ -15,14 +15,10 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __RC_FILE_REVIEW_H__
-#define __RC_FILE_REVIEW_H__
+#ifndef RC_FILE_REVIEW_H
+#define RC_FILE_REVIEW_H
 
 #include "i18n_review.h"
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
 #include <vector>
 
 /// @brief Class for reviewing a Microsoft Windows resource file (*.RC).
@@ -72,4 +68,4 @@ namespace i18n_check
 
 /** @}*/
 
-#endif // __RC_FILE_REVIEW_H__
+#endif // RC_FILE_REVIEW_H

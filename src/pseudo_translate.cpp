@@ -12,6 +12,8 @@
  ********************************************************************************/
 
 #include "pseudo_translate.h"
+#include <algorithm>
+#include <utility>
 
 namespace i18n_check
     {
@@ -61,11 +63,11 @@ namespace i18n_check
             return;
             }
 
-        static const std::wstring_view MSGID{ L"msgid \"" };
-        static const std::wstring_view MSGID_PLURAL{ L"msgid_plural \"" };
-        static const std::wstring_view MSGSTR{ L"msgstr \"" };
-        static const std::wstring_view MSGSTR0{ L"msgstr[0] \"" };
-        static const std::wstring_view MSGSTR1{ L"msgstr[1] \"" };
+        constexpr static std::wstring_view MSGID{ L"msgid \"" };
+        constexpr static std::wstring_view MSGID_PLURAL{ L"msgid_plural \"" };
+        constexpr static std::wstring_view MSGSTR{ L"msgstr \"" };
+        constexpr static std::wstring_view MSGSTR0{ L"msgstr[0] \"" };
+        constexpr static std::wstring_view MSGSTR1{ L"msgstr[1] \"" };
 
         std::wstring_view fileContent{ poFileText };
 
@@ -96,7 +98,7 @@ namespace i18n_check
             currentPosition += entryPos;
             fileContent = std::wstring_view{ poFileText }.substr(currentPosition);
 
-            int64_t altertedLengthDiff{ 0 };
+            int64_t alteredLengthDiff{ 0 };
 
             // read the main source string
             std::wstring_view msgIdEntry{ entryContent };
@@ -129,9 +131,9 @@ namespace i18n_check
                     // replace main translation it with a pseudo-translation
                     auto mutatedStr{ mutate_message(msgIdContent) };
                     adjustedMainTranslationLength = mutatedStr.length() - msgStrLen;
-                    altertedLengthDiff = mutatedStr.length() - msgStrLen;
+                    alteredLengthDiff = mutatedStr.length() - msgStrLen;
                     poFileText.replace(currentPosition + msgStrPos + msgStrKey.length(), msgStrLen,
-                                       std::move(mutatedStr));
+                                       mutatedStr);
                     }
                 }
             // if a plural form of the source string exists, then pseudo-translate msgstr[1]
@@ -142,22 +144,22 @@ namespace i18n_check
                     {
                     // ...and replace it with a pseudo-translation
                     auto mutatedStr{ mutate_message(msgIdPluralContent) };
-                    altertedLengthDiff += mutatedStr.length() - msgStrPluralLen;
+                    alteredLengthDiff += mutatedStr.length() - msgStrPluralLen;
                     poFileText.replace(currentPosition + msgStrPluralPos + MSGSTR1.length() +
                                            adjustedMainTranslationLength,
-                                       msgStrPluralLen, std::move(mutatedStr));
+                                       msgStrPluralLen, mutatedStr);
                     }
                 }
 
             // step to end of catalog entry and look for next one
-            currentPosition += static_cast<size_t>(entryContent.length() + altertedLengthDiff);
+            currentPosition += static_cast<size_t>(entryContent.length() + alteredLengthDiff);
             fileContent = std::wstring_view{ poFileText }.substr(currentPosition);
             std::tie(foundEntry, entryContent, entryPos) =
                 i18n_review::read_po_catalog_entry(fileContent);
             }
 
         // remove any fuzzy specifiers
-        const std::wstring_view FUZZY{ _DT(L"#, fuzzy") };
+        constexpr std::wstring_view FUZZY{ _DT(L"#, fuzzy") };
         size_t foundPos = poFileText.find(FUZZY);
         while (foundPos != std::wstring::npos && foundPos > 0)
             {
@@ -186,18 +188,18 @@ namespace i18n_check
             }
 
         // mark the file's encoding as UTF-8
-        const std::wregex CONTENT_TYPE_RE{
+        const std::wregex contentTypeRe{
             LR"((\r|\n)\"Content-Type:[ ]*text/plain;[ ]*charset[ ]*=[ ]*([a-zA-Z0-9\-]*))"
         };
         std::wsmatch matches;
-        if (std::regex_search(poFileText, matches, CONTENT_TYPE_RE) && matches.size() >= 3)
+        if (std::regex_search(poFileText, matches, contentTypeRe) && matches.size() >= 3)
             {
             poFileText.replace(matches.position(2), matches.length(2), L"UTF-8");
             }
 
         // if target language is missing, then set to Esperanto
-        const std::wregex LANG_RE{ LR"((\r|\n)\"Language:[ ]*([a-zA-Z0-9\-]*))" };
-        if (std::regex_search(poFileText, matches, LANG_RE) && matches.size() >= 3 &&
+        const std::wregex langRe{ LR"((\r|\n)\"Language:[ ]*([a-zA-Z0-9\-]*))" };
+        if (std::regex_search(poFileText, matches, langRe) && matches.size() >= 3 &&
             matches.length(2) == 0)
             {
             poFileText.replace(matches.position(2), matches.length(2), L"eo");
@@ -244,8 +246,8 @@ namespace i18n_check
                     ++i;
                     continue;
                     }
-                else if (i < (msg.length() - 1) && msg[i] == L'\\' &&
-                         (msg[i + 1] == L'r' || msg[i + 1] == L'n' || msg[i + 1] == L't'))
+                if (i < (msg.length() - 1) && msg[i] == L'\\' &&
+                    (msg[i + 1] == L'r' || msg[i + 1] == L'n' || msg[i + 1] == L't'))
                     {
                     i += 2;
                     continue;
@@ -266,8 +268,8 @@ namespace i18n_check
                     --i;
                     continue;
                     }
-                else if ((msg[i] == L'r' || msg[i] == L'n' || msg[i] == L't') && i > 0 &&
-                         msg[i - 1] == L'\\')
+                if ((msg[i] == L'r' || msg[i] == L'n' || msg[i] == L't') && i > 0 &&
+                    msg[i - 1] == L'\\')
                     {
                     i -= 2;
                     continue;
@@ -294,14 +296,14 @@ namespace i18n_check
         int64_t charCountToCopy{ 0 };
         if (m_width_change < 0)
             {
-            int64_t charCountToRemove = static_cast<int64_t>(
+            auto charCountToRemove = static_cast<int64_t>(
                 std::ceil(msg.length() * (static_cast<double>(-m_width_change) / 100)));
             charCountToRemove += trackPrefix.length();
             if (m_add_surrounding_brackets)
                 {
                 charCountToRemove += 2;
                 }
-            if (charCountToRemove >= static_cast<int64_t>(msg.length()))
+            if (std::cmp_greater_equal(charCountToRemove, msg.length()))
                 {
                 charCountToRemove = (static_cast<int64_t>(msg.length()) - 1);
                 }
@@ -335,8 +337,8 @@ namespace i18n_check
                 continue;
                 }
             // step over printf commands
-            auto foundPos = std::find_if(printfSpecifiers.cbegin(), printfSpecifiers.cend(),
-                                         [i](auto val) noexcept { return val.first == i; });
+            auto foundPos = std::ranges::find_if(printfSpecifiers,
+                                                 [i](auto val) noexcept { return val.first == i; });
             if (foundPos != printfSpecifiers.cend())
                 {
                 newMsg += msg.substr(i, foundPos->second);
@@ -344,8 +346,8 @@ namespace i18n_check
                 continue;
                 }
             // step over file filters
-            foundPos = std::find_if(fileFilters.cbegin(), fileFilters.cend(),
-                                    [i](auto val) noexcept { return val.first == i; });
+            foundPos = std::ranges::find_if(fileFilters,
+                                            [i](auto val) noexcept { return val.first == i; });
             if (foundPos != fileFilters.cend())
                 {
                 newMsg += msg.substr(i, foundPos->second);
@@ -353,8 +355,8 @@ namespace i18n_check
                 continue;
                 }
             // step over positional commands
-            foundPos = std::find_if(positionalSpecifiers.cbegin(), positionalSpecifiers.cend(),
-                                    [i](auto val) noexcept { return val.first == i; });
+            foundPos = std::ranges::find_if(positionalSpecifiers,
+                                            [i](auto val) noexcept { return val.first == i; });
             if (foundPos != positionalSpecifiers.cend())
                 {
                 newMsg += msg.substr(i, foundPos->second);
@@ -362,7 +364,7 @@ namespace i18n_check
                 continue;
                 }
 
-            if (std::iswalnum(msg[i]))
+            if (std::iswalnum(msg[i]) != 0)
                 {
                 if (m_trans_type == pseudo_translation_method::all_caps)
                     {
@@ -370,11 +372,11 @@ namespace i18n_check
                     }
                 else if (m_trans_type == pseudo_translation_method::Xx_es)
                     {
-                    if (std::iswupper(msg[i]))
+                    if (std::iswupper(msg[i]) != 0)
                         {
                         appendChar(L'X');
                         }
-                    else if (std::iswlower(msg[i]))
+                    else if (std::iswlower(msg[i]) != 0)
                         {
                         appendChar(L'x');
                         }
@@ -421,7 +423,7 @@ namespace i18n_check
 
         if (m_width_change > 0)
             {
-            int64_t newCharCountToAdd = static_cast<int64_t>(
+            auto newCharCountToAdd = static_cast<int64_t>(
                 std::ceil(msg.length() * (static_cast<double>(m_width_change) / 100)));
             if (m_add_surrounding_brackets && newCharCountToAdd >= 2)
                 {
