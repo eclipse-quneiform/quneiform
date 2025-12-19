@@ -13,6 +13,7 @@
 
 #include "pseudo_translate.h"
 #include <algorithm>
+#include <cmath>
 #include <utility>
 
 namespace i18n_check
