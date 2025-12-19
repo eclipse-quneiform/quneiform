@@ -201,6 +201,7 @@ namespace i18n_check
         // if target language is missing, then set to Esperanto
         const std::wregex langRe{ LR"((\r|\n)\"Language:[ ]*([a-zA-Z0-9\-]*))" };
         if (std::regex_search(poFileText, matches, langRe) && matches.size() >= 3 &&
+            // NOLINTNEXTLINE(readability-container-size-empty)
             matches.length(2) == 0)
             {
             poFileText.replace(matches.position(2), matches.length(2), L"eo");

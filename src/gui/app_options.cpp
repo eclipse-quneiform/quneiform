@@ -24,6 +24,7 @@ void I18NOptions::Save(const wxString& filePath)
     auto* node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"path");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, m_filePath));
 
+    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
     auto* exclPathsNode = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"excluded-paths");
     for (auto exclFile : m_excludedPaths)
         {
@@ -62,6 +63,7 @@ void I18NOptions::Save(const wxString& filePath)
             pathNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, untransName));
             }
         }
+    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"checks");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, std::to_wstring(m_options)));

@@ -351,7 +351,7 @@ void I18NFrame::InitControls()
             if (selectedItem.IsOk())
                 {
                 const I18NResultsTreeModelNode* node =
-                    reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+                    static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
                 if (node != nullptr)
                     {
@@ -482,7 +482,7 @@ void I18NFrame::InitControls()
          {
              if (evt.GetWindow()->GetId() == EDITOR_ID)
                  {
-                 const I18NResultsTreeModelNode* node = reinterpret_cast<I18NResultsTreeModelNode*>(
+                 const I18NResultsTreeModelNode* node = static_cast<I18NResultsTreeModelNode*>(
                      m_resultsDataView->GetSelection().GetID());
                  if (node != nullptr)
                      {
@@ -510,7 +510,7 @@ void I18NFrame::InitControls()
                  }
 
              const I18NResultsTreeModelNode* node =
-                 reinterpret_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
+                 static_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
              if (node != nullptr)
                  {
                  wxMenu menu;
@@ -562,7 +562,7 @@ void I18NFrame::InitControls()
         [this](wxDataViewEvent& event)
         {
             const I18NResultsTreeModelNode* node =
-                reinterpret_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
+                static_cast<I18NResultsTreeModelNode*>(event.GetItem().GetID());
 
             if (node != nullptr)
                 {
@@ -740,7 +740,7 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& evt)
 
     if (selectedItem.IsOk())
         {
-        auto* node = reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+        auto* node = static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
         if (node != nullptr)
             {
@@ -825,7 +825,7 @@ void I18NFrame::OnOpenSelectedFile([[maybe_unused]] wxCommandEvent& evt)
     if (selectedItem.IsOk())
         {
         const I18NResultsTreeModelNode* node =
-            reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+            static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
         if (node != nullptr)
             {
             wxLaunchDefaultApplication(node->m_fileName);
@@ -901,7 +901,7 @@ void I18NFrame::OnIgnore(wxRibbonButtonBarEvent& event)
     if (selectedItem.IsOk())
         {
         const I18NResultsTreeModelNode* node =
-            reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+            static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
         if (node != nullptr)
             {
             wxMenu menu;
@@ -940,7 +940,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& evt)
     if (selectedItem.IsOk())
         {
         const I18NResultsTreeModelNode* node =
-            reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+            static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
         if (node != nullptr)
             {
@@ -956,7 +956,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& evt)
                     {
                     return;
                     }
-                node = reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+                node = static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
                 if (node == nullptr)
                     {
                     return;
@@ -1015,7 +1015,7 @@ void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent& evt)
     if (selectedItem.IsOk())
         {
         const I18NResultsTreeModelNode* node =
-            reinterpret_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
+            static_cast<I18NResultsTreeModelNode*>(selectedItem.GetID());
 
         // child node of file parent node
         if (node != nullptr && node->m_fileName != node->m_warningId)
@@ -1687,6 +1687,7 @@ void I18NFrame::Process()
             }
         wxStringTokenizer tokenizer(
             currentLine, L"\t",
+            // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
             wxStringTokenizerMode(wxTOKEN_STRTOK | wxTOKEN_RET_EMPTY | wxTOKEN_RET_EMPTY_ALL));
         while (tokenizer.HasMoreTokens())
             {

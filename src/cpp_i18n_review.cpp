@@ -408,7 +408,6 @@ namespace i18n_check
                                 if (scanAhead < endSentinel && *scanAhead == L'\"')
                                     {
                                     clear_section(connectedQuote, std::next(connectedQuote, 1));
-                                    connectedQuote = scanAhead;
                                     end = std::next(scanAhead);
                                     continue;
                                     }

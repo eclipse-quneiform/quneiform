@@ -1597,15 +1597,15 @@ namespace i18n_check
                           std::regex_token_iterator<
                               std::remove_reference_t<decltype(string1)>::const_iterator>(),
                           std::back_inserter(idNameParts));
-                const auto idVal = [&string_2 = string2]()
+                const auto idVal = [&theString = string2]()
                 {
                     try
                         {
-                        if (string_2.starts_with(L"0x"))
+                        if (theString.starts_with(L"0x"))
                             {
-                            return std::optional<int32_t>(std::stol(string_2, nullptr, 16));
+                            return std::optional<int32_t>(std::stol(theString, nullptr, 16));
                             }
-                        return std::optional<int32_t>(std::stol(string_2));
+                        return std::optional<int32_t>(std::stol(theString));
                         }
                     catch (...)
                         {
@@ -2256,6 +2256,7 @@ namespace i18n_check
                 if (!matchedInternalVar)
                     {
                     classify_non_localizable_string(string_info(
+                        // NOLINTNEXTLINE(bugprone-use-after-move, hicpp-invalid-access-moved)
                         std::move(clippedValue),
                         string_info::usage_info(string_info::usage_info::usage_type::variable,
                                                 variableInfo.m_name, variableInfo.m_type,
@@ -2355,6 +2356,7 @@ namespace i18n_check
     std::pair<bool, size_t> i18n_review::is_untranslatable_string(std::wstring strToReview,
                                                                   const bool limitWordCount) const
         {
+        // NOLINTBEGIN(readability-redundant-string-cstr)
         // if no spaces but lengthy, then this is probably some sort of GUID
         if (strToReview.length() >= 32 &&
             strToReview.find_first_of(L" \n\r") == std::wstring::npos &&
@@ -2597,6 +2599,7 @@ namespace i18n_check
                         std::wstring::npos);
             return std::make_pair(false, strToReview.length());
             }
+        // NOLINTEND(readability-redundant-string-cstr)
         }
 
     //--------------------------------------------------

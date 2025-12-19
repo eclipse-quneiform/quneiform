@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
         result = options.parse(argc, argv);
 
-        if (result.count("help"))
+        if (result.count("help") != 0U)
             {
             std::wcout << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
             return 0;
@@ -103,10 +103,7 @@ int main(int argc, char* argv[])
             {
             return result[option].as<bool>();
             }
-        else
-            {
-            return defaultValue;
-            }
+        return defaultValue;
     };
 
     const auto readIntOption = [&result](const std::string& option, const int defaultValue)
@@ -115,10 +112,8 @@ int main(int argc, char* argv[])
             {
             return result[option].as<int>();
             }
-        else
-            {
-            return defaultValue;
-            }
+
+        return defaultValue;
     };
 
     fs::path inputFolder;
@@ -148,7 +143,7 @@ int main(int argc, char* argv[])
         std::wcout << L"Searching for files to analyze in " << inputFolder << L"...\n\n";
         }
 
-    std::vector<std::string> providedIgnoredPaths{
+    const std::vector<std::string> providedIgnoredPaths{
         (result["ignore"].count() > 0) ? result["ignore"].as<std::vector<std::string>>() :
                                          std::vector<std::string>{}
     };
@@ -156,7 +151,7 @@ int main(int argc, char* argv[])
     std::vector<fs::path> providedIgnoredPathsWidened;
     for (const auto& iPath : providedIgnoredPaths)
         {
-        providedIgnoredPathsWidened.push_back(i18n_string_util::lazy_string_to_wstring(iPath));
+        providedIgnoredPathsWidened.emplace_back(i18n_string_util::lazy_string_to_wstring(iPath));
         }
     // paths being ignored
     const auto excludedInfo =
@@ -166,7 +161,7 @@ int main(int argc, char* argv[])
     const auto filesToAnalyze = i18n_check::get_files_to_analyze(
         inputFolder, excludedInfo.m_excludedPaths, excludedInfo.m_excludedFiles);
 
-    std::vector<std::string> untranslatableNames{
+    const std::vector<std::string> untranslatableNames{
         (result["untranslatables"].count() > 0) ?
             result["untranslatables"].as<std::vector<std::string>>() :
             std::vector<std::string>{}
@@ -533,9 +528,9 @@ int main(int argc, char* argv[])
     const std::wstringstream report = analyzer.format_results(readBoolOption("verbose", false));
 
     // write the output to file (if requested)
-    if (result.count("output"))
+    if (result.count("output") != 0U)
         {
-        fs::path outPath{ result["output"].as<std::string>() };
+        const fs::path outPath{ result["output"].as<std::string>() };
         std::ofstream ofs(outPath);
 
         // write the results report in UTF-8

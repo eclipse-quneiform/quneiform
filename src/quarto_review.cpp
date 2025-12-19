@@ -215,8 +215,9 @@ namespace i18n_check
                     }
                 }
             // Windows absolute paths: C:/foo/bar
-            else if (pathStartIndex + 2 < pathEndIndex && std::iswalpha(text[pathStartIndex]) &&
-                     text[pathStartIndex + 1] == L':' && text[pathStartIndex + 2] == L'/')
+            else if (pathStartIndex + 2 < pathEndIndex &&
+                     std::iswalpha(text[pathStartIndex]) != 0 && text[pathStartIndex + 1] == L':' &&
+                     text[pathStartIndex + 2] == L'/')
                 {
                 shouldFlag = true;
                 }
