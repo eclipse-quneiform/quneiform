@@ -13,6 +13,7 @@
 
 #include "i18n_review.h"
 #include <algorithm>
+#include <format>
 
 namespace i18n_check
     {

@@ -56,7 +56,8 @@ namespace i18n_check
             @param callback Callback function to display the progress.
                 Takes the current file index, overall file count, and the name of the current file.
                 Returning @c false indicates that the user cancelled the analysis.*/
-        void review_strings(const analyze_callback_reset& resetCallback, const analyze_callback& callback) final
+        void review_strings(const analyze_callback_reset& resetCallback,
+                            const analyze_callback& callback) final
             {
             translation_catalog_review::review_strings(resetCallback, callback);
             }
