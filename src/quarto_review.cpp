@@ -131,7 +131,7 @@ namespace i18n_check
         auto funcAbsolutePaths = std::async(std::launch::async, &quarto_review::LoadAbsolutePaths,
                                             this, std::cref(filteredContent));
 
-        {
+            {
             auto sameLineResults = funcSameLine.get();
             m_sentencesOnSameLine.insert(m_sentencesOnSameLine.end(),
                                          std::make_move_iterator(sameLineResults.begin()),
