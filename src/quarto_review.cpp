@@ -131,13 +131,55 @@ namespace i18n_check
         auto funcAbsolutePaths = std::async(std::launch::async, &quarto_review::LoadAbsolutePaths,
                                             this, std::cref(filteredContent));
 
-        m_sentencesOnSameLine = funcSameLine.get();
-        m_sentencesSplitOnDifferentLines = funcSplitSentences.get();
-        m_malformedContent = funcMalformed.get();
-        m_smartQuotes = funcSmartQuotes.get();
-        m_rangeDashIssues = funcRanges.get();
-        m_malformedImageLinks = funcMalformedImages.get();
-        m_absolute_path_links = funcAbsolutePaths.get();
+        {
+            auto sameLineResults = funcSameLine.get();
+            m_sentencesOnSameLine.insert(m_sentencesOnSameLine.end(),
+                                         std::make_move_iterator(sameLineResults.begin()),
+                                         std::make_move_iterator(sameLineResults.end()));
+            }
+
+            {
+            auto splitSentenceResults = funcSplitSentences.get();
+            m_sentencesSplitOnDifferentLines.insert(
+                m_sentencesSplitOnDifferentLines.end(),
+                std::make_move_iterator(splitSentenceResults.begin()),
+                std::make_move_iterator(splitSentenceResults.end()));
+            }
+
+            {
+            auto malformedContentResults = funcMalformed.get();
+            m_malformedContent.insert(m_malformedContent.end(),
+                                      std::make_move_iterator(malformedContentResults.begin()),
+                                      std::make_move_iterator(malformedContentResults.end()));
+            }
+
+            {
+            auto smartQuoteResults = funcSmartQuotes.get();
+            m_smartQuotes.insert(m_smartQuotes.end(),
+                                 std::make_move_iterator(smartQuoteResults.begin()),
+                                 std::make_move_iterator(smartQuoteResults.end()));
+            }
+
+            {
+            auto rangeDashResults = funcRanges.get();
+            m_rangeDashIssues.insert(m_rangeDashIssues.end(),
+                                     std::make_move_iterator(rangeDashResults.begin()),
+                                     std::make_move_iterator(rangeDashResults.end()));
+            }
+
+            {
+            auto malformedImageResults = funcMalformedImages.get();
+            m_malformedImageLinks.insert(m_malformedImageLinks.end(),
+                                         std::make_move_iterator(malformedImageResults.begin()),
+                                         std::make_move_iterator(malformedImageResults.end()));
+            }
+
+            {
+            auto absolutePathResults = funcAbsolutePaths.get();
+            m_absolute_path_links.insert(m_absolute_path_links.end(),
+                                         std::make_move_iterator(absolutePathResults.begin()),
+                                         std::make_move_iterator(absolutePathResults.end()));
+            }
         }
 
     //--------------------------------------------------
