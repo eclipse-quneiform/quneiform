@@ -33,6 +33,7 @@
     // for the GUI version, include gettext's translation loading support via wxWidgets
     #if __has_include(<wx/wx.h>)
         #include <wx/wx.h>
+        // NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp,readability-identifier-naming)
         #define _WXTRANS_WSTR(s) _(s).wc_string()
     #else
         #define _(s) (s)
@@ -498,9 +499,8 @@ namespace i18n_check
         /** @brief Main interface for extracting resource text from C++ source code.
             @param fileText The text to review.
             @param fileName The (optional) name of source file being analyzed.*/
-        virtual void
-        operator()(std::wstring_view fileText,
-                   const std::filesystem::path& fileName = std::filesystem::path{}) = 0;
+        virtual void operator()(std::wstring_view fileText,
+                                const std::filesystem::path& fileName) = 0;
 
         /** @brief Finalizes the review process after all files have been loaded.
             @details Reviews any strings that are available for translation that are suspect,

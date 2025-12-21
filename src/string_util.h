@@ -15,8 +15,8 @@
     @brief Utility classes.
 @{*/
 
-#ifndef __STRING_UTIL_H__
-#define __STRING_UTIL_H__
+#ifndef QUNEIFORM_STRING_UTIL_H
+#define QUNEIFORM_STRING_UTIL_H
 
 #include <array>
 #include <cassert>
@@ -1253,9 +1253,9 @@ namespace string_util
         {
       public:
         [[nodiscard]]
-        bool operator()(const T& a_, const T& b_) const
+        bool operator()(const T& left, const T& right) const
             {
-            return (a_.compare(b_) < 0);
+            return (left.compare(right) < 0);
             }
         };
 
@@ -1264,9 +1264,9 @@ namespace string_util
         {
       public:
         [[nodiscard]]
-        bool operator()(const T& a_, const T& b_) const noexcept
+        bool operator()(const T& left, const T& right) const noexcept
             {
-            return (string_util::stricmp(a_.c_str(), b_.c_str()) < 0);
+            return (string_util::stricmp(left.c_str(), right.c_str()) < 0);
             }
         };
 
@@ -1275,9 +1275,9 @@ namespace string_util
         {
       public:
         [[nodiscard]]
-        bool operator()(const T* a_, const T* b_) const
+        bool operator()(const T* left, const T* right) const
             {
-            return (string_util::strnatordncasecmp(a_, b_) < 0);
+            return (string_util::strnatordncasecmp(left, right) < 0);
             }
         };
 
@@ -1432,116 +1432,6 @@ namespace string_util
             }
         return false;
         }
-
-    /** @brief Tokenizes a string using a set of delimiters.*/
-    template<typename T>
-    class string_tokenize
-        {
-      public:
-        string_tokenize() = delete;
-        string_tokenize(const string_tokenize&) = delete;
-
-        /// @brief Constructor which takes the string to parse and the delimiters to use.
-        /// @param val The string to parse.
-        /// @param delims The set of delimiters to separate the string.
-        /// @param skipEmptyTokens @c true to skip empty tokens (i.e., ignoring consecutive
-        /// delimiters).
-        string_tokenize(const T& val, std::wstring delims, const bool skipEmptyTokens)
-            : m_value(val), m_delims(std::move(delims)), m_skip_empty_tokens(skipEmptyTokens)
-            {
-            m_start = m_value.c_str();
-            m_next_delim =
-                string_util::strcspn_pointer(m_start, m_delims.c_str(), m_delims.length());
-            m_has_more_tokens = val.length();
-            }
-
-        /// @param val The string to tokenize.
-        /// @returns The number of tokens in a provided string.
-        [[nodiscard]]
-        size_t count_tokens(const T& val)
-            {
-            size_t tokenCount{ 0 };
-            for (size_t i = 0; i < val.length(); ++i)
-                {
-                if (is_one_of<wchar_t>(val[i], m_delims.c_str()))
-                    {
-                    if (m_skip_empty_tokens)
-                        {
-                        if (i + 1 < val.length() &&
-                            is_one_of<wchar_t>(val[i + 1], m_delims.c_str()))
-                            {
-                            continue;
-                            }
-
-                        ++tokenCount;
-                        }
-                    else
-                        {
-                        ++tokenCount;
-                        }
-                    }
-                }
-            return tokenCount + 1;
-            }
-
-        /// @returns Whether there are more tokens in the string.
-        [[nodiscard]]
-        bool has_more_tokens() const noexcept
-            {
-            return m_has_more_tokens;
-            }
-
-        /// @returns Whether there are more delimiters in the string.\n
-        ///     This is useful for seeing if there are any delimiters at all when
-        ///     first loading the string.
-        [[nodiscard]]
-        bool has_more_delimiters() const noexcept
-            {
-            return (m_next_delim != nullptr);
-            }
-
-        /// @returns The next token from the original string as a string object
-        /// @note Empty tokens can be returned if there is proceeding or trailing
-        ///     delimiters in the string, or if there are repeated delimiters next to each other.
-        [[nodiscard]]
-        T get_next_token()
-            {
-            if (m_next_delim != nullptr)
-                {
-                const wchar_t* currentStart = m_start;
-                const wchar_t* currentNextDelim = m_next_delim;
-                // move the pointers to the next token
-                m_start = ++m_next_delim;
-                m_next_delim = strcspn_pointer(m_start, m_delims.c_str(), m_delims.length());
-                if ((currentNextDelim - currentStart) == 0 && m_skip_empty_tokens)
-                    {
-                    return get_next_token();
-                    }
-
-                return T(currentStart, currentNextDelim - currentStart);
-                }
-            // no more delims means that we are on the last token
-            if (m_start != nullptr)
-                {
-                m_has_more_tokens = false;
-                const wchar_t* currentStart = m_start;
-                m_start = nullptr;
-                return T(currentStart);
-                }
-            // if called when there are no more tokens, then return an empty string
-
-            m_has_more_tokens = false;
-            return T();
-            }
-
-      private:
-        T m_value;
-        const wchar_t* m_start{ nullptr };
-        const wchar_t* m_next_delim{ nullptr };
-        std::wstring m_delims;
-        bool m_skip_empty_tokens{ true };
-        bool m_has_more_tokens{ false };
-        };
 
     /// @brief Removes all whitespace from a string
     /// @param text The text to review.
@@ -1840,4 +1730,4 @@ namespace string_util
 
 /** @}*/
 
-#endif //__STRING_UTIL_H__
+#endif // QUNEIFORM_STRING_UTIL_H

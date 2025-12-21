@@ -12,6 +12,7 @@ Hel = "Hel"
 ist = "ist"
 ommand = "ommand"
 tring = "tring"
+optin = "optin"
 
 [type.svg]
 extend-glob = ["*.svg"]

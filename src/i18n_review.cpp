@@ -2569,7 +2569,7 @@ namespace i18n_check
                 return std::make_pair(false, strToReview.length());
                 }
 
-            if (m_untranslatable_exceptions.find(strToReview) != m_untranslatable_exceptions.cend())
+            if (m_untranslatable_exceptions.contains(strToReview))
                 {
                 return std::make_pair(false, strToReview.length());
                 }

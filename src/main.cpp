@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     };
 
     fs::path inputFolder;
-    if (result.count("input"))
+    if (result.count("input") != 0)
         {
         inputFolder = fs::path{ result["input"].as<std::string>(), fs::path::native_format };
         if (!fs::exists(inputFolder))
@@ -149,6 +149,7 @@ int main(int argc, char* argv[])
     };
 
     std::vector<fs::path> providedIgnoredPathsWidened;
+    providedIgnoredPathsWidened.reserve(providedIgnoredPaths.size());
     for (const auto& iPath : providedIgnoredPaths)
         {
         providedIgnoredPathsWidened.emplace_back(i18n_string_util::lazy_string_to_wstring(iPath));
@@ -199,7 +200,7 @@ int main(int argc, char* argv[])
     i18n_check::quarto_review quartoReview;
 
     // see which checks are being performed
-    if (result.count("enable"))
+    if (result.count("enable") != 0)
         {
         const auto& styles = result["enable"].as<std::vector<std::string>>();
         int64_t rs{ i18n_check::review_style::no_checks };
@@ -355,7 +356,7 @@ int main(int argc, char* argv[])
         rc.set_style(static_cast<i18n_check::review_style>(rs));
         }
     // ...and if any checks are being excluded
-    if (result.count("disable"))
+    if (result.count("disable") != 0)
         {
         const auto& styles = result["disable"].as<std::vector<std::string>>();
         int64_t rs{ static_cast<int64_t>(cpp.get_style()) };
