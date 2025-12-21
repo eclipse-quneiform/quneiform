@@ -1165,7 +1165,7 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent& evt)
     if (wxFileName{ dialog.GetPath() }.GetExt().CmpNoCase(L"qfn") != 0)
         {
         m_activeProjectFilePath.clear();
-        m_projectDirty = true;
+        m_projectDirty = false;
 
         m_activeProjectOptions = wxGetApp().m_defaultOptions;
         CopyProjectOptionsToGlobalOptions();
