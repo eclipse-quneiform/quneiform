@@ -97,7 +97,7 @@ void InsertTransCommentDlg::EnableExtraControls()
     }
 
 //-------------------------------------------------------------
-void InsertTransCommentDlg::OnOK([[maybe_unused]] wxCommandEvent& evt)
+void InsertTransCommentDlg::OnOK([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
 

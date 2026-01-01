@@ -125,6 +125,9 @@ int main(int argc, char* argv[])
             std::wcout << L"Input path does not exist: " << inputFolder;
             return 0;
             }
+        inputFolder = std::filesystem::weakly_canonical(
+            inputFolder.is_relative() ? std::filesystem::current_path() / inputFolder :
+                                        inputFolder);
         }
     else
         {
@@ -137,7 +140,7 @@ int main(int argc, char* argv[])
         {
         std::wcout << L"\n###################################################\n# "
                    << i18n_string_util::lazy_string_to_wstring(options.program())
-                   << L":\n# Internationalization/localization analysis system\n# (c) 2021-2025 "
+                   << L":\n# Internationalization/localization analysis system\n# (c) 2021-2026 "
                       L"Blake Madden\n"
                    << L"###################################################\n\n";
         std::wcout << L"Searching for files to analyze in " << inputFolder << L"...\n\n";

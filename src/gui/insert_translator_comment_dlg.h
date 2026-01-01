@@ -79,7 +79,7 @@ class InsertTransCommentDlg final : public wxDialog
 
   private:
     void CreateControls();
-    void OnOK([[maybe_unused]] wxCommandEvent&);
+    void OnOK([[maybe_unused]] wxCommandEvent& event);
 
     void OnHelpClicked([[maybe_unused]] wxCommandEvent& event)
         {
