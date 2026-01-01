@@ -543,6 +543,8 @@ namespace i18n_check
         m_untranslatable_regexes = {
             // nothing but numbers, punctuation, or control characters?
             std::wregex(LR"(([[:digit:][:space:][:punct:][:cntrl:]]|\\[rnt])+)"),
+            // version strings
+            std::wregex(LR"(^v?\d+(?:\.\d+)*-\d+-g[0-9a-f]+$)"),
             // placeholder text
             std::wregex(LR"(Lorem ipsum.*)", std::regex_constants::icase),
             std::wregex(LR"(The quick brown fox.*)", std::regex_constants::icase),
