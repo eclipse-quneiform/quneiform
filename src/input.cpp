@@ -14,6 +14,7 @@
 #include "input.h"
 #include "i18n_review.h"
 #include <iostream>
+#include <unordered_set>
 
 namespace i18n_check
     {
@@ -111,64 +112,113 @@ namespace i18n_check
                          const std::vector<std::filesystem::path>& excludedFiles)
         {
         std::vector<std::filesystem::path> filesToAnalyze;
+        // wouldn't make sense to analyze anything in these folders
+        static const std::unordered_set<std::wstring> defaultIgnoredDirs{
+            L".vs",     L".git",   L".gitmodules", L".gitworktree", L".cache",
+            L".clangd", L".cmake", L".gradle",     L".quarto",      L".github",
+            L".vscode", L".idea",  L".svn"
+        };
 
-        if (std::filesystem::is_regular_file(inputFolder) && std::filesystem::exists(inputFolder))
+        std::vector<std::filesystem::path> excludedDirsAbs;
+        excludedDirsAbs.reserve(excludedPaths.size());
+
+        for (const auto& ePath : excludedPaths)
+            {
+            std::filesystem::path p(ePath, std::filesystem::path::format::native_format);
+            if (p.is_relative())
+                {
+                p = inputFolder / p;
+                }
+            excludedDirsAbs.push_back(std::filesystem::weakly_canonical(p));
+            }
+
+        std::vector<std::filesystem::path> excludedFilesAbs;
+        excludedFilesAbs.reserve(excludedFiles.size());
+
+        for (const auto& eFile : excludedFiles)
+            {
+            std::filesystem::path p(eFile, std::filesystem::path::format::native_format);
+
+            if (p.is_relative())
+                {
+                p = inputFolder / p;
+                }
+
+            excludedFilesAbs.push_back(std::filesystem::weakly_canonical(p));
+            }
+
+        if (std::filesystem::exists(inputFolder) && std::filesystem::is_regular_file(inputFolder))
             {
             filesToAnalyze.push_back(inputFolder);
             }
-        else if (std::filesystem::is_directory(inputFolder) && std::filesystem::exists(inputFolder))
+        else if (std::filesystem::exists(inputFolder) && std::filesystem::is_directory(inputFolder))
             {
-            for (const auto& p : std::filesystem::recursive_directory_iterator(inputFolder))
+            for (std::filesystem::recursive_directory_iterator
+                     it(inputFolder, std::filesystem::directory_options::skip_permission_denied),
+                 end;
+                 it != end; ++it)
                 {
+                const std::filesystem::directory_entry& p = *it;
+
+                // prune excluded directories immediately
+                if (p.is_directory())
+                    {
+                    const std::wstring dirName = p.path().filename().wstring();
+                    bool excludeDir = defaultIgnoredDirs.contains(dirName);
+
+                    if (!excludeDir)
+                        {
+                        const std::filesystem::path curDir =
+                            std::filesystem::weakly_canonical(p.path());
+
+                        for (const auto& excDir : excludedDirsAbs)
+                            {
+                            if (curDir == excDir)
+                                {
+                                excludeDir = true;
+                                break;
+                                }
+                            }
+                        }
+
+                    if (excludeDir)
+                        {
+                        // skip this directory entirely
+                        it.disable_recursion_pending();
+                        continue;
+                        }
+                    }
                 const auto ext = p.path().extension();
                 bool inExcludedPath{ false };
                 try
                     {
-                    for (const auto& ePath : excludedPaths)
+                    if (p.is_regular_file())
                         {
-                        const std::filesystem::path excPath(
-                            ePath, std::filesystem::path::format::native_format);
-                        if (p.exists() && std::filesystem::exists(excPath) &&
-                            std::filesystem::equivalent(p.path().parent_path(), excPath))
+                        const std::filesystem::path curFile =
+                            std::filesystem::weakly_canonical(p.path());
+
+                        for (const auto& excFile : excludedFilesAbs)
                             {
-                            inExcludedPath = true;
-                            break;
-                            }
-                        }
-                    // compare against excluded files if not already in an excluded folder
-                    if (!inExcludedPath)
-                        {
-                        for (const auto& eFile : excludedFiles)
-                            {
-                            const std::filesystem::path excFile(
-                                eFile, std::filesystem::path::format::native_format);
-                            if (p.exists() && std::filesystem::exists(excFile) &&
-                                std::filesystem::equivalent(p, excFile))
+                            if (curFile == excFile)
                                 {
                                 inExcludedPath = true;
                                 break;
                                 }
                             }
                         }
-                    if (p.exists() && p.is_regular_file() && !inExcludedPath &&
-                        (ext.compare(std::filesystem::path(L".rc")) == 0 ||
-                         ext.compare(std::filesystem::path(L".plist")) == 0 ||
-                         ext.compare(std::filesystem::path(L".qmd")) == 0 ||
-                         ext.compare(std::filesystem::path(L".c")) == 0 ||
-                         ext.compare(std::filesystem::path(L".cs")) == 0 ||
-                         ext.compare(std::filesystem::path(L".cpp")) == 0 ||
-                         ext.compare(std::filesystem::path(L".h")) == 0 ||
-                         ext.compare(std::filesystem::path(L".hpp")) == 0 ||
-                         ext.compare(std::filesystem::path(L".po")) == 0 ||
-                         ext.compare(std::filesystem::path(L".pot")) == 0) &&
+
+                    if (p.is_regular_file() && !inExcludedPath &&
+                        (ext == L".rc" || ext == L".plist" || ext == L".qmd" || ext == L".c" ||
+                         ext == L".cs" || ext == L".cpp" || ext == L".h" || ext == L".hpp" ||
+                         ext == L".po" || ext == L".pot") &&
                         // ignore CMake build files
-                        p.path().filename().compare(L"CMakeCXXCompilerId.cpp") != 0 &&
-                        p.path().filename().compare(L"CMakeCCompilerId.c") != 0 &&
+                        p.path().filename() != L"CMakeCXXCompilerId.cpp" &&
+                        p.path().filename() != L"CMakeCCompilerId.c" &&
                         // main catch2 files
-                        p.path().filename().compare(L"catch.hpp") != 0 &&
-                        p.path().filename().compare(L"catch_amalgamated.cpp") != 0 &&
-                        p.path().filename().compare(L"catch_amalgamated.hpp") != 0 &&
-                        // ignore pseudo-translated message catalogs what we previously generated
+                        p.path().filename() != L"catch.hpp" &&
+                        p.path().filename() != L"catch_amalgamated.cpp" &&
+                        p.path().filename() != L"catch_amalgamated.hpp" &&
+                        // ignore pseudo-translated message catalogs
                         !p.path().filename().wstring().starts_with(L"pseudo_"))
                         {
                         filesToAnalyze.push_back(p.path());

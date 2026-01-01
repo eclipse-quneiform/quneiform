@@ -227,6 +227,7 @@ namespace i18n_check
         m_po->clear_results();
         m_csharp->clear_results();
         m_quarto->clear_results();
+        m_lastBatchSize = filesToAnalyze.size();
 
         size_t currentFileIndex{ 0 };
 
@@ -462,6 +463,7 @@ namespace i18n_check
                 << L"\n";
             }
         report << _(L"Statistics") << L"\n###################################################\n"
+               << _(L"# of files reviewed: ") << get_last_batch_size() << L"\n"
                << _(L"Strings available for translation within C/C++ source files: ")
                << m_cpp->get_localizable_strings().size() << L"\n"
                << _(L"Strings available for translation within C# source files: ")

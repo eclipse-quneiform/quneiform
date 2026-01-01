@@ -529,8 +529,6 @@ namespace i18n_check
             m_deprecated_string_functions.insert(
                 { L"wxMax", _WXTRANS_WSTR(L"Use std::max() instead of wxMax().") });
             m_deprecated_string_functions.insert(
-                { L"wxRound", _WXTRANS_WSTR(L"Use std::lround() instead of wxRound().") });
-            m_deprecated_string_functions.insert(
                 { L"wxIsNan", _WXTRANS_WSTR(L"Use std::isnan() instead of wxIsNan().") });
             m_deprecated_string_functions.insert(
                 { L"wxNOEXCEPT", _WXTRANS_WSTR(L"Use noexcept instead of wxNOEXCEPT.") });

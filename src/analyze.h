@@ -178,6 +178,13 @@ namespace i18n_check
             return m_logReport;
             }
 
+        /// @returns The number of files analyzed in the last run batch.
+        [[nodiscard]]
+        size_t get_last_batch_size() const noexcept
+            {
+            return m_lastBatchSize;
+            }
+
       private:
         i18n_check::cpp_i18n_review* m_cpp{ nullptr };
         i18n_check::rc_file_review* m_rc{ nullptr };
@@ -190,6 +197,7 @@ namespace i18n_check
         std::vector<std::filesystem::path> m_filesThatContainUTF8Signature;
 
         std::wstring m_logReport;
+        size_t m_lastBatchSize{ 0 };
         };
     } // namespace i18n_check
 
