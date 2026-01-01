@@ -208,6 +208,7 @@ namespace i18n_check
     std::set<string_util::case_insensitive_wstring> i18n_review::m_file_extensions = { // NOLINT
         L"xml", L"html", L"htm", L"xhtml", L"rtf", L"doc", L"docx", L"dot", L"docm", L"txt", L"ppt",
         L"pptx", L"pdf", L"ps", L"odt", L"ott", L"odp", L"otp", L"pptm", L"md", L"xaml", L"tex",
+        L"pango",
         // Visual Studio files
         L"sln", L"csproj", L"json", L"pbxproj", L"apk", L"tlb", L"ocx", L"pdb", L"tlh", L"hlp",
         L"msi", L"rc", L"vcxproj", L"resx", L"appx", L"vcproj",
