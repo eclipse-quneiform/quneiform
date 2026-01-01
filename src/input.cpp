@@ -121,14 +121,24 @@ namespace i18n_check
 
         std::vector<std::filesystem::path> excludedDirsAbs;
         excludedDirsAbs.reserve(excludedPaths.size());
+        std::unordered_set<std::wstring> excludedDirNames;
+        excludedDirNames.reserve(excludedPaths.size());
 
         for (const auto& ePath : excludedPaths)
             {
-            std::filesystem::path p(ePath, std::filesystem::path::format::native_format);
+            std::filesystem::path p(ePath);
+
+            if (!p.has_parent_path())
+                {
+                excludedDirNames.insert(p.filename().wstring());
+                continue;
+                }
+
             if (p.is_relative())
                 {
                 p = inputFolder / p;
                 }
+
             excludedDirsAbs.push_back(std::filesystem::weakly_canonical(p));
             }
 
@@ -164,7 +174,8 @@ namespace i18n_check
                 if (p.is_directory())
                     {
                     const std::wstring dirName = p.path().filename().wstring();
-                    bool excludeDir = defaultIgnoredDirs.contains(dirName);
+                    bool excludeDir =
+                        defaultIgnoredDirs.contains(dirName) || excludedDirNames.contains(dirName);
 
                     if (!excludeDir)
                         {

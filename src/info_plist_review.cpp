@@ -25,9 +25,11 @@ namespace i18n_check
             return;
             }
 
+        // NOLINTNEXTLINE(readability-identifier-naming)
         static const std::wregex CFBundleLocalizationsRegEx{
             LR"(<key>CFBundleLocalizations<\/key>\s+<array>[\s<>[:alnum:]\/]+<\/array>)"
         };
+        // NOLINTNEXTLINE(readability-identifier-naming)
         static const std::wregex CFBundleLocalStringRegEx{ LR"(<string>[[:alnum:]]+<\/string>)" };
 
         // check to see if any languages are supported
