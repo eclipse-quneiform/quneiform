@@ -163,7 +163,7 @@ void InsertTransMacroDlg::CreateControls()
     }
 
 //-------------------------------------------------------------
-void InsertTransMacroDlg::OnOK([[maybe_unused]] wxCommandEvent& evt)
+void InsertTransMacroDlg::OnOK([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
 

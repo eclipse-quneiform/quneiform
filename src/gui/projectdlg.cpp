@@ -199,7 +199,7 @@ void NewProjectDialog::UpdateConsistencyOptions()
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnSampleTextChanged([[maybe_unused]] wxCommandEvent& evt)
+void NewProjectDialog::OnSampleTextChanged([[maybe_unused]] wxCommandEvent& event)
     {
     UpdatePseudoTransOptions();
     }
@@ -326,7 +326,7 @@ void NewProjectDialog::SetOptions(const i18n_check::review_style style)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent& evt)
+void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
 
@@ -487,7 +487,7 @@ void NewProjectDialog::OnOK([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent& evt)
+void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
     wxDirDialog dirDlg(this, _(L"Select Folder to Analyze"));
@@ -504,7 +504,7 @@ void NewProjectDialog::OnFolderButtonClick([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
+void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
     const wxFileName fn{ m_filePath };
@@ -522,7 +522,7 @@ void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent& evt)
+void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
 
@@ -559,7 +559,7 @@ void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEve
     }
 
 //-------------------------------------------------------------
-void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
+void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
 

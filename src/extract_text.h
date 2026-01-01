@@ -1,28 +1,23 @@
-/********************************************************************************
- * Copyright (c) 2005-2024 Blake Madden
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License 2.0 which is available at
- * https://www.eclipse.org/legal/epl-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *   Blake Madden - initial implementation
- ********************************************************************************/
-
 /** @addtogroup Importing
     @brief Classes for importing data.
+    @date 2005-2025
+    @copyright Blake Madden
+    @author Blake Madden
+    @details This program is free software; you can redistribute it and/or modify
+     it under the terms of the 3-Clause BSD License.
+
+     SPDX-License-Identifier: BSD-3-Clause
 @{*/
 
-#ifndef __EXTRACT_TEXT_H__
-#define __EXTRACT_TEXT_H__
+#ifndef EXTRACT_TEXT_H
+#define EXTRACT_TEXT_H
 
 #include "char_traits.h"
 #include "donttranslate.h"
 #include "string_util.h"
 #include <exception>
 #include <string_view>
+#include <unordered_map>
 
 namespace lily_of_the_valley
     {
@@ -122,11 +117,11 @@ namespace lily_of_the_valley
         void resize_buffer(const size_t newSize) { m_text_buffer.resize(newSize); }
 
         /// @brief Empties the log of any previous parsing issues.
-        void clear_log() { m_log.clear(); }
+        void clear_log() const { m_log.clear(); }
 
         /** @brief Adds a message to the report logging system.
             @param message The message to log.*/
-        void log_message(const std::wstring& message)
+        void log_message(const std::wstring& message) const
             {
             if (m_log.empty())
                 {
@@ -139,7 +134,7 @@ namespace lily_of_the_valley
             }
 
       private:
-        std::wstring m_log;
+        mutable std::wstring m_log;
         std::wstring m_log_message_separator{ L"\n" };
         // data
         std::wstring m_text_buffer;
@@ -148,4 +143,4 @@ namespace lily_of_the_valley
 
 /** @}*/
 
-#endif //__EXTRACT_TEXT_H__
+#endif // EXTRACT_TEXT_H

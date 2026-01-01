@@ -734,7 +734,7 @@ void I18NFrame::OnEditButtonClicked(wxRibbonButtonBarEvent& event)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& event)
     {
     const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
 
@@ -818,7 +818,7 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnOpenSelectedFile([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnOpenSelectedFile([[maybe_unused]] wxCommandEvent& event)
     {
     const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
 
@@ -929,7 +929,7 @@ void I18NFrame::OnIgnore(wxRibbonButtonBarEvent& event)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& event)
     {
     wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
     if (selectedItem == m_resultsModel->GetRoot())
@@ -975,7 +975,7 @@ void I18NFrame::OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent& event)
     {
     NewProjectDialog projDlg(this, wxID_ANY, _(L"Default Settings"), EditorPage);
     projDlg.SetAllOptions(wxGetApp().m_defaultOptions);
@@ -988,7 +988,7 @@ void I18NFrame::OnSettings([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnConvertString([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnConvertString([[maybe_unused]] wxCommandEvent& event)
     {
     ConvertStringDlg csDlg(this);
     csDlg.SetInput(m_editor->GetSelectedText());
@@ -996,7 +996,7 @@ void I18NFrame::OnConvertString([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnStringInfo([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnStringInfo([[maybe_unused]] wxCommandEvent& event)
     {
     StringInfoDlg dlg(this);
     dlg.SetValue(m_editor->GetSelectedText());
@@ -1004,7 +1004,7 @@ void I18NFrame::OnStringInfo([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent& event)
     {
     const wxDataViewItem selectedItem = m_resultsDataView->GetSelection();
     if (selectedItem == m_resultsModel->GetRoot())
@@ -1028,7 +1028,7 @@ void I18NFrame::OnValueInfo([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnHelp([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnHelp([[maybe_unused]] wxCommandEvent& event)
     {
     const wxString docPath = []()
     {
@@ -1048,7 +1048,7 @@ void I18NFrame::OnHelp([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent& event)
     {
     wxDateTime buildDate;
     buildDate.ParseDate(__DATE__);
@@ -1067,7 +1067,7 @@ void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent& event)
     {
     if (!m_hasOpenProject)
         {
@@ -1096,7 +1096,7 @@ void I18NFrame::OnRefresh([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnNew([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnNew([[maybe_unused]] wxCommandEvent& event)
     {
     SaveProjectIfNeeded();
 
@@ -1148,7 +1148,7 @@ void I18NFrame::CopyProjectOptionsToGlobalOptions()
     }
 
 //------------------------------------------------------
-void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent& event)
     {
     SaveProjectIfNeeded();
 
@@ -1187,7 +1187,7 @@ void I18NFrame::OnOpen([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent& event)
     {
     int linePos{ 0 };
     const wxString lineText = m_editor->GetCurLine(&linePos);
@@ -1221,7 +1221,7 @@ void I18NFrame::OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent& event)
     {
     const std::wstring selText{ m_editor->GetSelectedText().wc_string() };
     if (selText.empty())
@@ -1266,7 +1266,7 @@ void I18NFrame::OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent& event)
     {
     const wxString selText{ m_editor->GetSelectedText() };
     if (selText.empty())
@@ -1290,7 +1290,7 @@ void I18NFrame::OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent& event)
     {
     const wxString selText{ m_editor->GetSelectedText() };
     if (selText.empty())
@@ -1311,7 +1311,7 @@ void I18NFrame::OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent& event)
     {
     const wxString selText{ m_editor->GetSelectedText() };
     if (selText.empty())
@@ -1332,7 +1332,7 @@ void I18NFrame::OnInsertDTMacro([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnExportResults([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnExportResults([[maybe_unused]] wxCommandEvent& event)
     {
     const wxFileName projectName{ m_activeProjectOptions.m_filePath };
     const wxString lastFolder =
@@ -1368,7 +1368,7 @@ void I18NFrame::OnExportResults([[maybe_unused]] wxCommandEvent& evt)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnSave([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnSave([[maybe_unused]] wxCommandEvent& event)
     {
     SaveSourceFileIfNeeded();
 
@@ -1747,7 +1747,7 @@ void I18NFrame::OnClose(wxCloseEvent& event)
     }
 
 //------------------------------------------------------
-void I18NFrame::OnFindCommand([[maybe_unused]] wxCommandEvent& evt)
+void I18NFrame::OnFindCommand([[maybe_unused]] wxCommandEvent& event)
     {
     if (m_findDlg == nullptr)
         {

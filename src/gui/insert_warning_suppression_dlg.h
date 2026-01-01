@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __INSERT_SUPPRESS_WARNINGS_DLG_H__
-#define __INSERT_SUPPRESS_WARNINGS_DLG_H__
+#ifndef INSERT_SUPPRESS_WARNINGS_DLG_H
+#define INSERT_SUPPRESS_WARNINGS_DLG_H
 
 #include "../i18n_review.h"
 #include "app_options.h"
@@ -89,9 +89,9 @@ class InsertWarningSuppressionDlg final : public wxDialog
         OnHelpClicked(cmd);
         }
 
-    void OnOK([[maybe_unused]] wxCommandEvent&);
+    void OnOK([[maybe_unused]] wxCommandEvent& event);
 
-    void OnApplicationChange([[maybe_unused]] wxCommandEvent&);
+    void OnApplicationChange([[maybe_unused]] wxCommandEvent& event);
 
     int m_indenting{ 0 };
 
@@ -108,4 +108,4 @@ class InsertWarningSuppressionDlg final : public wxDialog
 
     /** @}*/
 
-#endif //__INSERT_SUPPRESS_WARNINGS_DLG_H__
+#endif // INSERT_SUPPRESS_WARNINGS_DLG_H

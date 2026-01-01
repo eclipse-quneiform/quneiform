@@ -49,31 +49,31 @@ class I18NFrame : public wxFrame
     void InitControls();
 
   private:
-    void OnNew([[maybe_unused]] wxCommandEvent&);
-    void OnOpen([[maybe_unused]] wxCommandEvent&);
-    void OnSave([[maybe_unused]] wxCommandEvent&);
-    void OnExportResults([[maybe_unused]] wxCommandEvent&);
-    void OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent&);
-    void OnStringInfo([[maybe_unused]] wxCommandEvent&);
-    void OnValueInfo([[maybe_unused]] wxCommandEvent&);
-    void OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent&);
-    void OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent&);
-    void OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent&);
-    void OnInsertDTMacro([[maybe_unused]] wxCommandEvent&);
+    void OnNew([[maybe_unused]] wxCommandEvent& event);
+    void OnOpen([[maybe_unused]] wxCommandEvent& event);
+    void OnSave([[maybe_unused]] wxCommandEvent& event);
+    void OnExportResults([[maybe_unused]] wxCommandEvent& event);
+    void OnInsertTranslatorComment([[maybe_unused]] wxCommandEvent& event);
+    void OnStringInfo([[maybe_unused]] wxCommandEvent& event);
+    void OnValueInfo([[maybe_unused]] wxCommandEvent& event);
+    void OnInsertEncodedUnicode([[maybe_unused]] wxCommandEvent& event);
+    void OnInsertTGetTextMacro([[maybe_unused]] wxCommandEvent& event);
+    void OnInsertWarningSuppression([[maybe_unused]] wxCommandEvent& event);
+    void OnInsertDTMacro([[maybe_unused]] wxCommandEvent& event);
     void OnSaveMenu(wxRibbonButtonBarEvent& event);
-    void OnRefresh([[maybe_unused]] wxCommandEvent&);
-    void OnOpenSelectedFile([[maybe_unused]] wxCommandEvent&);
+    void OnRefresh([[maybe_unused]] wxCommandEvent& event);
+    void OnOpenSelectedFile([[maybe_unused]] wxCommandEvent& event);
     void OnIgnore(wxRibbonButtonBarEvent& event);
     void OnInsert(wxRibbonButtonBarEvent& event);
-    void OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent&);
-    void OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent&);
-    void OnSettings([[maybe_unused]] wxCommandEvent&);
-    void OnConvertString([[maybe_unused]] wxCommandEvent&);
-    void OnAbout([[maybe_unused]] wxCommandEvent&);
-    void OnHelp([[maybe_unused]] wxCommandEvent&);
+    void OnIgnoreSelectedFile([[maybe_unused]] wxCommandEvent& event);
+    void OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& event);
+    void OnSettings([[maybe_unused]] wxCommandEvent& event);
+    void OnConvertString([[maybe_unused]] wxCommandEvent& event);
+    void OnAbout([[maybe_unused]] wxCommandEvent& event);
+    void OnHelp([[maybe_unused]] wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnFind(wxFindDialogEvent& event);
-    void OnFindCommand([[maybe_unused]] wxCommandEvent&);
+    void OnFindCommand([[maybe_unused]] wxCommandEvent& event);
     void OnEditButtonClicked(wxRibbonButtonBarEvent& event);
 
     void EnableEditBar(const bool enable)

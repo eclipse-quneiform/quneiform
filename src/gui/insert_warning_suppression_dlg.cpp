@@ -76,7 +76,7 @@ void InsertWarningSuppressionDlg::CreateControls()
     }
 
 //-------------------------------------------------------------
-void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommandEvent& evt)
+void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
     if (m_warningsTextCtrl != nullptr)
@@ -87,7 +87,7 @@ void InsertWarningSuppressionDlg::OnApplicationChange([[maybe_unused]] wxCommand
     }
 
 //-------------------------------------------------------------
-void InsertWarningSuppressionDlg::OnOK([[maybe_unused]] wxCommandEvent& evt)
+void InsertWarningSuppressionDlg::OnOK([[maybe_unused]] wxCommandEvent& event)
     {
     TransferDataFromWindow();
     if (std::cmp_equal(m_selectedTag, (m_suppressionTags.size() - 1)) && m_warnings.empty())

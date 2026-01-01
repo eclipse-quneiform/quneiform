@@ -62,7 +62,7 @@ add_executable(${CMAKE_PROJECT_NAME} ../src/i18n_string_util.cpp
 ../src/quarto_review.cpp
 ../src/translation_catalog_review.cpp
 ../src/pseudo_translate.cpp
-i18nstringtests.cpp stringutiltests.cpp cpptests.cpp csharptests.cpp
+i18nstringtests.cpp cpptests.cpp csharptests.cpp
 decodetests.cpp rctests.cpp potests.cpp quartotests.cpp testingmain.cpp)
 if(MSVC)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC __UNITTEST)

@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __INSERT_TRANS_MACRO_DLG_H__
-#define __INSERT_TRANS_MACRO_DLG_H__
+#ifndef INSERT_TRANS_MACRO_DLG_H
+#define INSERT_TRANS_MACRO_DLG_H
 
 #include "../i18n_review.h"
 #include "app_options.h"
@@ -109,7 +109,7 @@ class InsertTransMacroDlg final : public wxDialog
         return (macro == L"tr");
         }
 
-    void OnOK([[maybe_unused]] wxCommandEvent&);
+    void OnOK([[maybe_unused]] wxCommandEvent& event);
 
     void OnHelpClicked([[maybe_unused]] wxCommandEvent& event)
         {
@@ -164,4 +164,4 @@ class InsertTransMacroDlg final : public wxDialog
 
     /** @}*/
 
-#endif //__INSERT_TRANS_MACRO_DLG_H__
+#endif // INSERT_TRANS_MACRO_DLG_H

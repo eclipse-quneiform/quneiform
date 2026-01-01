@@ -1,22 +1,16 @@
-/********************************************************************************
- * Copyright (c) 2005-2024 Blake Madden
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License 2.0 which is available at
- * https://www.eclipse.org/legal/epl-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *   Blake Madden - initial implementation
- ********************************************************************************/
-
 /** @addtogroup Importing
     @brief Classes for importing data.
+    @date 2005-2025
+    @copyright Blake Madden
+    @author Blake Madden
+    @details This program is free software; you can redistribute it and/or modify
+     it under the terms of the 3-Clause BSD License.
+
+     SPDX-License-Identifier: BSD-3-Clause
 @{*/
 
-#ifndef __UNICODE_EXTRACT_TEXT_H__
-#define __UNICODE_EXTRACT_TEXT_H__
+#ifndef UNICODE_EXTRACT_TEXT_H
+#define UNICODE_EXTRACT_TEXT_H
 
 #include "extract_text.h"
 #include <cstdint>
@@ -32,7 +26,7 @@ namespace lily_of_the_valley
             std::ios::in|std::ios::binary|std::ios::ate);
         if (fs.is_open())
             {
-            //read a unicode file into a char* buffer
+            //read a Unicode file into a char* buffer
             size_t fileSize = fs.tellg();
             char* fileContents = new char[fileSize+1];
             std::unique_ptr<char> deleteBuffer(fileContents);
@@ -100,24 +94,25 @@ namespace lily_of_the_valley
             return (std::strncmp(get_bom_utf16be(), text, 2) == 0);
             }
 
-        /** @brief Main interface for taking a Unicode (char*) stream and converting
+        /** @brief Main interface for taking a Unicode (`char*`) stream and converting
                 it into a wide Unicode stream.
             @param unicodeText The char* (raw) stream of test.
             @param length: The length of the raw string.
             @param systemIsLittleEndian Whether the current system is little endian.
                 This is used to determine whether the bits need to be flipped or not.
-            @returns A wchar_t* pointer of the raw (char*) stream converted into a wchar_t buffer.
+            @returns A wchar_t* pointer of the raw (char*) stream converted into a
+                @c wchar_t buffer.
                 Call get_filtered_text_length() to get the length of this buffer.*/
         const wchar_t* operator()(const char* unicodeText, const size_t length,
                                   const bool systemIsLittleEndian = true)
             {
             clear_log();
-            if (!unicodeText || length == 0)
+            clear();
+            if ((unicodeText == nullptr) || length == 0)
                 {
-                clear();
                 return nullptr;
                 }
-            // first see if the file is an even number of bytes (a unicode file would have to be)
+            // first see if the file is an even number of bytes (a Unicode file would have to be)
             if (length % 2 != 0)
                 {
                 log_message(L"Invalid Unicode stream, uneven number of bytes.");
@@ -125,30 +120,29 @@ namespace lily_of_the_valley
                 }
             // prepare the wide buffer
             const size_t outSize{ (length / 2) + 1 /*Null terminator*/ };
-            auto outBuffer = std::make_unique<wchar_t[]>(outSize);
-            std::wmemset(outBuffer.get(), 0, outSize);
+            std::vector<wchar_t> outBuffer(outSize);
             allocate_text_buffer(outSize);
 
-            /* If unicode stream is the native endian format,
+            /* If Unicode stream is the native endian format,
                then just copy it over into the wide buffer.*/
-            if (std::strncmp(systemIsLittleEndian ? get_bom_utf16le() : get_bom_utf16be(),
-                             unicodeText, 2) == 0)
+            if (std::memcmp(systemIsLittleEndian ? get_bom_utf16le() : get_bom_utf16be(),
+                            unicodeText, 2) == 0)
                 {
                 // note that we skip the BoM
-                convert_unicode_char_stream(outBuffer.get(), unicodeText + 2, length - 2);
+                convert_unicode_char_stream(outBuffer.data(), unicodeText + 2, length - 2);
                 }
             // ...otherwise, start flipping the bytes around to make it the native endian type
-            else if (std::strncmp(systemIsLittleEndian ? get_bom_utf16be() : get_bom_utf16le(),
-                                  unicodeText, 2) == 0)
+            else if (std::memcmp(systemIsLittleEndian ? get_bom_utf16be() : get_bom_utf16le(),
+                                 unicodeText, 2) == 0)
                 {
-                get_flipped_buffer(outBuffer.get(), unicodeText + 2, length - 2);
+                get_flipped_buffer(outBuffer.data(), unicodeText + 2, length - 2);
                 }
             else
                 {
                 return nullptr;
                 }
 
-            add_characters(outBuffer.get());
+            add_characters(outBuffer.data());
 
             return get_filtered_text();
             }
@@ -157,30 +151,30 @@ namespace lily_of_the_valley
         /** @brief Flips the bytes of unicodeText and copy them into destination.
                 Destination should be length+1 and zeroed out beforehand.
             @param[out] destination wchar_t buffer to write the flipped text.
-            @param unicodeText The raw char* unicode stream.
+            @param unicodeText The raw char* Unicode stream.
             @param length The length of the raw char* stream.*/
         static void get_flipped_buffer(wchar_t* destination, const char* unicodeText,
                                        const size_t length)
             {
-            auto flippedBuffer = std::make_unique<char[]>(length + 1);
+            std::vector<char> flippedBuffer(length + 1, '\0'); // fully zeroed
             // copy over the words (two byte pair), but flip the bytes around
             for (size_t i = 0; i < length; i += 2)
                 {
                 flippedBuffer[i] = unicodeText[i + 1];
                 flippedBuffer[i + 1] = unicodeText[i];
                 }
-            convert_unicode_char_stream(destination, flippedBuffer.get(), length);
+            convert_unicode_char_stream(destination, flippedBuffer.data(), length);
             }
 
         /** @brief Copies the bytes of unicodeText into destination.
                 Destination should be length+1 and zeroed out beforehand.
             @param[out] destination wchar_t buffer to write the flipped text.
-            @param unicodeText The raw char* unicode stream.
+            @param unicodeText The raw char* Unicode stream.
             @param length The length of the raw char* stream.*/
         static void convert_unicode_char_stream(wchar_t* destination, const char* unicodeText,
                                                 size_t length) noexcept
             {
-            const uint16_t* doubleByteBuffer = reinterpret_cast<const uint16_t*>(unicodeText);
+            const auto* doubleByteBuffer = reinterpret_cast<const uint16_t*>(unicodeText);
             if constexpr (sizeof(wchar_t) == 2)
                 {
                 std::memcpy(destination, unicodeText,
@@ -203,4 +197,4 @@ namespace lily_of_the_valley
 
 /** @}*/
 
-#endif //__UNICODE_EXTRACT_TEXT_H__
+#endif // UNICODE_EXTRACT_TEXT_H

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2005-2024 Blake Madden
+ * Copyright (c) 2005-2025 Blake Madden
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -15,18 +15,20 @@
     @brief Utility classes.
 @{*/
 
-#ifndef QUNEIFORM_STRING_UTIL_H
-#define QUNEIFORM_STRING_UTIL_H
+#ifndef WISTERIA_STRING_UTIL_H
+#define WISTERIA_STRING_UTIL_H
 
 #include <array>
 #include <cassert>
 #include <cctype>
+#include <concepts>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
 #include <cwctype>
+#include <format>
 #include <functional>
 #include <memory>
 #include <regex>
@@ -44,12 +46,24 @@ namespace string_util
     /// @private
     inline wchar_t tolower(wchar_t c) { return std::towlower(c); }
 
-    // strlen
-    /// @private
-    inline size_t strlen(const char* text) { return std::strlen(text); }
+    template<typename T>
+    concept wide_string_like = std::is_same_v<typename T::value_type, wchar_t> &&
+                               requires(T s, const wchar_t* p, std::size_t n) {
+                                   // construction
+                                   T{ p, n };
 
-    /// @private
-    inline size_t strlen(const wchar_t* text) { return std::wcslen(text); }
+                                       // string interface
+                                       { s.data() } -> std::convertible_to<const wchar_t*>;
+                                           { s.size() } -> std::convertible_to<std::size_t>;
+                                               { s.empty() } -> std::same_as<bool>;
+                                                   {
+                                               s.find(wchar_t{})
+                                                   } -> std::convertible_to<std::size_t>;
+
+                                                   // iteration
+                                                   { s.begin() };
+                                                       { s.end() };
+                               };
 
     /// @brief Determines if a given value is either of two other given values.
     /// @param value The value to compare with.
@@ -79,7 +93,7 @@ namespace string_util
     /// @param ch The character to review.
     /// @returns @c true if @c ch is a trademark, service mark, or registration symbol.
     [[nodiscard]]
-    constexpr static bool is_trademark_or_registration(const wchar_t ch) noexcept
+    constexpr bool is_trademark_or_registration(const wchar_t ch) noexcept
         {
         // clang-format off
         return (ch == 0x2122) || // (TM)
@@ -95,7 +109,7 @@ namespace string_util
     /** @returns Whether a character is a number (0-9 characters only, narrow versions).
         @param ch The letter to be reviewed.*/
     [[nodiscard]]
-    constexpr static bool is_numeric_8bit(const wchar_t ch) noexcept
+    constexpr bool is_numeric_8bit(const wchar_t ch) noexcept
         {
         return ch >= L'0' && ch <= L'9';
         }
@@ -103,7 +117,7 @@ namespace string_util
     /// @returns @c true if @c ch is a subscript number.
     /// @param ch The character to review.
     [[nodiscard]]
-    constexpr static bool is_subscript_number(const wchar_t ch) noexcept
+    constexpr bool is_subscript_number(const wchar_t ch) noexcept
         {
         return (ch >= 0x2080 && ch <= 0x2089);
         }
@@ -111,7 +125,7 @@ namespace string_util
     /// @returns @c true if @c ch is a subscript.
     /// @param ch The character to review.
     [[nodiscard]]
-    constexpr static bool is_subscript(const wchar_t ch) noexcept
+    constexpr bool is_subscript(const wchar_t ch) noexcept
         {
         // clang-format off
         return (ch >= 0x2080 && ch <= 0x2089) ||
@@ -143,7 +157,7 @@ namespace string_util
         @note This only applies to numbers, simple math characters,
             and a few letters (e.g., 2 -> ²)*/
     [[nodiscard]]
-    constexpr static wchar_t to_subscript(const wchar_t ch) noexcept
+    constexpr wchar_t to_subscript(const wchar_t ch) noexcept
         {
         // clang-format off
         return (ch == L'0' || ch == 0xFF10) ? static_cast<wchar_t>(0x2080) :
@@ -182,7 +196,7 @@ namespace string_util
     /// @param ch The character to review.
     /// @returns @c true if @c ch is a fraction symbol.
     [[nodiscard]]
-    constexpr static bool is_fraction(const wchar_t ch) noexcept
+    constexpr bool is_fraction(const wchar_t ch) noexcept
         {
         return (ch == 0xBC || ch == 0xBD || ch == 0xBE);
         }
@@ -191,7 +205,7 @@ namespace string_util
     /// @note This includes lowercased Roman numeral letters.
     /// @returns @c true if @c ch is a superscript number.
     [[nodiscard]]
-    constexpr static bool is_superscript_number(const wchar_t ch) noexcept
+    constexpr bool is_superscript_number(const wchar_t ch) noexcept
         {
         // clang-format off
         return (ch == 0x2070) ||
@@ -217,7 +231,7 @@ namespace string_util
     /// @returns @c true if @c ch is a lowercased superscript letter.
     /// @param ch The character to review.
     [[nodiscard]]
-    constexpr static bool is_superscript_lowercase(const wchar_t ch) noexcept
+    constexpr bool is_superscript_lowercase(const wchar_t ch) noexcept
         {
         // clang-format off
         return // a-z
@@ -257,7 +271,7 @@ namespace string_util
     /// @returns @c true if @c ch is a superscript.
     /// @param ch The character to review.
     [[nodiscard]]
-    inline constexpr static bool is_superscript(const wchar_t ch) noexcept
+    constexpr bool is_superscript(const wchar_t ch) noexcept
         {
         // clang-format off
         return (ch == 0x2070) ||
@@ -287,7 +301,7 @@ namespace string_util
         @note This only applies to numbers, simple math characters,
             and a few letters (e.g., 2 -> ²).*/
     [[nodiscard]]
-    inline constexpr static wchar_t to_superscript(const wchar_t ch) noexcept
+    constexpr wchar_t to_superscript(const wchar_t ch) noexcept
         {
         // clang-format off
         return (ch == L'0' || ch == 0xFF10) ? 0x2070 :
@@ -349,40 +363,37 @@ namespace string_util
     /** @brief Attempts to convert a string @c buffer to a double.
         @details Same as wcstod(), except it handles thousands separators as well.
         @param buffer The string buffer to read a number from.
-        @param[out] endPtr The (optional) pointer in the buffer where the number text ends.
-            (Will be the null terminator if the entire string is a number.)
-        @returns The string's value converted to a number. (Will be zero if conversion failed.)
-        @todo Need to support 0x (hex) strings.*/
+        @returns A tuple containing the converted numeric value and the end position.
+            The numeric value will be zero and the end pointer will be
+            @c nullptr if conversion failed.*/
     [[nodiscard]]
-    inline double wcstod_thousands_separator(const wchar_t* buffer, wchar_t** endPtr)
+    inline std::tuple<double, const wchar_t*> wcstod_thousands_separator(const wchar_t* buffer)
         {
         if (buffer == nullptr)
             {
-            return 0;
+            return { 0.0, nullptr };
             }
 
         // vanilla version of reading as a number
-        wchar_t* end(nullptr);
-        auto value = std::wcstod(buffer, &end);
+        wchar_t* wcstodEnd{ nullptr };
+        double value = std::wcstod(buffer, &wcstodEnd);
+        const wchar_t* end{ wcstodEnd };
 
         // step over any space like wcstod would have done
-        while (buffer < end && (std::iswspace(*buffer) != 0))
+        while (buffer < end && std::iswspace(*buffer) != 0)
             {
             ++buffer;
             }
 
         // if wcstod ran into what appears to be a thousands separator,
         // then weed those out and try wcstod again
-        if ( // wcstod actually read a little bit at least
-            end > buffer &&
-            // but stopped on a thousands separator
-            (*end == ',' || *end == '.') &&
-            // and what's after the thousands separator is a number
-            *(end + 1) != 0 && is_numeric_8bit(*(end + 1)))
+        if (end > buffer && (*end == L',' || *end == L'.') && *(end + 1) != 0 &&
+            is_numeric_8bit(*(end + 1)))
             {
-            const auto thousandsSep = *end;
-            const auto* realNumberStart = buffer;
-            const auto* realNumberEnd = buffer;
+            const wchar_t thousandsSep{ *end };
+            const wchar_t* realNumberStart{ buffer };
+            const wchar_t* realNumberEnd{ buffer };
+
             // scan past any numbers, +/-, and thousands & radix separators
             while (*realNumberEnd != 0 &&
                    (is_numeric_8bit(*realNumberEnd) || is_either(*realNumberEnd, L',', L'.') ||
@@ -390,29 +401,25 @@ namespace string_util
                 {
                 ++realNumberEnd;
                 }
-            // copy over the number text from the buffer, but skipping over the thousands separators
-            constexpr size_t BUFFER_SIZE{ 64 };
-            std::array<wchar_t, BUFFER_SIZE> realNumberStr{ 0 };
-            size_t newNumBufferCounter{ 0 };
-            while (realNumberStart < realNumberEnd && newNumBufferCounter + 1 < BUFFER_SIZE)
+
+            // copy over the number text from the buffer, skipping thousands separators
+            std::wstring realNumberStr;
+            realNumberStr.reserve(static_cast<std::size_t>(realNumberEnd - realNumberStart));
+
+            while (realNumberStart < realNumberEnd)
                 {
                 if (*realNumberStart != thousandsSep)
                     {
-                    realNumberStr[newNumBufferCounter++] = *realNumberStart;
+                    realNumberStr.push_back(*realNumberStart);
                     }
                 ++realNumberStart;
                 }
-            end = const_cast<wchar_t*>(realNumberStart);
-            // try wcstod again
-            value = std::wcstod(realNumberStr.data(), nullptr);
-            }
-        // set the end to where we read, if caller asked for it
-        if (endPtr != nullptr)
-            {
-            *endPtr = end;
+
+            end = realNumberStart;
+            value = std::wcstod(realNumberStr.c_str(), nullptr);
             }
 
-        return value;
+        return { value, end };
         }
 
     /** Returns the number of characters in the string pointed to by @c str, not including the
@@ -427,14 +434,13 @@ namespace string_util
     [[nodiscard]]
     size_t strnlen(const T* str, const size_t maxlen) noexcept
         {
-        if (!str || maxlen == 0)
+        if (str == nullptr || maxlen == 0)
             {
             return 0;
             }
-        size_t i = 0;
-        for (i = 0; i < maxlen && str[i]; ++i)
+        size_t i{ 0 };
+        for (i = 0; i < maxlen && str[i] != 0; ++i)
             {
-            /* no-op */;
             }
         return i;
         }
@@ -447,14 +453,14 @@ namespace string_util
     [[nodiscard]]
     const T* stristr(const T* string, const T* strSearch) noexcept
         {
-        if (!string || !strSearch || *strSearch == 0)
+        if (string == nullptr || strSearch == nullptr || *strSearch == 0)
             {
             return nullptr;
             }
-        while (*string)
+        while (*string != 0)
             {
             // compare the characters one at a time
-            size_t i = 0;
+            size_t i{ 0 };
             for (i = 0; strSearch[i] != 0; ++i)
                 {
                 if (string[i] == 0)
@@ -486,14 +492,14 @@ namespace string_util
     [[nodiscard]]
     const T* strnistr(const T* string, const T* strSearch, const size_t charCount) noexcept
         {
-        if (!string || !strSearch || charCount == 0 || *strSearch == 0)
+        if (string == nullptr || strSearch == nullptr || charCount == 0 || *strSearch == 0)
             {
             return nullptr;
             }
         for (size_t i = 0; i < charCount; ++i)
             {
             // compare the characters one at a time
-            size_t j = 0;
+            size_t j{ 0 };
             for (j = 0; strSearch[j] != 0; ++j)
                 {
                 if ((i + j) >= charCount || string[i + j] == 0)
@@ -524,15 +530,15 @@ namespace string_util
     int strnicmp(const T* first, const T* second, size_t charCount) noexcept
         {
         // first check if either of the strings are null
-        if (!first && !second)
+        if (first == nullptr && second == nullptr)
             {
             return 0;
             }
-        if (!first && second)
+        if (first == nullptr && second != nullptr)
             {
             return -1;
             }
-        if (first && !second)
+        if (first != nullptr && second == nullptr)
             {
             return 1;
             }
@@ -542,12 +548,14 @@ namespace string_util
         if (charCount > 0)
             {
             int f{ 0 }, l{ 0 };
+            // NOLINTBEGIN(bugprone-signed-char-misuse,cert-str34-c) custom tolower handles cast
             do
                 {
                 f = string_util::tolower(*(first++));
                 l = string_util::tolower(*(second++));
                 } while ((--charCount) && f && (f == l));
-            result = static_cast<int>(f - l);
+            result = (f - l);
+            // NOLINTEND(bugprone-signed-char-misuse,cert-str34-c)
             }
         return result;
         }
@@ -574,68 +582,70 @@ namespace string_util
     int stricmp(const T* first, const T* second) noexcept
         {
         // first check if either of the strings are null
-        if (!first && !second)
+        if (first == nullptr && second == nullptr)
             {
             return 0;
             }
-        if (!first && second)
+        if (first == nullptr && second != nullptr)
             {
             return -1;
             }
-        if (first && !second)
+        if (first != nullptr && second == nullptr)
             {
             return 1;
             }
 
         int f{ 0 }, l{ 0 };
+        // NOLINTBEGIN(bugprone-signed-char-misuse,cert-str34-c) custom tolower handles cast
         do
             {
             f = string_util::tolower(*(first++));
             l = string_util::tolower(*(second++));
-            } while (f && (f == l));
+            } while (f != 0 && (f == l));
+        // NOLINTEND(bugprone-signed-char-misuse,cert-str34-c)
 
-        return static_cast<int>(f - l);
+        return (f - l);
         }
 
     /** @brief Natural order comparison (recognizes numeric strings).
         @details This will see "2" as being less than "12".
         @param firstString The first string in the comparison.
         @param secondString The second string in the comparison.
-        @param caseInsensitive Whether the comparison should be case-insensitive.
+        @param caseInsensitive Whether the comparison should be case insensitive.
         @returns @c -1 if the first string is less, 1 if the first string is greater,
             or @c 0 if the strings are equal.*/
-    template<typename T>
     [[nodiscard]]
-    int strnatordcmp(const T* firstString, const T* secondString, bool caseInsensitive = false)
+    inline int strnatordcmp(const wchar_t* firstString, const wchar_t* secondString,
+                            bool caseInsensitive = false)
         {
         // first check if either of the strings are null
-        if (!firstString && !secondString)
+        if (firstString == nullptr && secondString == nullptr)
             {
             return 0;
             }
-        if (!firstString && secondString)
+        if (firstString == nullptr && secondString != nullptr)
             {
             return -1;
             }
-        if (firstString && !secondString)
+        if (firstString != nullptr && secondString == nullptr)
             {
             return 1;
             }
 
-        size_t firstStringIndex = 0, secondStringIndex = 0;
+        size_t firstStringIndex{ 0 }, secondStringIndex{ 0 };
 
         while (true)
             {
-            T ch1 = firstString[firstStringIndex];
-            T ch2 = secondString[secondStringIndex];
+            wchar_t ch1 = firstString[firstStringIndex];
+            wchar_t ch2 = secondString[secondStringIndex];
 
             // skip leading spaces
-            while (std::iswspace(ch1))
+            while (std::iswspace(ch1) != 0)
                 {
                 ch1 = firstString[++firstStringIndex];
                 }
 
-            while (std::iswspace(ch2))
+            while (std::iswspace(ch2) != 0)
                 {
                 ch2 = secondString[++secondStringIndex];
                 }
@@ -643,11 +653,10 @@ namespace string_util
             // process run of digits
             if (is_numeric_8bit(ch1) && is_numeric_8bit(ch2))
                 {
-                T *firstEnd(nullptr), *secondEnd(nullptr);
-                const double firstDouble =
-                    wcstod_thousands_separator(firstString + firstStringIndex, &firstEnd);
-                const double secondDouble =
-                    wcstod_thousands_separator(secondString + secondStringIndex, &secondEnd);
+                const auto [firstDouble, firstEnd] =
+                    wcstod_thousands_separator(firstString + firstStringIndex);
+                const auto [secondDouble, secondEnd] =
+                    wcstod_thousands_separator(secondString + secondStringIndex);
 
                 if (firstDouble < secondDouble)
                     {
@@ -658,6 +667,7 @@ namespace string_util
                     return 1;
                     }
                 // numbers are equal
+
                 // if this was the end of both strings then they are equal
                 if (*firstEnd == 0 && *secondEnd == 0)
                     {
@@ -718,34 +728,13 @@ namespace string_util
         }
 
     /// @brief Compare, recognizing numeric strings and ignoring case.
-    /// @param a The first string to compare.
-    /// @param b The second string to compare.
+    /// @param lhs The first string to compare.
+    /// @param rhs The second string to compare.
     /// @returns The comparison result.
-    template<typename T>
     [[nodiscard]]
-    int strnatordncasecmp(const T* a, const T* b)
+    inline int strnatordncasecmp(const wchar_t* lhs, const wchar_t* rhs)
         {
-        return strnatordcmp(a, b, true);
-        }
-
-    /// Indicates whether a larger strings ends with the specified suffix. Lengths are provided
-    /// by the caller for efficiency. This function is case-sensitive.
-    /// @param text The text to review.
-    /// @param textLength The text's length.
-    /// @param suffix The suffix to check for.
-    /// @param suffixLength The length of @c suffix.
-    /// @returns @c true if text contains the provided suffix.
-    template<typename T>
-    [[nodiscard]]
-    bool has_suffix(const T* text, const size_t textLength, const T* suffix,
-                    const size_t suffixLength) noexcept
-        {
-        if (text == nullptr || suffix == nullptr || textLength <= suffixLength)
-            {
-            return false;
-            }
-        return (string_util::strnicmp(text + (textLength - suffixLength), suffix, suffixLength) ==
-                0);
+        return strnatordcmp(lhs, rhs, true);
         }
 
     /** @brief Searches for a matching tag, skipping an extra open/close pairs
@@ -767,7 +756,7 @@ namespace string_util
             {
             return nullptr;
             }
-        long openStack = 0;
+        long open_stack{ 0 };
         while (*stringToSearch != 0)
             {
             if (stringToSearch[0] == openSymbol)
@@ -776,15 +765,15 @@ namespace string_util
                     {
                     return nullptr;
                     }
-                ++openStack;
+                ++open_stack;
                 }
             else if (stringToSearch[0] == closeSymbol)
                 {
-                if (openStack == 0)
+                if (open_stack == 0)
                     {
                     return stringToSearch;
                     }
-                --openStack;
+                --open_stack;
                 }
             ++stringToSearch;
             }
@@ -799,26 +788,29 @@ namespace string_util
     /// @returns Pointer to where the closing tag is, or @c nullptr if not found.
     [[nodiscard]]
     inline const wchar_t* find_matching_close_tag(std::wstring_view stringToSearch,
-                                                  std::wstring_view openSymbol,
-                                                  std::wstring_view closeSymbol)
+                                                  const std::wstring_view openSymbol,
+                                                  const std::wstring_view closeSymbol)
         {
         if (stringToSearch.empty() || openSymbol.empty() || closeSymbol.empty())
             {
             return nullptr;
             }
-
+        if (openSymbol.empty() || closeSymbol.empty())
+            {
+            return nullptr;
+            }
         long openStack{ 0 };
         while (!stringToSearch.empty())
             {
             if (stringToSearch.length() >= openSymbol.length() &&
-                stringToSearch.starts_with(openSymbol))
+                stringToSearch.compare(0, openSymbol.length(), openSymbol) == 0)
                 {
                 ++openStack;
                 stringToSearch.remove_prefix(openSymbol.length());
                 continue;
                 }
             if (stringToSearch.length() >= closeSymbol.length() &&
-                stringToSearch.starts_with(closeSymbol))
+                stringToSearch.compare(0, closeSymbol.length(), closeSymbol) == 0)
                 {
                 if (openStack == 0)
                     {
@@ -844,29 +836,29 @@ namespace string_util
                                                const T closeSymbol) noexcept
         {
         assert(openSymbol != closeSymbol);
-        if (!stringToSearch || openSymbol == closeSymbol)
+        if (stringToSearch == nullptr || openSymbol == closeSymbol)
             {
             return nullptr;
             }
         const T* const originalStart = stringToSearch;
-        long openStack = 0;
-        while (*stringToSearch)
+        long open_stack = 0;
+        while (*stringToSearch != 0)
             {
             if (stringToSearch[0] == openSymbol &&
                 ((stringToSearch == originalStart) || stringToSearch[-1] != L'\\'))
                 {
-                ++openStack;
+                ++open_stack;
                 ++stringToSearch;
                 continue;
                 }
             if (stringToSearch[0] == closeSymbol &&
                 ((stringToSearch == originalStart) || stringToSearch[-1] != L'\\'))
                 {
-                if (openStack == 0)
+                if (open_stack == 0)
                     {
                     return stringToSearch;
                     }
-                --openStack;
+                --open_stack;
                 }
             ++stringToSearch;
             }
@@ -887,13 +879,13 @@ namespace string_util
                                                          const T closeSymbol) noexcept
         {
         assert(openSymbol != closeSymbol);
-        if (!stringToSearch || openSymbol == closeSymbol)
+        if (stringToSearch == nullptr || openSymbol == closeSymbol)
             {
             return nullptr;
             }
         const T* const originalStart = stringToSearch;
-        long openStack = 0;
-        while (*stringToSearch)
+        long open_stack = 0;
+        while (*stringToSearch != 0)
             {
             if (stringToSearch[0] == L'\n' || stringToSearch[0] == L'\r')
                 {
@@ -902,18 +894,18 @@ namespace string_util
             if (stringToSearch[0] == openSymbol &&
                 ((stringToSearch == originalStart) || stringToSearch[-1] != L'\\'))
                 {
-                ++openStack;
+                ++open_stack;
                 ++stringToSearch;
                 continue;
                 }
             if (stringToSearch[0] == closeSymbol &&
                 ((stringToSearch == originalStart) || stringToSearch[-1] != L'\\'))
                 {
-                if (openStack == 0)
+                if (open_stack == 0)
                     {
                     return stringToSearch;
                     }
-                --openStack;
+                --open_stack;
                 }
             ++stringToSearch;
             }
@@ -939,7 +931,7 @@ namespace string_util
             return nullptr;
             }
         const wchar_t* const originalStart = stringToSearch;
-        long openStack = 0;
+        long open_stack = 0;
         while ((*stringToSearch != 0) && numberOfCharacters > 0)
             {
             if (stringToSearch[0] == L'\n' || stringToSearch[0] == L'\r')
@@ -949,16 +941,16 @@ namespace string_util
             if (stringToSearch[0] == openSymbol &&
                 ((stringToSearch == originalStart) || stringToSearch[-1] != L'\\'))
                 {
-                ++openStack;
+                ++open_stack;
                 }
             else if (stringToSearch[0] == closeSymbol &&
                      ((stringToSearch == originalStart) || stringToSearch[-1] != L'\\'))
                 {
-                if (openStack == 0)
+                if (open_stack == 0)
                     {
                     return stringToSearch;
                     }
-                --openStack;
+                --open_stack;
                 }
             ++stringToSearch;
             --numberOfCharacters;
@@ -975,11 +967,11 @@ namespace string_util
     [[nodiscard]]
     const T* find_unescaped_char(const T* stringToSearch, const T ch) noexcept
         {
-        if (!stringToSearch)
+        if (stringToSearch == nullptr)
             {
             return nullptr;
             }
-        while (*stringToSearch)
+        while (*stringToSearch != 0)
             {
             // if on an escape character, then step over that and whatever it's escaping
             if (*stringToSearch == L'\\')
@@ -1006,11 +998,11 @@ namespace string_util
     const T* find_unescaped_char_n(const T* stringToSearch, const T ch,
                                    int64_t numberOfCharacters) noexcept
         {
-        if (!stringToSearch)
+        if (stringToSearch == nullptr)
             {
             return nullptr;
             }
-        while (*stringToSearch && numberOfCharacters > 0)
+        while (*stringToSearch != 0 && numberOfCharacters > 0)
             {
             // if on an escape character, then step over that
             if (*stringToSearch == L'\\')
@@ -1043,11 +1035,11 @@ namespace string_util
     const T* find_unescaped_char_same_line_n(const T* stringToSearch, const T ch,
                                              int64_t numberOfCharacters) noexcept
         {
-        if (!stringToSearch)
+        if (stringToSearch == nullptr)
             {
             return nullptr;
             }
-        while (*stringToSearch && numberOfCharacters > 0)
+        while (*stringToSearch != 0 && numberOfCharacters > 0)
             {
             if (stringToSearch[0] == L'\n' || stringToSearch[0] == L'\r')
                 {
@@ -1085,11 +1077,11 @@ namespace string_util
     [[nodiscard]]
     const T* strnchr(const T* stringToSearch, const T ch, size_t numberOfCharacters) noexcept
         {
-        if (!stringToSearch)
+        if (stringToSearch == nullptr)
             {
             return nullptr;
             }
-        size_t i = 0;
+        size_t i{ 0 };
         for (i = 0; i < numberOfCharacters; ++i)
             {
             /* if string being searched is shorter than the size argument,
@@ -1112,28 +1104,22 @@ namespace string_util
         @param searchSequence The sequence of characters to search for.
             If any character in this sequence is found in @c stringToSearch,
             then its position will be returned.
-        @param searchSeqLength The length of the search sequence.
         @returns A pointer to where the character was found, or @c nullptr if not found.*/
     template<typename T>
     [[nodiscard]]
-    const T* strcspn_pointer(const T* stringToSearch, const T* searchSequence,
-                             const size_t searchSeqLength) noexcept
+    const T* strcspn_pointer(const T* stringToSearch,
+                             std::basic_string_view<T> searchSequence) noexcept
         {
-        if (!stringToSearch || !searchSequence || searchSeqLength == 0)
+        if (stringToSearch == nullptr || searchSequence.empty())
             {
             return nullptr;
             }
-        assert((string_util::strlen(searchSequence) == searchSeqLength) &&
-               "Invalid length passed to strcspn_pointer().");
-        while (stringToSearch)
+
+        while (*stringToSearch != 0)
             {
-            if (stringToSearch[0] == 0)
+            for (T chr : searchSequence)
                 {
-                return nullptr;
-                }
-            for (size_t i = 0; i < searchSeqLength; ++i)
-                {
-                if (stringToSearch[0] == searchSequence[i])
+                if (*stringToSearch == chr)
                     {
                     return stringToSearch;
                     }
@@ -1144,20 +1130,21 @@ namespace string_util
         }
 
     /// @brief Searches for a string in a larger string as a whole word.
-    /// @param haystack The string to search in.
+    /// @param haystack The string to search inside.
     /// @param needle The string to search for.
-    /// @param startIndex The starting position within @c haystack to start the search.
+    /// @param start_index The starting position within @c haystack to start the search.
     /// @returns The position of the found word, or @c npos if not found.
     template<typename T>
     [[nodiscard]]
-    T::size_type find_whole_word(const T& haystack, const T& needle, size_t startIndex = 0)
+    typename T::size_type find_whole_word(const T& haystack, const T& needle,
+                                          size_t start_index = 0)
         {
-        if (needle.length() == 0 || haystack.length() == 0)
+        if (needle.empty() || haystack.empty())
             {
             return T::npos;
             }
 
-        auto start{ startIndex };
+        auto start{ start_index };
 
         while (start != T::npos)
             {
@@ -1174,12 +1161,11 @@ namespace string_util
                     {
                     return start;
                     }
-                if (std::iswspace(haystack[start + needle.length()]) ||
-                    std::iswpunct(haystack[start + needle.length()]))
+                if (std::iswspace(haystack[start + needle.length()]) != 0 ||
+                    std::iswpunct(haystack[start + needle.length()]) != 0)
                     {
                     return start;
                     }
-
                 ++start;
                 continue;
                 }
@@ -1190,37 +1176,26 @@ namespace string_util
                     {
                     return start;
                     }
-                if (std::iswspace(haystack[start - 1]) || std::iswpunct(haystack[start - 1]) ||
-                    // after a hard coded newline or tab
-                    (start >= 2 &&
-                     (haystack[start - 1] == L'n' || haystack[start - 1] == L'r' ||
-                      haystack[start - 1] == L't') &&
-                     haystack[start - 2] == L'\\'))
+                if (std::iswspace(haystack[start - 1]) != 0 ||
+                    std::iswpunct(haystack[start - 1]) != 0)
                     {
                     return start;
                     }
-
                 ++start;
                 continue;
                 }
-            // inside of haystack
-
+            // inside haystack
             if (needle.length() == haystack.length())
                 {
                 return start;
                 }
-            if ((std::iswspace(haystack[start + needle.length()]) ||
-                 std::iswpunct(haystack[start + needle.length()])) &&
-                (std::iswspace(haystack[start - 1]) || std::iswpunct(haystack[start - 1]) ||
-                 // after a hard coded newline or tab
-                 (start >= 2 &&
-                  (haystack[start - 1] == L'n' || haystack[start - 1] == L'r' ||
-                   haystack[start - 1] == L't') &&
-                  haystack[start - 2] == L'\\')))
+            if ((std::iswspace(haystack[start + needle.length()]) != 0 ||
+                 std::iswpunct(haystack[start + needle.length()]) != 0) &&
+                (std::iswspace(haystack[start - 1]) != 0 ||
+                 std::iswpunct(haystack[start - 1]) != 0))
                 {
                 return start;
                 }
-
             ++start;
             }
         return T::npos;
@@ -1282,16 +1257,42 @@ namespace string_util
         };
 
     /** @brief Performs a heuristic check on a buffer to see if it's 7-bit or 8-bit ASCII.
+        @details
+            This function is intended as a lightweight heuristic when scanning raw binary
+            data (such as legacy Microsoft Word DOC files) to determine whether a byte
+            sequence is plausibly Western, human-readable text or more likely binary or
+            wide-character encoded data.
+
+            The check is intentionally heuristic and makes the following assumptions:
+
+            - Embedded NUL bytes (i.e., a zero byte followed by a non-zero byte) are treated
+              as a strong indicator of UTF-16 or other binary encodings and cause an
+              immediate failure.
+
+            - Small buffers (≤ 128 bytes) are assumed to be textual if no UTF-16 pattern is
+              detected. Short samples are not statistically meaningful enough to reliably
+              distinguish text from binary data.
+
+            - Larger buffers (> 128 bytes) are expected to contain at least one ASCII
+              whitespace character. Long sequences with no whitespace are commonly observed
+              in binary blobs, compressed data, identifier streams, or non-Western scripts,
+              and are therefore treated as non-text.
+
+            This function does not validate encoding correctness and should not be used as a
+            general text classifier. Its purpose is to cheaply exclude obviously non-textual
+            regions when extracting candidate strings from binary document formats.
         @param buffer The buffer to review (should be either char or unsigned char).
         @param buffSize The byte count of @c buffer.
-        @returns @c true if @c buffer is some sort of ASCII, false if possibly UTF-16.
-        @note The larger the buffer, the more accurate the check will be.*/
+        @returns @c true if @c buffer is likely some form of 7-bit or 8-bit ASCII text;
+                 @c false if it is likely UTF-16 or other binary data.
+        @note The larger the buffer, the more accurate the heuristic becomes.
+    */
     template<typename T>
     [[nodiscard]]
     bool is_extended_ascii(const T* buffer, const size_t buffSize) noexcept
         {
         static_assert(std::is_same_v<T, char> || std::is_same_v<T, unsigned char>);
-        if (!buffer || buffSize == 0)
+        if (buffer == nullptr || buffSize == 0)
             {
             return false;
             }
@@ -1307,7 +1308,7 @@ namespace string_util
                 {
                 return false;
                 }
-            if (std::isspace(static_cast<unsigned char>(buffer[i])))
+            if (std::isspace(static_cast<unsigned char>(buffer[i])) != 0)
                 {
                 ++spaceCount;
                 }
@@ -1326,7 +1327,7 @@ namespace string_util
     void ltrim(string_typeT& str)
         {
         str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](wchar_t ch) noexcept
-                                            { return !std::iswspace(ch); }));
+                                            { return std::iswspace(ch) == 0; }));
         }
 
     /// @brief Trims right side of @c str (in-place).
@@ -1336,7 +1337,7 @@ namespace string_util
     void rtrim(string_typeT& str)
         {
         str.erase(std::find_if(str.rbegin(), str.rend(),
-                               [](wchar_t ch) noexcept { return !std::iswspace(ch); })
+                               [](wchar_t ch) noexcept { return std::iswspace(ch) == 0; })
                       .base(),
                   str.end());
         }
@@ -1354,13 +1355,13 @@ namespace string_util
     /// @brief "Trims" left and right sides of a wstring_view.
     /// @param str The string to trim.
     /// @returns A subset of the view, with leading and trailing spaces excluded.
-    inline std::wstring_view trim_view(std::wstring_view str)
+    inline std::wstring_view trim_view(const std::wstring_view str)
         {
         if (str.empty())
             {
             return str;
             }
-        auto left = str.cbegin();
+        std::wstring_view::const_iterator left = str.cbegin();
         for (;; ++left)
             {
             if (left == str.cend())
@@ -1372,9 +1373,10 @@ namespace string_util
                 break;
                 }
             }
-        auto right = str.cend() - 1;
-        for (; right > left && (std::iswspace(*right) != 0); --right)
-            ;
+        std::wstring_view::const_iterator right = std::prev(str.cend());
+        for (; right > left && std::iswspace(*right) != 0; --right)
+            {
+            }
         return str.substr(std::distance(str.cbegin(), left), std::distance(left, right) + 1);
         }
 
@@ -1385,7 +1387,7 @@ namespace string_util
     void ltrim_punct(string_typeT& str)
         {
         str.erase(str.begin(), std::find_if(str.begin(), str.end(),
-                                            [](wchar_t ch) { return !std::iswpunct(ch); }));
+                                            [](wchar_t ch) { return std::iswpunct(ch) == 0; }));
         }
 
     /// @brief Trims punctuation from right side of @c str (in-place).
@@ -1394,10 +1396,10 @@ namespace string_util
     template<typename string_typeT>
     void rtrim_punct(string_typeT& str)
         {
-        str.erase(
-            std::find_if(str.rbegin(), str.rend(), [](wchar_t ch) { return !std::iswpunct(ch); })
-                .base(),
-            str.end());
+        str.erase(std::find_if(str.rbegin(), str.rend(),
+                               [](wchar_t ch) { return std::iswpunct(ch) == 0; })
+                      .base(),
+                  str.end());
         }
 
     /// @brief Trims punctuation from left and right sides of @c str (in-place).
@@ -1422,7 +1424,7 @@ namespace string_util
             {
             return false;
             }
-        while (*charString)
+        while (*charString != 0)
             {
             if (character == charString[0])
                 {
@@ -1432,6 +1434,134 @@ namespace string_util
             }
         return false;
         }
+
+    /** @brief Tokenizes a string using a set of delimiters.*/
+    template<wide_string_like T>
+    class string_tokenize
+        {
+      public:
+        /// @brief The character type of the input string.
+        using char_type = typename T::value_type;
+        /// @brief The string view wrapper type of the input string.
+        using string_view_type = std::basic_string_view<char_type, typename T::traits_type>;
+
+        string_tokenize() = delete;
+
+        /** @brief Initializes the tokenizer with a string view and delimiters.
+            @param val The string to tokenize.
+            @param delims The set of delimiter characters used to separate tokens.
+            @param skipEmptyTokens @c true to skip empty tokens
+                (i.e., ignoring consecutive delimiters or leading/trailing delimiters).
+            @warning
+                Both the input string and delimiter parameters are stored as string views.
+                They must refer to memory with a lifetime that exceeds that of
+                the tokenizer (such as string literals or caller-owned strings).
+        */
+        string_tokenize(string_view_type val, string_view_type delims,
+                        bool skipEmptyTokens) noexcept
+            : m_delims(delims), m_skip_empty_tokens(skipEmptyTokens),
+              m_has_more_tokens(!val.empty()), m_view(val)
+            {
+            }
+
+        /// @returns The number of tokens in a provided string.
+        /// @param val The string to review.
+        [[nodiscard]]
+        size_t count_tokens(string_view_type val) const
+            {
+            if (val.empty())
+                {
+                return 0;
+                }
+
+            size_t count{ 0 };
+            bool inToken{ false };
+
+            for (const char_type ch : val)
+                {
+                if (m_delims.find(ch) != std::wstring::npos)
+                    {
+                    if (!m_skip_empty_tokens || inToken)
+                        {
+                        ++count;
+                        }
+                    inToken = false;
+                    }
+                else
+                    {
+                    inToken = true;
+                    }
+                }
+
+            return count + (inToken ? 1 : 0);
+            }
+
+        /// @returns @c true if there are any more tokens left to parse.
+        /// @sa get_next_token().
+        [[nodiscard]]
+        bool has_more_tokens() const noexcept
+            {
+            return m_has_more_tokens;
+            }
+
+        /// @returns @c true if the input from the constructor contains any delimiters.
+        [[nodiscard]]
+        bool has_delimiters() const noexcept
+            {
+            return m_view.find_first_of(m_delims) != string_view_type::npos;
+            }
+
+        /// @returns The next token, or empty string if there are no more tokens.
+        /// @note Call has_more_tokens() prior to this.
+        [[nodiscard]]
+        T get_next_token()
+            {
+            if (!has_more_tokens())
+                {
+                return T{};
+                }
+
+            while (true)
+                {
+                const std::size_t delimPos = m_view.find_first_of(m_delims, m_pos);
+
+                if (delimPos != string_view_type::npos)
+                    {
+                    const std::size_t len = delimPos - m_pos;
+
+                    const std::size_t tokenStart = m_pos;
+                    m_pos = delimPos + 1;
+
+                    if (len == 0 && m_skip_empty_tokens)
+                        {
+                        continue;
+                        }
+
+                    return T{ m_view.data() + tokenStart, len };
+                    }
+                // last token
+                m_has_more_tokens = false;
+
+                const std::size_t tokenStart = m_pos;
+                m_pos = m_view.size();
+
+                if (tokenStart == m_view.size() && m_skip_empty_tokens)
+                    {
+                    return T{};
+                    }
+
+                return T{ m_view.data() + tokenStart, m_view.size() - tokenStart };
+                }
+            }
+
+      private:
+        string_view_type m_delims;
+        bool m_skip_empty_tokens{ true };
+        bool m_has_more_tokens{ false };
+
+        string_view_type m_view;
+        std::size_t m_pos{ 0 };
+        };
 
     /// @brief Removes all whitespace from a string
     /// @param text The text to review.
@@ -1443,7 +1573,7 @@ namespace string_util
         T tempText = text;
         for (typename T::size_type i = 0; i < tempText.length(); /*in loop*/)
             {
-            if (tempText[i] == 10 || tempText[i] == 13 || tempText[i] == 9)
+            if (tempText[i] == L'\n' || tempText[i] == L'\r' || tempText[i] == L'\t')
                 {
                 tempText.erase(i, 1);
                 }
@@ -1457,14 +1587,14 @@ namespace string_util
 
     /// @brief Removes all instances of a character from a string.
     /// @param[in,out] text The text to remove the character from.
-    /// @param charToRemove The character to remove.
+    /// @param char_to_remove The character to remove.
     template<typename T>
-    void remove_all(T& text, const typename T::traits_type::char_type charToRemove)
+    void remove_all(T& text, const typename T::traits_type::char_type char_to_remove)
         {
-        size_t start = 0;
+        size_t start{ 0 };
         while (start != T::npos)
             {
-            start = text.find(charToRemove, start);
+            start = text.find(char_to_remove, start);
             if (start == T::npos)
                 {
                 return;
@@ -1481,7 +1611,7 @@ namespace string_util
     void replace_all(T& text, const typename T::traits_type::char_type charToReplace,
                      const typename T::traits_type::char_type replacementChar)
         {
-        size_t start = 0;
+        size_t start{ 0 };
         while (start != T::npos)
             {
             start = text.find(charToReplace, start);
@@ -1503,11 +1633,11 @@ namespace string_util
                      const size_t textToReplaceLength,
                      const typename T::traits_type::char_type* replacementText)
         {
-        if (!textToReplace || !replacementText)
+        if (textToReplace == nullptr || replacementText == nullptr)
             {
             return;
             }
-        size_t start = 0;
+        size_t start{ 0 };
         while (start != T::npos)
             {
             start = text.find(textToReplace, start);
@@ -1526,7 +1656,7 @@ namespace string_util
     template<typename T>
     void replace_all(T& text, const T& textToReplace, const T& replacementText)
         {
-        size_t start = 0;
+        size_t start{ 0 };
         while (start != T::npos)
             {
             start = text.find(textToReplace, start);
@@ -1547,7 +1677,7 @@ namespace string_util
     void replace_all_whole_word(T& text, const T& textToReplace, const T& replacementText,
                                 const size_t index = 0)
         {
-        if (textToReplace.length() == 0 || replacementText.length() == 0)
+        if (textToReplace.empty() || replacementText.empty())
             {
             return;
             }
@@ -1572,24 +1702,24 @@ namespace string_util
     template<typename string_typeT>
     size_t remove_extra_spaces(string_typeT& text)
         {
-        size_t numberOfSpacesRemoved = 0;
+        size_t numberOfSpacesRemoved{ 0 };
 
-        if (!text.length())
+        if (text.empty())
             {
             return 0;
             }
-        bool alreadyHasSpace = true;
+        bool alreadyHasSpace{ true };
         // make sure that there is only a space between each word
         for (unsigned int i = 0; i < text.length(); ++i)
             {
             // if this is the first space found after the current
             // word then it's OK--just leave it
-            if (std::iswspace(text[i]) && !alreadyHasSpace)
+            if (std::iswspace(text[i]) != 0 && !alreadyHasSpace)
                 {
                 alreadyHasSpace = true;
                 }
             // this is extra space right after another--get rid of it
-            else if (std::iswspace(text[i]) && alreadyHasSpace)
+            else if (std::iswspace(text[i]) != 0 && alreadyHasSpace)
                 {
                 // make sure it isn't a Windows \r\n
                 if (i && !(text[i - 1] == 13 && text[i] == 10))
@@ -1599,7 +1729,7 @@ namespace string_util
                     }
                 }
             // we are starting another word--reset
-            else if (!std::iswspace(text[i]))
+            else if (std::iswspace(text[i]) == 0)
                 {
                 alreadyHasSpace = false;
                 }
@@ -1614,9 +1744,9 @@ namespace string_util
     template<typename string_typeT>
     size_t remove_blank_lines(string_typeT& text)
         {
-        size_t numberOfLinesRemoved = 0;
+        size_t numberOfLinesRemoved{ 0 };
 
-        if (!text.length())
+        if (text.empty())
             {
             return 0;
             }
@@ -1686,9 +1816,8 @@ namespace string_util
             *endptr = nullptr;
             return 0.0;
             }
-        const wchar_t sepStr[3] = { 0x2D, 0x3A, 0 };
-        const Tchar_type* separator = string_util::strcspn_pointer<Tchar_type>(nptr, sepStr, 2);
-        // if there is no hyphen or there is one, but it is at the end then just call strtod
+        const auto* separator = string_util::strcspn_pointer<wchar_t>(nptr, L"-:");
+        // if there is no hyphen or there is one, but it is at the end, then just call strtod
         if (separator == nullptr || *(separator + 1) == 0)
             {
             return std::wcstod(nptr, endptr);
@@ -1730,4 +1859,4 @@ namespace string_util
 
 /** @}*/
 
-#endif // QUNEIFORM_STRING_UTIL_H
+#endif // WISTERIA_STRING_UTIL_H

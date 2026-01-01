@@ -15,8 +15,8 @@
     @brief i18n classes.
 @{*/
 
-#ifndef __I18N_PROJECT_DLG_H__
-#define __I18N_PROJECT_DLG_H__
+#ifndef I18N_PROJECT_DLG_H
+#define I18N_PROJECT_DLG_H
 
 #include "../i18n_review.h"
 #include "../pseudo_translate.h"
@@ -279,12 +279,12 @@ class NewProjectDialog final : public wxDialog
 
   private:
     void CreateControls();
-    void OnFolderButtonClick([[maybe_unused]] wxCommandEvent&);
-    void OnFileButtonClick([[maybe_unused]] wxCommandEvent&);
-    void OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent&);
-    void OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent&);
-    void OnSampleTextChanged([[maybe_unused]] wxCommandEvent&);
-    void OnOK([[maybe_unused]] wxCommandEvent&);
+    void OnFolderButtonClick([[maybe_unused]] wxCommandEvent& event);
+    void OnFileButtonClick([[maybe_unused]] wxCommandEvent& event);
+    void OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent& event);
+    void OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent& event);
+    void OnSampleTextChanged([[maybe_unused]] wxCommandEvent& event);
+    void OnOK([[maybe_unused]] wxCommandEvent& event);
 
     void OnHelpClicked([[maybe_unused]] wxCommandEvent& event)
         {
@@ -410,4 +410,4 @@ class NewProjectDialog final : public wxDialog
 
     /** @}*/
 
-#endif //__I18N_PROJECT_DLG_H__
+#endif // I18N_PROJECT_DLG_H

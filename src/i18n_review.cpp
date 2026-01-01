@@ -224,7 +224,7 @@ namespace i18n_check
         L"xls", L"xlsx", L"ods", L"csv",
         // image formats
         L"gif", L"jpg", L"jpeg", L"jpe", L"bmp", L"tiff", L"tif", L"png", L"tga", L"svg", L"xcf",
-        L"ico", L"psd", L"hdr", L"pcx",
+        L"ico", L"psd", L"hdr", L"pcx", L"webp",
         // webpages
         L"asp", L"aspx", L"cfm", L"cfml", L"php", L"php3", L"php4", L"sgml", L"wmf", L"js",
         // style sheets
@@ -887,6 +887,9 @@ namespace i18n_check
             L"AddTranslator", L"MarkerSetBackground", L"SetProperty", L"SetAppName",
             L"SetPrintToFile", L"GetAttribute", L"SetAuthor", L"GetPropertyAsSize",
             L"GetPropertyAsInteger", L"FoundSwitch", L"GetPane",
+            // Wisteria
+            L"ContinuousColumns", L"CategoricalColumns", L"IdColumn", L"RemoveColumnNamesFromList",
+            L"ImportCSV",
             // Qt
             L"Q_ASSERT", L"Q_ASSERT_X", L"qSetMessagePattern", L"qmlRegisterUncreatableMetaObject",
             L"addShaderFromSourceCode", L"QStandardPaths::findExecutable", L"QDateTime::fromString",
