@@ -207,7 +207,7 @@ namespace i18n_check
     // documents
     std::set<string_util::case_insensitive_wstring> i18n_review::m_file_extensions = { // NOLINT
         L"xml", L"html", L"htm", L"xhtml", L"rtf", L"doc", L"docx", L"dot", L"docm", L"txt", L"ppt",
-        L"pptx", L"pdf", L"ps", L"odt", L"ott", L"odp", L"otp", L"pptm", L"md", L"xaml",
+        L"pptx", L"pdf", L"ps", L"odt", L"ott", L"odp", L"otp", L"pptm", L"md", L"xaml", L"tex",
         // Visual Studio files
         L"sln", L"csproj", L"json", L"pbxproj", L"apk", L"tlb", L"ocx", L"pdb", L"tlh", L"hlp",
         L"msi", L"rc", L"vcxproj", L"resx", L"appx", L"vcproj",
@@ -673,7 +673,7 @@ namespace i18n_check
             std::wregex(LR"(=[A-Za-z0-9_]+)"),
             // character encodings
             std::wregex(
-                LR"((utf[-]?[[:digit:]]+|Shift[-_]JIS|us-ascii|windows-[[:digit:]]{4}|KOI8-R|Big5|GB2312|iso-[[:digit:]]{4}-[[:digit:]]+))",
+                LR"((utf[-]?[[:digit:]]+|utf|Shift[-_]JIS|us-ascii|windows-[[:digit:]]{4}|KOI8-R|Big5|GB2312|iso-[[:digit:]]{4}-[[:digit:]]+))",
                 std::regex_constants::icase),
             // wxWidgets constants
             std::wregex(LR"((wx|WX)[A-Z_0-9]{2,})"),
@@ -707,6 +707,7 @@ namespace i18n_check
                 LR"(text-(color|background|decoration|align|size|layout|transform|indent|justify|orientation|overflow|underline|shadow|emphasis)[[:space:]]*[:]?.*)",
                 std::regex_constants::icase),
             std::wregex(LR"((background-)?color[[:space:]]*:.*)", std::regex_constants::icase),
+            std::wregex(LR"(background[[:space:]]*:.*)", std::regex_constants::icase),
             std::wregex(LR"(style[[:space:]]*=["']?.*)", std::regex_constants::icase),
             // local file paths & file names
             std::wregex(LR"((WINDIR|Win32|System32|Kernel32|/etc|/tmp))",
@@ -886,7 +887,7 @@ namespace i18n_check
             L"wxGetCommandOutput", L"SetKeyWords", L"AddDeveloper", L"AddDocWriter", L"AddArtist",
             L"AddTranslator", L"MarkerSetBackground", L"SetProperty", L"SetAppName",
             L"SetPrintToFile", L"GetAttribute", L"SetAuthor", L"GetPropertyAsSize",
-            L"GetPropertyAsInteger", L"FoundSwitch",
+            L"GetPropertyAsInteger", L"FoundSwitch", L"GetPane",
             // Qt
             L"Q_ASSERT", L"Q_ASSERT_X", L"qSetMessagePattern", L"qmlRegisterUncreatableMetaObject",
             L"addShaderFromSourceCode", L"QStandardPaths::findExecutable", L"QDateTime::fromString",

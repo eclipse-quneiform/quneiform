@@ -525,6 +525,11 @@ void NewProjectDialog::OnFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
 void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
+
+    wxFileName baseFn;
+    baseFn.AssignDir(m_filePath);
+    baseFn.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+
     wxDirDialog dirDlg(this, _(L"Select Subfolders to Ignore"), wxString{},
                        wxDD_DEFAULT_STYLE | wxDD_MULTIPLE | wxDD_DIR_MUST_EXIST);
     const wxFileName fn{ m_filePath };
@@ -536,7 +541,17 @@ void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEve
 
     wxArrayString paths;
     dirDlg.GetPaths(paths);
-    m_excludedPaths.insert(m_excludedPaths.end(), paths.begin(), paths.end());
+
+    for (const auto& absPath : paths)
+        {
+        wxFileName selFn(absPath);
+        selFn.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+        // make path relative to base directory
+        if (selFn.MakeRelativeTo(baseFn.GetPath()))
+            {
+            m_excludedPaths.push_back("/" + selFn.GetFullPath(wxPATH_UNIX));
+            }
+        }
     m_exclusionList->SetStrings(m_excludedPaths);
 
     TransferDataToWindow();
@@ -547,6 +562,11 @@ void NewProjectDialog::OnExcludedFolderButtonClick([[maybe_unused]] wxCommandEve
 void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent& evt)
     {
     TransferDataFromWindow();
+
+    wxFileName baseFn;
+    baseFn.AssignDir(m_filePath);
+    baseFn.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+
     const wxFileName fn{ m_filePath };
     wxFileDialog dialog(this, _(L"Select Files to Ignore"),
                         (fn.GetExt().empty() ? m_filePath : fn.GetPath()), wxString{},
@@ -559,7 +579,17 @@ void NewProjectDialog::OnExcludedFileButtonClick([[maybe_unused]] wxCommandEvent
 
     wxArrayString paths;
     dialog.GetPaths(paths);
-    m_excludedPaths.insert(m_excludedPaths.end(), paths.begin(), paths.end());
+
+    for (const auto& absPath : paths)
+        {
+        wxFileName selFn(absPath);
+        selFn.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+        // make path relative to base directory
+        if (selFn.MakeRelativeTo(baseFn.GetPath()))
+            {
+            m_excludedPaths.push_back("/" + selFn.GetFullPath(wxPATH_UNIX));
+            }
+        }
     m_exclusionList->SetStrings(m_excludedPaths);
 
     TransferDataToWindow();
