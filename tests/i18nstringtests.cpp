@@ -125,6 +125,12 @@ TEST_CASE("translatable", "[i18nreview]")
     CHECK_FALSE(reviewer.is_untranslatable_string(L"Q3FY%", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"Debug", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"...", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"x-axis", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"y-axis", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"z-axis", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"x-axes", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"y-axes", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"u-axes", false).first);
     }
 
 TEST_CASE("i18n string utils", "[i18nstringutil]")

@@ -537,7 +537,8 @@ namespace i18n_check
                 { L"__WXMAC__", _WXTRANS_WSTR(L"Use __WXOSX__ instead of __WXMAC__.") });
             }
 
-        m_translatable_regexes = { std::wregex(LR"(Q[0-9](F|A)Y.*)") };
+        m_translatable_regexes = { std::wregex(LR"(Q[0-9][FA]Y.*)"),
+                                   std::wregex(LR"([xyz]-(?:axis|axes))") };
 
         m_untranslatable_regexes = {
             // nothing but numbers, punctuation, or control characters?
@@ -552,16 +553,16 @@ namespace i18n_check
                 LR"([A-Za-z0-9\-]+/[A-Za-z0-9\-]+;[[:space:]]*[A-Za-z0-9\-]+=[A-Za-z0-9\-]+)"),
             // SQL code
             m_sql_code,
-            std::wregex(LR"(^(INSERT INTO|DELETE ([*] )?FROM).*)", std::regex_constants::icase),
+            std::wregex(LR"(^(?:INSERT INTO|DELETE (?:[*] )?FROM).*)", std::regex_constants::icase),
             std::wregex(LR"(^ORDER BY.*)"), // more strict
-            std::wregex(LR"([(]*SELECT[[:space:]]+(COUNT|MIN|MAX|SUM|AVG|DISTINCT)[(].*)"),
+            std::wregex(LR"([(]*SELECT[[:space:]]+(?:COUNT|MIN|MAX|SUM|AVG|DISTINCT)[(].*)"),
             std::wregex(LR"([(]*SELECT[[:space:]]+[A-Z_0-9\.]+,.*)"), std::wregex(LR"(^DSN=.*)"),
-            std::wregex(LR"(^Provider=(SQLOLEDB|Search).*)"),
+            std::wregex(LR"(^Provider=(?:SQLOLEDB|Search).*)"),
             std::wregex(LR"(^Connection: Keep-Alive$)"), std::wregex(LR"(ODBC;DSN=.*)"),
             // C++ code
             std::wregex(LR"([a-zA-Z0-9]+\:\:[a-zA-Z0-9]+(\:\:[a-zA-Z0-9]+)?)"),
             // gettext formats
-            std::wregex(LR"((possible\-)?(c|cpp|kde|qt)\-(plural\-)?format)"),
+            std::wregex(LR"((?:possible\-)?(?:c|cpp|kde|qt)\-(?:plural\-)?format)"),
             // a regex expression
             std::wregex(LR"([(][?]i[)].*)"),
             // single file filter that just has a file extension as its "name"
@@ -569,17 +570,17 @@ namespace i18n_check
             // PNG (*.png)|*.png
             // TIFF (*.tif;*.tiff)|*.tif;*.tiff
             // special case for the word "bitmap" also, wouldn't normally translate that
-            std::wregex(LR"(([A-Z]+|[bB]itmap) [(]([*][.][A-Za-z0-9]{1,7}[)]))"),
+            std::wregex(LR"((?:[A-Z]+|[bB]itmap) [(]([*][.][A-Za-z0-9]{1,7}[)]))"),
             std::wregex(
-                LR"((([A-Z]+|[bB]itmap) [(]([*][.][A-Za-z0-9]{1,7})(;[*][.][A-Za-z0-9]{1,7})*[)][|]([*][.][A-Za-z0-9]{1,7})(;[*][.][A-Za-z0-9]{1,7})*[|]{0,2})+)"),
+                LR"((?:(?:[A-Z]+|[bB]itmap) [(]([*][.][A-Za-z0-9]{1,7})(?:;[*][.][A-Za-z0-9]{1,7})*[)][|](?:[*][.][A-Za-z0-9]{1,7})(?:;[*][.][A-Za-z0-9]{1,7})*[|]{0,2})+)"),
             // multiple file filters next to each other
-            std::wregex(LR"(([*][.][A-Za-z0-9]{1,7}[;]?[[:space:]]*)+)"),
+            std::wregex(LR"((?:[*][.][A-Za-z0-9]{1,7}[;]?[[:space:]]*)+)"),
             // clang-tidy commands
             std::wregex(LR"(\-checks=.*)"),
             // generic measuring string (or regex expression)
-            std::wregex(LR"([[:space:]]*(ABCDEFG|abcdefg|AEIOU|aeiou).*)"),
+            std::wregex(LR"([[:space:]]*(?:ABCDEFG|abcdefg|AEIOU|aeiou).*)"),
             // debug messages
-            std::wregex(LR"(Assert(ion)? (f|F)ail.*)"), std::wregex(LR"(ASSERT *)"),
+            std::wregex(LR"(Assert(?:ion)? [fF]ail.*)"), std::wregex(LR"(ASSERT *)"),
             // HTML doc start
             std::wregex(LR"(<!DOCTYPE html)"),
             // HTML entities
@@ -589,39 +590,39 @@ namespace i18n_check
             // anchor
             std::wregex(LR"(#[a-zA-Z0-9\-]{3,})"),
             // CSS
-            std::wregex(LR"(a[:](hover|link))", std::regex_constants::icase),
-            std::wregex(LR"((width|height)[[:space:]]*\:[%]?[a-z]{2,4};)",
+            std::wregex(LR"(a[:](?:hover|link))", std::regex_constants::icase),
+            std::wregex(LR"((?:width|height)[[:space:]]*\:[%]?[a-z]{2,4};)",
                         std::regex_constants::icase),
             std::wregex(
-                LR"([\s\S]*(\{[[:space:]]*[a-zA-Z\-]+[[:space:]]*[:][[:space:]]*[0-9a-zA-Z\- \(\)\\;\:%#'",]+[[:space:]]*\})+[\s\S]*)"),
+                LR"([\s\S]*(?:\{[[:space:]]*[a-zA-Z\-]+[[:space:]]*[:][[:space:]]*[0-9a-zA-Z\- \(\)\\;\:%#'",]+[[:space:]]*\})+[\s\S]*)"),
             std::wregex(
-                LR"((margin[-](top|bottom|left|right)|text[-]indent)[:][[:space:]]*[[:alnum:]%]+;)"),
+                LR"((margin[-](?:top|bottom|left|right)|text[-]indent)[:][[:space:]]*[[:alnum:]%]+;)"),
             // single hyphenated word that starts lowercase
             std::wregex(LR"([a-z][a-z0-9_]*\-[a-z0-9_]+(\-[a-z0-9_]+)*)"),
             // JS
             std::wregex(LR"(class[[:space:]]*=[[:space:]]*['"][A-Za-z0-9\- _]*['"])"),
             // An opening HTML element
-            std::wregex(LR"(<(body|html|img|head|meta|style|span|p|tr|td))"),
+            std::wregex(LR"(<(?:body|html|img|head|meta|style|span|p|tr|td))"),
             // PostScript element
             std::wregex(LR"(%%[a-zA-Z]+:.*)"),
             std::wregex(LR"((<< [\/()A-Za-z0-9[:space:]]*(\\n|[[:space:]])*)+)"),
             std::wregex(
-                LR"((\/[A-Za-z0-9[:space:]]* \[[A-Za-z0-9[:space:]%]+\](\\n|[[:space:]])*)+)"),
+                LR"((?:\/[A-Za-z0-9[:space:]]* \[[A-Za-z0-9[:space:]%]+\](?:\\n|[[:space:]])*)+)"),
             // C
             std::wregex(
-                LR"(^#(include|define|if|ifdef|ifndef|endif|elif|pragma|warning)[[:space:]].*)"),
+                LR"(^#(?:include|define|if|ifdef|ifndef|endif|elif|pragma|warning)[[:space:]].*)"),
             // C++
             std::wregex(LR"([a-zA-Z0-9_]+([-][>]|::)[a-zA-Z0-9_]+([(][)];)?)"),
             std::wregex(LR"(#(define|pragma) .*)"),
             // command lines
-            std::wregex(LR"(.*\b(rm|rmdir|mv) .*)"),
+            std::wregex(LR"(.*\b(?:rm|rmdir|mv) .*)"),
             std::wregex(LR"(\-\-[a-z0-9]+([\-\=][a-z0-9]+)*)"),
             std::wregex(LR"([-]D [A-Z_]{2,}[ =].*)"), std::wregex(LR"([-]dynamiclib .*)"),
             std::wregex(LR"([-]{2}[a-z]{2,}[ :].*)"),
             // registry keys
-            std::wregex(LR"(SOFTWARE[\\]{1,2}(Policies|Microsoft|Classes).*)",
+            std::wregex(LR"(SOFTWARE[\\]{1,2}(?:Policies|Microsoft|Classes).*)",
                         std::regex_constants::icase),
-            std::wregex(LR"(SYSTEM[\\]{1,2}(CurrentControlSet).*)", std::regex_constants::icase),
+            std::wregex(LR"(SYSTEM[\\]{1,2}(?:CurrentControlSet).*)", std::regex_constants::icase),
             std::wregex(LR"(HKEY_.*)"),
             // web query
             std::wregex(LR"(search.aspx\?.*)"),
@@ -633,10 +634,11 @@ namespace i18n_check
                                                                                 // content after it
             std::wregex(
                 LR"(<[A-Za-z]+[A-Za-z0-9_/\\\-\.'"=;:[:space:]]+>[[:space:][:digit:][:punct:]]*<[A-Za-z0-9_/\-.']*>)"),
-            std::wregex(LR"(<[A-Za-z]+([A-Za-z0-9_\-\.]+[[:space:]]*){1,2}=[[:punct:]A-Za-z0-9]*)"),
+            std::wregex(
+                LR"(<[A-Za-z]+(?:[A-Za-z0-9_\-\.]+[[:space:]]*){1,2}=[[:punct:]A-Za-z0-9]*)"),
             std::wregex(LR"(^[[:space:]]*xmlns(:[[:alnum:]]+)?=.*)"),
             std::wregex(LR"(^[[:space:]]*<soap(\.udp)?\:[[:alnum:]]+.*)"),
-            std::wregex(LR"(^[[:space:]]*<port\b.*)"), std::wregex(LR"(ms-app(data|x))"),
+            std::wregex(LR"(^[[:space:]]*<port\b.*)"), std::wregex(LR"(ms-app(?:data|x))"),
             std::wregex(LR"(^\{\{.*)"),                      // soap syntax
             std::wregex(LR"(&[a-zA-Z0-9]+=[a-zA-Z0-9]+.*)"), // args passed to an URL
             std::wregex(LR"([cC]ontent-[tT]ype: [a-zA-Z]{3,}\/.*)"),
@@ -650,20 +652,20 @@ namespace i18n_check
             // placeholders
             std::wregex(LR"(asdfs.*)"),
             // program version string
-            std::wregex(LR"([a-zA-Z\-]+ v(ersion)?[ ]?[0-9\.]+)"),
+            std::wregex(LR"([a-zA-Z\-]+ v(?:ersion)?[ ]?[0-9\.]+)"),
             // bash command (e.g., "lpstat -p") and system variables
             std::wregex(LR"([a-zA-Z]{3,} [\-][a-zA-Z]+)"), std::wregex(LR"(sys[$].*)"),
             // Pascal-case words (e.g., "GetValueFromUser");
             // surrounding punctuation is stripped first.
-            std::wregex(LR"([[:punct:]]*[A-Z]+[a-z0-9]+([A-Z]+[a-z0-9]+)+[[:punct:]]*)"),
+            std::wregex(LR"([[:punct:]]*[A-Z]+[a-z0-9]+(?:[A-Z]+[a-z0-9]+)+[[:punct:]]*)"),
             // camel-case words (e.g., "getValueFromUser", "unencodedExtASCII");
             // surrounding punctuation is stripped first.
-            std::wregex(LR"([[:punct:]]*[a-z]+[[:digit:]]*([A-Z]+[a-z0-9]*)+[[:punct:]]*)"),
-            std::wregex(LR"([[:punct:]]*[a-z]+[[:digit:]]*_([A-Z]+[a-z0-9]*)+[[:punct:]]*)"),
+            std::wregex(LR"([[:punct:]]*[a-z]+[[:digit:]]*(?:[A-Z]+[a-z0-9]*)+[[:punct:]]*)"),
+            std::wregex(LR"([[:punct:]]*[a-z]+[[:digit:]]*_(?:[A-Z]+[a-z0-9]*)+[[:punct:]]*)"),
             // reverse camel-case (e.g., "UTF8FileWithBOM")
-            std::wregex(LR"([[:punct:]]*[A-Z]+[[:digit:]]*([a-z0-9]+[A-Z]+)+[[:punct:]]*)"),
+            std::wregex(LR"([[:punct:]]*[A-Z]+[[:digit:]]*(?:[a-z0-9]+[A-Z]+)+[[:punct:]]*)"),
             // formulas (e.g., ABS(-2.7), POW(-4, 2), =SUM(1; 2) )
-            std::wregex(LR"((=)?[A-Za-z0-9_]{3,}[(]([RC0-9\-\.,;:\[\] ])*[)])"),
+            std::wregex(LR"((?:=)?[A-Za-z0-9_]{3,}[(]([RC0-9\-\.,;:\[\] ])*[)])"),
             // formulas (e.g., ComputeNumbers() )
             std::wregex(LR"([A-Za-z0-9_]{3,}[(][)])"),
             std::wregex(LR"([A-Za-z0-9_]{3,}[:]{2}[A-Za-z0-9_]{3,}[(][)])"),
@@ -672,10 +674,10 @@ namespace i18n_check
             std::wregex(LR"(=[A-Za-z0-9_]+)"),
             // character encodings
             std::wregex(
-                LR"((utf[-]?[[:digit:]]+|utf|Shift[-_]JIS|us-ascii|windows-[[:digit:]]{4}|KOI8-R|Big5|GB2312|iso-[[:digit:]]{4}-[[:digit:]]+))",
+                LR"((?:utf[-]?[[:digit:]]+|utf|Shift[-_]JIS|us-ascii|windows-[[:digit:]]{4}|KOI8-R|Big5|GB2312|iso-[[:digit:]]{4}-[[:digit:]]+))",
                 std::regex_constants::icase),
             // wxWidgets constants
-            std::wregex(LR"((wx|WX)[A-Z_0-9]{2,})"),
+            std::wregex(LR"((?:wx|WX)[A-Z_0-9]{2,})"),
             // ODCTask --surrounding punctuation is stripped first
             std::wregex(LR"([[:punct:]]*[A-Z]{3,}[a-z_0-9]{2,}[[:punct:]]*)"),
             // snake case words
@@ -685,33 +687,33 @@ namespace i18n_check
             std::wregex(LR"([_]*[A-Z0-9][a-z0-9]+(_[A-Z0-9][a-z0-9]+)+[_]*)"), // Config_File_Path
             // CSS strings
             std::wregex(
-                LR"(font-(style|weight|family|size|face-name|underline|point-size|variant)[[:space:]]*[:]?.*)",
+                LR"(font-(?:style|weight|family|size|face-name|underline|point-size|variant)[[:space:]]*[:]?.*)",
                 std::regex_constants::icase),
             std::wregex(
-                LR"(border-(block|bottom|color|collapse|right|left|top|collapse|image|inline|start|end|width|style)[[:space:]]*[:]?.*)",
+                LR"(border-(?:block|bottom|color|collapse|right|left|top|collapse|image|inline|start|end|width|style)[[:space:]]*[:]?.*)",
                 std::regex_constants::icase),
             std::wregex(
-                LR"(background-(clip|color|image|origin|position|repeat|size)[[:space:]]*[:]?.*)",
+                LR"(background-(?:clip|color|image|origin|position|repeat|size)[[:space:]]*[:]?.*)",
                 std::regex_constants::icase),
-            std::wregex(LR"(padding-(block|inline|left|right|top|bottom)[[:space:]]*[:]?.*)",
+            std::wregex(LR"(padding-(?:block|inline|left|right|top|bottom)[[:space:]]*[:]?.*)",
                         std::regex_constants::icase),
             std::wregex(LR"(page-break[[:space:]]*[:]?.*)", std::regex_constants::icase),
-            std::wregex(LR"(line-(break|height|style|through)[[:space:]]*[:]?.*)",
+            std::wregex(LR"(line-(?:break|height|style|through)[[:space:]]*[:]?.*)",
                         std::regex_constants::icase),
-            std::wregex(LR"((vertical|horizontal)-align[[:space:]]*[:]?.*)",
+            std::wregex(LR"((?:vertical|horizontal)-align[[:space:]]*[:]?.*)",
                         std::regex_constants::icase),
-            std::wregex(LR"(flex-(basis|direction|flow|grow|shrink|wrap)[[:space:]]*[:]?.*)",
+            std::wregex(LR"(flex-(?:basis|direction|flow|grow|shrink|wrap)[[:space:]]*[:]?.*)",
                         std::regex_constants::icase),
             std::wregex(
-                LR"(text-(color|background|decoration|align|size|layout|transform|indent|justify|orientation|overflow|underline|shadow|emphasis)[[:space:]]*[:]?.*)",
+                LR"(text-(?:color|background|decoration|align|size|layout|transform|indent|justify|orientation|overflow|underline|shadow|emphasis)[[:space:]]*[:]?.*)",
                 std::regex_constants::icase),
-            std::wregex(LR"((background-)?color[[:space:]]*:.*)", std::regex_constants::icase),
+            std::wregex(LR"((?:background-)?color[[:space:]]*:.*)", std::regex_constants::icase),
             std::wregex(LR"(background[[:space:]]*:.*)", std::regex_constants::icase),
             std::wregex(LR"(style[[:space:]]*=["']?.*)", std::regex_constants::icase),
             // local file paths & file names
-            std::wregex(LR"((WINDIR|Win32|System32|Kernel32|/etc|/tmp))",
+            std::wregex(LR"((?:WINDIR|Win32|System32|Kernel32|/etc|/tmp))",
                         std::regex_constants::icase),
-            std::wregex(LR"((so|dll|exe|dylib|jpg|bmp|png|gif|txt|doc))",
+            std::wregex(LR"((?:so|dll|exe|dylib|jpg|bmp|png|gif|txt|doc))",
                         std::regex_constants::icase), // common file extension that might be missing
                                                       // the period
             std::wregex(LR"([.][a-zA-Z0-9]{1,5})"),   // file extension
@@ -729,7 +731,7 @@ namespace i18n_check
             // Debug message
             std::wregex(LR"(^DEBUG:[\s\S].*)"),
             // mail protocols
-            std::wregex(LR"(^(RCPT TO|MAIL TO|MAIL FROM):.*)"), std::wregex(LR"(^(mailto)$)"),
+            std::wregex(LR"(^(?:RCPT TO|MAIL TO|MAIL FROM):.*)"), std::wregex(LR"(^(?:mailto)$)"),
             // GUIDs
             std::wregex(
                 LR"(^(CLSID[\\]{1,2})?[\{]?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}[\}]?$)"),
@@ -738,13 +740,13 @@ namespace i18n_check
             std::wregex(LR"(^(base[0-9]+|uuencode|quoted-printable)$)"),
             std::wregex(LR"(^(250\-AUTH)$)"),
             // MIME types
-            std::wregex(LR"((application|text)\/(x\-)?[a-z\-]+)"),
+            std::wregex(LR"((?:application|text)\/(x\-)?[a-z\-]+)"),
             std::wregex(LR"(application\/(x\-)?[a-z\-]+\+[a-z\-]+)"),
             std::wregex(LR"(image\/(x\-)?[a-z\-]+)"), std::wregex(LR"(video\/(x\-)?[a-z\-]+)"),
             // MIME headers
             std::wregex(LR"(^MIME-Version:.*)"), std::wregex(LR"(^X-Priority:.*)"),
             std::wregex(
-                LR"(^(application\/octet-stream|video\/([:alnum:]+)|audio\/([:alnum:]+)|image\/([:alnum:]+)|text\/(css|csv|plain|html|xml|rawdata|javascript))$)"),
+                LR"(^(?:application\/octet-stream|video\/(?:[:alnum:]+)|audio\/([:alnum:]+)|image\/(?:[:alnum:]+)|text\/(?:css|csv|plain|html|xml|rawdata|javascript))$)"),
             std::wregex(LR"(.*\bContent-Type:[[:space:]]*[[:alnum:]]+/[[:alnum:]]+;.*)"),
             std::wregex(LR"(.*\bContent-Transfer-Encoding:[[:space:]]*[[:alnum:]]+.*)"),
             // URL
@@ -759,23 +761,23 @@ namespace i18n_check
                 LR"(^[\w ]*<[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*>$)"),
             std::wregex(LR"(urn[:][a-zA-Z0-9]+.*)"),
             // Windows HTML clipboard data
-            std::wregex(LR"(.*(End|Start)(HTML|Fragment)[:]?[[:digit:]]*.*)"),
+            std::wregex(LR"(.*(?:End|Start)(?:HTML|Fragment)[:]?[[:digit:]]*.*)"),
             // printer commands (e.g., @PAGECOUNT@)
             std::wregex(LR"(@[A-Z0-9]+@)"),
             // [CMD]
             std::wregex(LR"(\[[A-Z0-9]+\])"),
             // Windows OS names
             std::wregex(
-                LR"((Microsoft )?Windows (95|98|NT|ME|2000|Server|Vista|Longhorn|XP|[[:digit:]]{1,2}[.]?[[:digit:]]{0,2})[[:space:]]*[[:digit:]]{0,4}[[:space:]]*(R|SP)?[[:digit:]]{0,2})"),
+                LR"((?:Microsoft )?Windows (?:95|98|NT|ME|2000|Server|Vista|Longhorn|XP|[[:digit:]]{1,2}[.]?[[:digit:]]{0,2})[[:space:]]*[[:digit:]]{0,4}[[:space:]]*(?:R|SP)?[[:digit:]]{0,2})"),
             // products and standards
-            std::wregex(LR"(UTF[-](8|16|32)(BE|LE)?)"),
-            std::wregex(LR"(Pentium( (II|III|M|Xeon|Pro))?)"),
-            std::wregex(LR"((Misra|MISRA) C( [0-9]+)?)"),
+            std::wregex(LR"(UTF[-](?:8|16|32)(BE|LE)?)"),
+            std::wregex(LR"(Pentium( (?:II|III|M|Xeon|Pro))?)"),
+            std::wregex(LR"((?:Misra|MISRA) C( [0-9]+)?)"),
             std::wregex(LR"(Borland C\+\+ Builder( [0-9]+)?)"), std::wregex(LR"(Qt Creator)"),
-            std::wregex(LR"((Microsoft )VS Code)"), std::wregex(LR"((Microsoft )?Visual Studio)"),
-            std::wregex(LR"((Microsoft )?Visual C\+\+)"),
-            std::wregex(LR"((Microsoft )?Visual Basic)"), std::wregex(LR"(GNU gdb debugger)"),
-            std::wregex(LR"(Clang\-(Format|Tidy))", std::regex_constants::icase),
+            std::wregex(LR"((?:Microsoft )VS Code)"), std::wregex(LR"((Microsoft )?Visual Studio)"),
+            std::wregex(LR"((?:Microsoft )?Visual C\+\+)"),
+            std::wregex(LR"((?:Microsoft )?Visual Basic)"), std::wregex(LR"(GNU gdb debugger)"),
+            std::wregex(LR"(Clang\-(?:Format|Tidy))", std::regex_constants::icase),
             std::wregex(LR"(GDB)"),
             // culture language tags
             std::wregex(LR"([a-z]{2,3}[\-_][A-Z]{2,3})"),
@@ -1075,19 +1077,19 @@ namespace i18n_check
         add_variable_name_pattern_to_ignore(
             std::wregex(LR"(^stacktrace.*)", std::regex_constants::icase));
         add_variable_name_pattern_to_ignore(
-            std::wregex(LR"(([[:alnum:]_\-])*xpm)", std::regex_constants::icase));
+            std::wregex(LR"((?:[[:alnum:]_\-])*xpm)", std::regex_constants::icase));
         add_variable_name_pattern_to_ignore(
-            std::wregex(LR"(xpm([[:alnum:]_\-])*)", std::regex_constants::icase));
-        add_variable_name_pattern_to_ignore(
-            std::wregex(LR"((sql|db|database)(Table|Update|Query|Command|Upgrade)?[[:alnum:]_\-]*)",
-                        std::regex_constants::icase));
+            std::wregex(LR"(xpm(?:[[:alnum:]_\-])*)", std::regex_constants::icase));
+        add_variable_name_pattern_to_ignore(std::wregex(
+            LR"((?:sql|db|database)(?:Table|Update|Query|Command|Upgrade)?[[:alnum:]_\-]*)",
+            std::regex_constants::icase));
         add_variable_name_pattern_to_ignore(std::wregex(LR"(log)"));
         add_variable_name_pattern_to_ignore(std::wregex(LR"([Cc]ommand(_)?[Ss]tring)"));
         add_variable_name_pattern_to_ignore(std::wregex(LR"(wxColourDialogNames)"));
         add_variable_name_pattern_to_ignore(std::wregex(LR"(wxColourTable)"));
         add_variable_name_pattern_to_ignore(std::wregex(LR"(QT_MESSAGE_PATTERN)"));
         // console objects
-        add_variable_name_pattern_to_ignore(std::wregex(LR"((std::)?[w]?(cout|cerr|qout|qerr))"));
+        add_variable_name_pattern_to_ignore(std::wregex(LR"((std::)?[w]?(?:cout|cerr|qout|qerr))"));
         }
 
     //--------------------------------------------------
