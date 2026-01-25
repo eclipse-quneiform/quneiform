@@ -535,6 +535,8 @@ namespace i18n_check
                 { L"wxNOEXCEPT", _WXTRANS_WSTR(L"Use noexcept instead of wxNOEXCEPT.") });
             m_deprecated_string_functions.insert(
                 { L"__WXMAC__", _WXTRANS_WSTR(L"Use __WXOSX__ instead of __WXMAC__.") });
+            m_deprecated_string_functions.insert(
+                { L"wxDIALOG_EX_METAL", _WXTRANS_WSTR(L"This style is deprecated; remove it.") });
             }
 
         m_translatable_regexes = { std::wregex(LR"(Q[0-9][FA]Y.*)"),
