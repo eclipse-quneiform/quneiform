@@ -890,7 +890,7 @@ namespace i18n_check
             L"wxGetCommandOutput", L"SetKeyWords", L"AddDeveloper", L"AddDocWriter", L"AddArtist",
             L"AddTranslator", L"MarkerSetBackground", L"SetProperty", L"SetAppName",
             L"SetPrintToFile", L"GetAttribute", L"SetAuthor", L"GetPropertyAsSize",
-            L"GetPropertyAsInteger", L"FoundSwitch", L"GetPane",
+            L"GetPropertyAsInteger", L"FoundSwitch", L"GetPane", L"SetVendorName",
             // Wisteria
             L"ContinuousColumns", L"CategoricalColumns", L"IdColumn", L"RemoveColumnNamesFromList",
             L"ImportCSV",
