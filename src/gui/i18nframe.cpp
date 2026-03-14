@@ -123,6 +123,7 @@ void I18NFrame::InitControls()
             }
         }
 
+    ribbon->SetArtProvider(new wxRibbonMSWFlatArtProvider);
     ribbon->Realize();
 
     wxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
