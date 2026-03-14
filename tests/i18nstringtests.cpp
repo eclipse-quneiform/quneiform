@@ -131,6 +131,10 @@ TEST_CASE("translatable", "[i18nreview]")
     CHECK_FALSE(reviewer.is_untranslatable_string(L"x-axes", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"y-axes", false).first);
     CHECK(reviewer.is_untranslatable_string(L"u-axes", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"Dot", false).first);
+    CHECK_FALSE(reviewer.is_untranslatable_string(L"Color:", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"variables.positive-aggregate", false).first);
+    CHECK(reviewer.is_untranslatable_string(L"row-suppression.label", false).first);
     }
 
 TEST_CASE("i18n string utils", "[i18nstringutil]")

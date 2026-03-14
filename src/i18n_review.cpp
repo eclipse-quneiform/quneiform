@@ -206,7 +206,7 @@ namespace i18n_check
 
     // documents
     std::set<string_util::case_insensitive_wstring> i18n_review::m_file_extensions = { // NOLINT
-        L"xml", L"html", L"htm", L"xhtml", L"rtf", L"doc", L"docx", L"dot", L"docm", L"txt", L"ppt",
+        L"xml", L"html", L"htm", L"xhtml", L"rtf", L"doc", L"docx", L"docm", L"txt", L"ppt",
         L"pptx", L"pdf", L"ps", L"odt", L"ott", L"odp", L"otp", L"pptm", L"md", L"xaml", L"tex",
         L"pango",
         // Visual Studio files
@@ -671,6 +671,9 @@ namespace i18n_check
             // formulas (e.g., ComputeNumbers() )
             std::wregex(LR"([A-Za-z0-9_]{3,}[(][)])"),
             std::wregex(LR"([A-Za-z0-9_]{3,}[:]{2}[A-Za-z0-9_]{3,}[(][)])"),
+            // tags (e.g., 'row-suppression.label')
+            std::wregex(LR"([A-Za-z0-9]{1,}\-[A-Za-z0-9]{1,}\.[A-Za-z0-9]{1,})"),
+            std::wregex(LR"([A-Za-z0-9]{1,}\.[A-Za-z0-9]{1,}\-[A-Za-z0-9]{1,})"),
             // equal sign followed by a single word is probably some sort of
             // config file tag or formula.
             std::wregex(LR"(=[A-Za-z0-9_]+)"),
@@ -709,8 +712,8 @@ namespace i18n_check
             std::wregex(
                 LR"(text-(?:color|background|decoration|align|size|layout|transform|indent|justify|orientation|overflow|underline|shadow|emphasis)[[:space:]]*[:]?.*)",
                 std::regex_constants::icase),
-            std::wregex(LR"((?:background-)?color[[:space:]]*:.*)", std::regex_constants::icase),
-            std::wregex(LR"(background[[:space:]]*:.*)", std::regex_constants::icase),
+            std::wregex(LR"((?:background-)?color:[a-zA-Z0-9#]{1,})", std::regex_constants::icase),
+            std::wregex(LR"(background:[a-zA-Z0-9#]{1,})", std::regex_constants::icase),
             std::wregex(LR"(style[[:space:]]*=["']?.*)", std::regex_constants::icase),
             // local file paths & file names
             std::wregex(LR"((?:WINDIR|Win32|System32|Kernel32|/etc|/tmp))",
