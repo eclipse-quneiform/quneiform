@@ -557,7 +557,7 @@ namespace i18n_check
             // JSON
             std::wregex(LR"([a-z0-9\-]{2,}[\{\[])"),
             std::wregex(LR"(\]\.[a-z0-9\-]{2,})"),
-            std::wregex(LR"([,]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)"),
+            std::wregex(LR"((\\\")?[,\{]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)"),
             // SQL code
             m_sql_code,
             std::wregex(LR"(^(?:INSERT INTO|DELETE (?:[*] )?FROM).*)", std::regex_constants::icase),

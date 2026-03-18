@@ -124,6 +124,9 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK(reviewer.is_untranslatable_string(LR"(, \"question-brackets\": )", false).first);
     CHECK(reviewer.is_untranslatable_string(LR"(, \"label\": {\"text\": \")", false).first);
     CHECK(reviewer.is_untranslatable_string(LR"(color: rgb(%u, %u, %u);)", false).first);
+    CHECK(reviewer.is_untranslatable_string(LR"(\"categorical-columns\": [], \"date-columns\": [], )", false).first);
+    CHECK(reviewer.is_untranslatable_string(LR"(\", \"canvas-margins\": [], \"padding\": [], \"outline\)", false).first);
+    CHECK(reviewer.is_untranslatable_string(LR"({\"name\": \"%s\", "                 L"\"section\": {})", false).first);
     }
 
 TEST_CASE("translatable", "[i18nreview]")
