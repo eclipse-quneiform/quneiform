@@ -555,8 +555,7 @@ namespace i18n_check
             std::wregex(
                 LR"([A-Za-z0-9\-]+/[A-Za-z0-9\-]+;[[:space:]]*[A-Za-z0-9\-]+=[A-Za-z0-9\-]+)"),
             // JSON
-            std::wregex(LR"([a-z0-9\-]{2,}[\{\[])"),
-            std::wregex(LR"(\]\.[a-z0-9\-]{2,})"),
+            std::wregex(LR"([a-z0-9\-]{2,}[\{\[])"), std::wregex(LR"(\]\.[a-z0-9\-]{2,})"),
             std::wregex(LR"((\\\")?[,\{]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)"),
             // SQL code
             m_sql_code,
@@ -2567,8 +2566,9 @@ namespace i18n_check
                 {
                 return std::make_pair(true, strToReview.length());
                 }
-            // JSON
-            if (strToReview.starts_with(LR"({\")"))
+            // JSON (done explicitly here for longer strings)
+            std::wregex jsonSyntax(LR"([{]?(\\\")?[,\{]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)");
+            if (std::regex_match(strToReview, jsonSyntax))
                 {
                 return std::make_pair(true, strToReview.length());
                 }
