@@ -2567,6 +2567,11 @@ namespace i18n_check
                 {
                 return std::make_pair(true, strToReview.length());
                 }
+            // JSON
+            if (strToReview.starts_with(LR"({\")"))
+                {
+                return std::make_pair(true, strToReview.length());
+                }
             // social media hashtag (or formatting code of some sort),
             // keyboard shortcuts, code, placeholder text, etc.
             if (std::regex_match(strToReview, m_hashtag_regex) ||
