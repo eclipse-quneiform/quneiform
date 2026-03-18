@@ -540,6 +540,7 @@ namespace i18n_check
             }
 
         m_translatable_regexes = { std::wregex(LR"(Q[0-9][FA]Y.*)"),
+                                   std::wregex(LR"(p\-(value|level)[s]?)"),
                                    std::wregex(LR"([xyz]-(?:axis|axes))") };
 
         m_untranslatable_regexes = {
@@ -553,6 +554,10 @@ namespace i18n_check
             // webpage content type
             std::wregex(
                 LR"([A-Za-z0-9\-]+/[A-Za-z0-9\-]+;[[:space:]]*[A-Za-z0-9\-]+=[A-Za-z0-9\-]+)"),
+            // JSON
+            std::wregex(LR"([a-z0-9\-]{2,}[\{\[])"),
+            std::wregex(LR"(\]\.[a-z0-9\-]{2,})"),
+            std::wregex(LR"([,]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)"),
             // SQL code
             m_sql_code,
             std::wregex(LR"(^(?:INSERT INTO|DELETE (?:[*] )?FROM).*)", std::regex_constants::icase),
@@ -592,6 +597,7 @@ namespace i18n_check
             // anchor
             std::wregex(LR"(#[a-zA-Z0-9\-]{3,})"),
             // CSS
+            std::wregex(LR"((background[-])?color[:] rgb[(].*)"),
             std::wregex(LR"(a[:](?:hover|link))", std::regex_constants::icase),
             std::wregex(LR"((?:width|height)[[:space:]]*\:[%]?[a-z]{2,4};)",
                         std::regex_constants::icase),
