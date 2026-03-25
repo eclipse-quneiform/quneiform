@@ -119,6 +119,7 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK_FALSE(reviewer.is_untranslatable_string(L"dorm room", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"p-value", false).first);
     // JSON syntax
+    CHECK(reviewer.is_untranslatable_string(L"ui.bold-header-row", false).first);
     CHECK(reviewer.is_untranslatable_string(L"last-bar-brackets[", false).first);
     CHECK(reviewer.is_untranslatable_string(L"].end-block", false).first);
     CHECK(reviewer.is_untranslatable_string(LR"(, \"question-brackets\": )", false).first);
