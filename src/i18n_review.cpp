@@ -2568,7 +2568,8 @@ namespace i18n_check
                 return std::make_pair(true, strToReview.length());
                 }
             // JSON (done explicitly here for longer strings)
-            std::wregex jsonSyntax(LR"([{]?(\\\")?[,\{]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)");
+            const std::wregex jsonSyntax(
+                LR"([{]?(\\\")?[,\{]?[[:space:]]*\\\"([a-z0-9\-]{2,})+\\\"\:.*)");
             if (std::regex_match(strToReview, jsonSyntax))
                 {
                 return std::make_pair(true, strToReview.length());

@@ -248,6 +248,8 @@ class NewProjectDialog final : public wxDialog
             return 2020;
         case 4:
             return 2023;
+        default:
+            return 2014;
             }
         return m_minCppVersion;
         }

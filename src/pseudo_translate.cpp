@@ -259,10 +259,10 @@ namespace i18n_check
             return i;
         }();
 
-        // Do the same for the trailing spaces.
+        // do the same for the trailing spaces
         const size_t endPos = [&msg]()
         {
-            int32_t i{ static_cast<int32_t>(msg.length() - 1) };
+            size_t i{ msg.length() - 1 };
             for (; i > 0; /* handled in loop*/)
                 {
                 if (msg[i] == L' ')
@@ -278,7 +278,7 @@ namespace i18n_check
                     }
                 break;
                 }
-            return static_cast<size_t>(i + 1);
+            return i + 1;
         }();
 
         // If nothing but spaces and newlines, then leave it alone.

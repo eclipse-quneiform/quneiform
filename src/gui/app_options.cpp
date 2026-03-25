@@ -18,13 +18,13 @@ void I18NOptions::Save(const wxString& filePath)
     {
     wxXmlDocument xmlDoc;
 
+    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
     auto* root = new wxXmlNode(nullptr, wxXML_ELEMENT_NODE, L"quneiform-settings");
     xmlDoc.SetRoot(root);
 
     auto* node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"path");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, m_filePath));
 
-    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
     auto* exclPathsNode = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"excluded-paths");
     for (auto exclFile : m_excludedPaths)
         {
@@ -63,7 +63,6 @@ void I18NOptions::Save(const wxString& filePath)
             pathNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, untransName));
             }
         }
-    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"checks");
     node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxString{}, std::to_wstring(m_options)));
@@ -134,6 +133,7 @@ void I18NOptions::Save(const wxString& filePath)
     node = new wxXmlNode(root, wxXML_ELEMENT_NODE, L"selected-translator-comment-style");
     node->AddChild(
         new wxXmlNode(wxXML_TEXT_NODE, wxString{}, m_lastSelectedTranslatorCommentStyle));
+    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     if (!xmlDoc.Save(filePath))
         {
