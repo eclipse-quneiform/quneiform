@@ -634,6 +634,8 @@ namespace i18n_check
             std::wregex(LR"(HKEY_.*)"),
             // web query
             std::wregex(LR"(search.aspx\?.*)"),
+            // SVG
+            std::wregex(LR"(<(svg|g|path|rect).*)"),
             // XML elements
             std::wregex(LR"(version[ ]?=\\"[0-9\.]+\\")"),
             std::wregex(LR"(<([A-Za-z])+([A-Za-z0-9_/\\\-\.'"=;:#[:space:]])+[>]?)"),
