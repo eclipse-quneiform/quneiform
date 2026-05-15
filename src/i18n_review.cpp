@@ -1010,7 +1010,8 @@ namespace i18n_check
             // more functions from various apps
             L"trace", L"ActionFormat", L"ErrorFormat", L"DEBUG", L"setParameters", L"getopt",
             L"_PrintEnter", L"_PrintExit", L"ERROR0", L"ERROR1", L"ERROR2", L"ERROR3",
-            L"TraceString",
+            L"TraceString", L"GetPropertyTemplate", L"SetPropertyTemplate", L"CarryForwardProperty",
+            L"oldExpanded",
             // assembly calls
             L"asm"
         };
