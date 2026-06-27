@@ -25,7 +25,14 @@
 #include "pseudo_translate.h"
 #include "quarto_review.h"
 #include "rc_file_review.h"
+#ifdef __clang__
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcharacter-conversion"
+#endif
 #include "utfcpp/source/utf8.h"
+#ifdef __clang__
+    #pragma clang diagnostic pop
+#endif
 #include <filesystem>
 #include <fstream>
 #include <sstream>

@@ -202,7 +202,6 @@ elseif(APPLE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC __WXOSX__
         $<$<CONFIG:Debug>:__WXDEBUG__> $<$<CONFIG:Release>:NDEBUG>)
     target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic -Wshadow -Werror
-                           $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-character-conversion>
                            $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fstack-protector-strong>
                            $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-D_FORTIFY_SOURCE=2>
                            $<$<CONFIG:Debug>:-Og>
