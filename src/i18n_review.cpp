@@ -1081,7 +1081,9 @@ namespace i18n_check
                                      // common UNIX names (Windows versions are handled by more
                                      // complex regex expressions elsewhere)
                                      L"UNIX", L"macOS", L"Apple Mac OS", L"Apple Mac OS X", L"OSX",
-                                     L"Linux", L"FreeBSD", L"POSIX", L"NetBSD" };
+                                     L"Linux", L"FreeBSD", L"POSIX", L"NetBSD",
+                                     // GPUs/CPUs
+                                     L"NVIDIA (DRM)", L"NVIDIA", L"Intel", L"AMD" };
 
         // keywords in the language that can appear in front of a string only
         m_keywords = { L"return", L"else", L"if", L"goto", L"new", L"delete", L"throw" };
