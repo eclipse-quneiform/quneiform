@@ -43,6 +43,7 @@ if(MSVC)
                          $<$<CONFIG:Debug>:/Od> $<$<CONFIG:Release>:/O2>)
 else()
   target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wshadow -Werror
+                         $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-character-conversion>
                          $<$<CONFIG:Debug>:-Og> $<$<CONFIG:Release>:-O2>)
 endif()
 
