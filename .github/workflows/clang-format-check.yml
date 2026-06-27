@@ -15,5 +15,6 @@ jobs:
           FILES=$(find src \( -name '*.h' -o -name '*.cpp' \) \
             ! -path 'src/cxxopts/*' \
             ! -path 'src/utfcpp/*')
+          echo "$FILES" | wc -l | xargs -I{} echo "Checking {} files..."
           echo "$FILES" | xargs sed -i 's/\r//'
           echo "$FILES" | xargs clang-format-19 --dry-run --Werror
