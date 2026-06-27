@@ -8,10 +8,11 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v5
-      - uses: DoozyX/clang-format-lint-action@v0.20
-        with:
-          source: "src"
-          exclude: "src/cxxopts src/utfcpp"
-          extensions: 'h,cpp'
-          style: file
-          clangFormatVersion: 19
+      - name: Install clang-format-19
+        run: sudo apt-get install -y clang-format-19
+      - name: Check formatting
+        run: |
+          find src \( -name '*.h' -o -name '*.cpp' \) \
+            ! -path 'src/cxxopts/*' \
+            ! -path 'src/utfcpp/*' \
+            | xargs clang-format-19 --dry-run --Werror
