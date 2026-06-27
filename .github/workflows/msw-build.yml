@@ -17,14 +17,7 @@ jobs:
           git checkout
           .\bootstrap-vcpkg.bat
           .\vcpkg.exe install cppzmq:x64-windows
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1.1.3
-        with:
-            vs-prerelease: true
       - name: build
         run: |
-             cd ${{ github.workspace }}
-             cmake ./
-      - name: Build Solution (windows)
-        run: |
-          msbuild quneiform.sln
+             cmake -S ${{ github.workspace }} -B ${{ github.workspace }}/build
+             cmake --build ${{ github.workspace }}/build --config Release
