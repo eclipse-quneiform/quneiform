@@ -12,7 +12,8 @@ jobs:
         run: sudo apt-get install -y clang-format-19
       - name: Check formatting
         run: |
-          find src \( -name '*.h' -o -name '*.cpp' \) \
+          FILES=$(find src \( -name '*.h' -o -name '*.cpp' \) \
             ! -path 'src/cxxopts/*' \
-            ! -path 'src/utfcpp/*' \
-            | xargs clang-format-19 --dry-run --Werror
+            ! -path 'src/utfcpp/*')
+          echo "$FILES" | xargs sed -i 's/\r//'
+          echo "$FILES" | xargs clang-format-19 --dry-run --Werror
