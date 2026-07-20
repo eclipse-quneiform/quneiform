@@ -3224,9 +3224,11 @@ namespace i18n_check
         // This will grab numbers like "36 600" (non-breaking space only, not regular space),
         // "36,600", and "36.600".
         // Also, 7-bit, full-width, and Hindi numbers will be extracted.
+        // quneiform-suppress-begin
         const std::wregex numberRegex{
             LR"([[:digit:]\u0966-\u096F\uFF10-\uFF19]+([\u00A0,\.][[:digit:]\u0966-\u096F\uFF10-\uFF19]+)*)"
         };
+        // quneiform-suppress-end
         // this will then normalize them all to 36600
         // quneiform-suppress-begin
         const std::wregex separatorsRegex{ LR"([\u00A0,\.])" };
