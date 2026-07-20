@@ -18,8 +18,9 @@
 namespace i18n_check
     {
     const std::wregex i18n_review::m_file_filter_regex{ LR"(([*][.][[:alnum:]\*]{1,5}[;]?)+$)" };
-
+    // quneiform-suppress-begin
     const std::wregex i18n_review::m_halfwidth_range_regex{ LR"([\uFF61-\uFFDC]+)" };
+    // quneiform-suppress-end
 
     const std::wregex i18n_review::m_url_email_regex{
         LR"(((http|ftp)s?:\/\/)?(www\.)[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))"
@@ -3227,7 +3228,9 @@ namespace i18n_check
             LR"([[:digit:]\u0966-\u096F\uFF10-\uFF19]+([\u00A0,\.][[:digit:]\u0966-\u096F\uFF10-\uFF19]+)*)"
         };
         // this will then normalize them all to 36600
+        // quneiform-suppress-begin
         const std::wregex separatorsRegex{ LR"([\u00A0,\.])" };
+        // quneiform-suppress-end
         std::wstring_view::const_iterator searchStart{ resource.cbegin() };
         std::match_results<std::wstring_view::const_iterator> res;
         while (std::regex_search(searchStart, resource.cend(), res, numberRegex))

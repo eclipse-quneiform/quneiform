@@ -1070,7 +1070,7 @@ void I18NFrame::OnAbout([[maybe_unused]] wxCommandEvent& event)
     aboutInfo.AddDeveloper(L"Blake Madden");
     aboutInfo.SetLicence(_DT(LR"(Eclipse Public License - v 2.0)"));
     aboutInfo.SetCopyright(
-        wxString::Format(_(L"Copyright \U000000A92021-%d %s. All rights reserved."),
+        wxString::Format(_(L"Copyright ©2021-%d %s. All rights reserved."),
                          buildDate.GetYear(), _DT(L"Blake Madden")));
     wxIcon appIcon;
     appIcon.CopyFromBitmap(

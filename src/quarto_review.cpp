@@ -472,10 +472,11 @@ namespace i18n_check
     quarto_review::LoadSmartQuotes(const std::wstring& filteredContent) const
         {
         std::vector<string_info> issues;
-
+        // quneiform-suppress-begin
         const std::wregex smartQuotesRE(
             LR"(([A-Za-z0-9_"'-]*[\u2018\u2019\u201C\u201D][A-Za-z0-9_"'-]*))",
             std::regex_constants::ECMAScript);
+        // quneiform-suppress-end
 
         if ((get_style() & check_malformed_strings) != 0U)
             {

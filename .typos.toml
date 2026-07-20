@@ -13,6 +13,7 @@ ist = "ist"
 ommand = "ommand"
 tring = "tring"
 optin = "optin"
+Caf = "Caf"
 
 [type.svg]
 extend-glob = ["*.svg"]
