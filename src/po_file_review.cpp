@@ -34,20 +34,42 @@ namespace i18n_check
         constexpr static std::wstring_view MSGSTR1{ L"msgstr[1] \"" };
         constexpr static std::wstring_view MSGCTXT{ L"msgctxt \"" };
         // type of printf formatting the string uses, and its fuzzy status
-        static const std::wregex entryLineRegEx{ LR"(^#, ([,a-z \-]+)+$)",
-        // MSVC doesn't have the std::regex::multiline flag, but behaves like multiline implicitly.
-        // GCC and Clang require this flag though.
-#ifdef _MSC_VER
-                                                 std::regex::ECMAScript };
-#else
-                                                 std::regex::ECMAScript | std::regex::multiline };
-#endif
+        static const std::wregex entryLineRegEx{ LR"(^#, ([,a-z \-]+)+$)" };
         // translator comments, where they go to the end of the line
         static const std::wregex commentLineRegEx{ LR"(^#[.] ([^\n\r]+)+$)" };
 
         // captures the "no-" prefix (in case it's in there) so that we know
         // to ignore this entry later
         static const std::wregex printfResourceRegEx{ LR"(\b([a-zA-Z\-])+\b)" };
+
+        // Splits a catalog entry into its individual lines (stripping the line terminator,
+        // including a trailing CR for CRLF content), so each line can be matched on its own
+        // with std::regex_match.
+        const auto splitIntoLines = [](std::wstring_view text)
+        {
+            std::vector<std::wstring_view> lines;
+            size_t lineStart{ 0 };
+            while (lineStart <= text.length())
+                {
+                size_t lineEnd = text.find(L'\n', lineStart);
+                if (lineEnd == std::wstring_view::npos)
+                    {
+                    lineEnd = text.length();
+                    }
+                std::wstring_view line{ text.substr(lineStart, lineEnd - lineStart) };
+                if (!line.empty() && line.back() == L'\r')
+                    {
+                    line.remove_suffix(1);
+                    }
+                lines.push_back(line);
+                if (lineEnd == text.length())
+                    {
+                    break;
+                    }
+                lineStart = lineEnd + 1;
+                }
+            return lines;
+        };
 
         std::vector<std::wstring> entryLines;
         std::vector<std::wstring> commentLines;
@@ -89,10 +111,14 @@ namespace i18n_check
 
             // load information about the string's fuzzy status and its printf format
             entryLines.clear();
-            std::copy(std::regex_token_iterator<decltype(entry)::const_iterator>(
-                          entry.cbegin(), entry.cend(), entryLineRegEx, 1),
-                      std::regex_token_iterator<decltype(entry)::const_iterator>{},
-                      std::back_inserter(entryLines));
+            for (const auto& line : splitIntoLines(entry))
+                {
+                std::match_results<std::wstring_view::const_iterator> lineMatch;
+                if (std::regex_match(line.cbegin(), line.cend(), lineMatch, entryLineRegEx))
+                    {
+                    entryLines.emplace_back(lineMatch[1].str());
+                    }
+                }
 
             po_format_string pofs{ po_format_string::no_format };
             bool formatSpecFound{ false };
@@ -137,10 +163,14 @@ namespace i18n_check
             // If a comment is multiline in the source code, then it gets separate "#." entries
             // in the PO file. These need to be pieced back together into one string.
             commentLines.clear();
-            std::copy(std::regex_token_iterator<decltype(entry)::const_iterator>(
-                          entry.cbegin(), entry.cend(), commentLineRegEx, 1),
-                      std::regex_token_iterator<decltype(entry)::const_iterator>{},
-                      std::back_inserter(commentLines));
+            for (const auto& line : splitIntoLines(entry))
+                {
+                std::match_results<std::wstring_view::const_iterator> lineMatch;
+                if (std::regex_match(line.cbegin(), line.cend(), lineMatch, commentLineRegEx))
+                    {
+                    commentLines.emplace_back(lineMatch[1].str());
+                    }
+                }
             std::wstring comment = [&commentLines]()
             {
                 std::wstring fullComment;
