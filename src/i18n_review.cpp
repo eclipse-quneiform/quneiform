@@ -1278,6 +1278,24 @@ namespace i18n_check
             classifyUnencodedStrings(m_internal_strings);
             classifyUnencodedStrings(m_not_available_for_localization_strings);
             }
+        else
+            {
+            const auto& classifyEscapedUnicodeStrings = [this](const auto& strings)
+            {
+                for (const auto& str : strings)
+                    {
+                    if (i18n_string_util::contains_escaped_unicode_value(str.m_string))
+                        {
+                        m_escaped_unicode_strings.push_back(str);
+                        }
+                    }
+            };
+
+            classifyEscapedUnicodeStrings(m_localizable_strings);
+            classifyEscapedUnicodeStrings(m_marked_as_non_localizable_strings);
+            classifyEscapedUnicodeStrings(m_internal_strings);
+            classifyEscapedUnicodeStrings(m_not_available_for_localization_strings);
+            }
 
         if ((m_review_styles & check_printf_single_number) != 0)
             {
@@ -2342,6 +2360,7 @@ namespace i18n_check
         m_unsafe_localizable_strings.clear();
         m_deprecated_macros.clear();
         m_unencoded_strings.clear();
+        m_escaped_unicode_strings.clear();
         m_printf_single_numbers.clear();
         m_ids_assigned_number.clear();
         m_duplicates_value_assigned_to_ids.clear();

@@ -764,6 +764,17 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& event)
                     }
             };
 
+            // includes a flag if the provided value matches the node's warning
+            // (for warnings that are the inverse of a flag being turned off,
+            // e.g., "escapedUnicode" being the opposite of "unencodedExtASCII")
+            const auto includeFlag = [this, &node](const wxString& value, const auto flag)
+            {
+                if (node->m_warningId == value)
+                    {
+                    m_activeProjectOptions.m_options = m_activeProjectOptions.m_options | flag;
+                    }
+            };
+
             excludeFlag(L"[notL10NAvailable]",
                         i18n_check::review_style::check_not_available_for_l10n);
             excludeFlag(L"[suspectL10NString]", i18n_check::review_style::check_l10n_strings);
@@ -795,6 +806,7 @@ void I18NFrame::OnIgnoreSelectedWarning([[maybe_unused]] wxCommandEvent& event)
             excludeFlag(L"[UTF8FileWithBOM]", i18n_check::review_style::check_utf8_with_signature);
             excludeFlag(L"[unencodedExtASCII]",
                         i18n_check::review_style::check_unencoded_ext_ascii);
+            includeFlag(L"[escapedUnicode]", i18n_check::review_style::check_unencoded_ext_ascii);
             excludeFlag(L"[printfSingleNumber]",
                         i18n_check::review_style::check_printf_single_number);
             excludeFlag(L"[numberAssignedToId]",

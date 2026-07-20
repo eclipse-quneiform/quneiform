@@ -25,6 +25,9 @@ It is generally recommended to encode files as UTF-8, making them portable betwe
 - `unencodedExtASCII`: indicates that the file contains hard-coded extended ASCII characters.
 It is recommended that these characters be encoded in hexadecimal format to avoid character-encoding issues between compilers.
 
+- `escapedUnicode`: indicates that a string contains an escaped Unicode sequence (e.g., `\uXXXX`) that could simply be written as a literal UTF-8 character.
+This is reported instead of `unencodedExtASCII` when that check is turned off (which is its default state).
+
 To look only for suspect strings that are exposed for translation and show the results in the console window:
 
 ``` {.bash filename="Terminal"}

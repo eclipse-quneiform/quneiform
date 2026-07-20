@@ -42,6 +42,8 @@ By following the aforementioned steps, this will be re-encoded to "B\\U00000142\
 
 ::: {.notesection data-latex=""}
 This warning is emitted when the option **Unencoded extended ASCII characters** (from the **Additional Checks** settings) is checked.
+
+When that option is unchecked, *Quneiform* instead emits an `escapedUnicode` warning for strings that already contain an escaped Unicode sequence (e.g., `\uXXXX`) and recommends replacing it with the literal UTF-8 character.
 :::
 
 ### Make Selection Translatable {-}

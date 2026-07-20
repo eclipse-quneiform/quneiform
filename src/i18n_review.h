@@ -652,6 +652,14 @@ namespace i18n_check
             return m_unencoded_strings;
             }
 
+        /// @returns The strings that contain escaped Unicode values that could just be
+        ///     written as literal UTF-8 characters.
+        [[nodiscard]]
+        const std::vector<string_info>& get_escaped_unicode_strings() const noexcept
+            {
+            return m_escaped_unicode_strings;
+            }
+
         /// @returns The strings that are a printf() command that only formats one number.\n
         ///     It is simpler to use std::to_string() variants to avoid potentially dangerous
         ///     printf() calls.
@@ -1410,6 +1418,7 @@ namespace i18n_check
         std::vector<string_info> m_article_issue_strings;
         std::vector<string_info> m_deprecated_macros;
         std::vector<string_info> m_unencoded_strings;
+        std::vector<string_info> m_escaped_unicode_strings;
         std::vector<string_info> m_printf_single_numbers;
         std::vector<string_info> m_ids_assigned_number;
         std::vector<string_info> m_duplicates_value_assigned_to_ids;

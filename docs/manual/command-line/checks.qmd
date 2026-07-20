@@ -97,6 +97,9 @@ Check for strings containing extended ASCII characters that are not encoded.
 
 This is turned off by default.
 
+When this check is turned off, *Quneiform* instead checks for the opposite situation: strings that contain an escaped Unicode sequence (e.g., `\uXXXX`, `\UXXXXXXXX`, `\xHH`) that could simply be written as a literal UTF-8 character.
+This is reported under the `escapedUnicode` warning ID.
+
 - `printfSingleNumber`
 
 Check for `printf()`-like functions being used to just format a number.

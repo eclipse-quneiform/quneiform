@@ -185,6 +185,9 @@ loaded by your application for integration testing.
                             It is recommended to save without the file signature for
                             best compiler portability.
   unencodedExtASCII:        Check for strings containing extended ASCII characters that are not encoded.
+                            This is turned off by default. When it is off, strings containing an
+                            escaped Unicode sequence (e.g., \uXXXX) that could simply be a literal
+                            UTF-8 character are reported instead (as "escapedUnicode").
   printfSingleNumber:       Check for printf()-like functions being used to just format a number.
   dupValAssignedToIds:      Check for the same value being assigned to different ID variables.
   numberAssignedToId:       Check for ID variables being assigned a hard-coded number.

@@ -442,6 +442,8 @@ namespace i18n_check
                 << (((m_cpp->get_style() & check_unencoded_ext_ascii) != 0) ?
                         L"unencodedExtASCII\n" :
                         L"")
+                << (((m_cpp->get_style() & check_unencoded_ext_ascii) == 0) ? L"escapedUnicode\n" :
+                                                                              L"")
                 << (((m_cpp->get_style() & check_printf_single_number) != 0) ?
                         L"printfSingleNumber\n" :
                         L"")
@@ -1056,6 +1058,15 @@ namespace i18n_check
                        << _(L"String contains extended ASCII characters that should be encoded. "
                             "Recommended change: '")
                        << encodingRecommendations.str() << L"'\"\t[unencodedExtASCII]\n";
+                }
+
+            for (const auto& val : sourceParser->get_escaped_unicode_strings())
+                {
+                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
+                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\""
+                       << _(L"String contains an escaped Unicode character sequence. "
+                            "Prefer using the literal UTF-8 character instead.")
+                       << L"\"\t[escapedUnicode]\n";
                 }
 
             for (const auto& val : sourceParser->get_trailing_spaces())

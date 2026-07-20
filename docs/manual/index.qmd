@@ -63,7 +63,10 @@ The command line and GUI versions provide the following checks:
   (It is recommended that files be UTF-8 encoded for portability between compilers.)
 - Strings that contain extended ASCII characters that are not encoded.
   ("Danke schön" instead of "Danke sch\\U000000F6n".)<br />
-  Encoding extended ASCII characters is recommended for best portability between compilers.
+  Encoding extended ASCII characters is recommended for best portability between compilers.<br />
+  This check is turned off by default.
+  When it is off, *Quneiform* instead checks for the opposite situation: strings with an escaped Unicode sequence that could simply be written as a literal UTF-8 character.
+  For example, "Danke sch\\U000000F6n" instead of "Danke schön" will be reported as an issue.
 - UTF-8 encoded files which start with a BOM/UTF-8 signature.<br />
   It is recommended to save without the file signature for best compiler portability.
 - `printf()`-like functions being used to just format an integer to a string.<br />

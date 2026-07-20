@@ -343,6 +343,7 @@ UTF-8 is recommended for compiler portability.
 It is recommended to save without the file signature for best compiler portability.
 
 **Unencoded extended ASCII characters**: select this to check for strings containing extended ASCII characters that are not encoded.
+When this is unchecked, *Quneiform* instead checks for the opposite situation: strings containing an escaped Unicode sequence (e.g., `\uXXXX`) that could simply be written as a literal UTF-8 character.
 
 **Trailing spaces**: select this to check for trailing spaces at the end of each line.
 

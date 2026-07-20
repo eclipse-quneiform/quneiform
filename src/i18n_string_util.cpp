@@ -362,4 +362,14 @@ namespace i18n_string_util
             ++i;
             }
         }
+
+    //--------------------------------------------------
+    bool contains_escaped_unicode_value(std::wstring_view str)
+        {
+        // "\uXXXX", "\UXXXXXXXX", or "\xXX"/"\xXXXX" formats
+        static const std::wregex escapedUnicodeRegex{
+            LR"(\\(u[[:xdigit:]]{4}|U[[:xdigit:]]{8}|x[[:xdigit:]]{2}([[:xdigit:]]{2})?))"
+        };
+        return std::regex_search(str.cbegin(), str.cend(), escapedUnicodeRegex);
+        }
     } // namespace i18n_string_util

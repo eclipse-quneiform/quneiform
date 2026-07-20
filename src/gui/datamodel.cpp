@@ -199,6 +199,7 @@ void I18NResultsTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& it
         else if (node->m_warningId == L"[nonUTF8File]" ||
                  node->m_warningId == L"[UTF8FileWithBOM]" ||
                  node->m_warningId == L"[unencodedExtASCII]" ||
+                 node->m_warningId == L"[escapedUnicode]" ||
                  node->m_warningId == L"[trailingSpaces]" || node->m_warningId == L"[tabs]" ||
                  node->m_warningId == L"[wideLine]" ||
                  node->m_warningId == L"[commentMissingSpace]")

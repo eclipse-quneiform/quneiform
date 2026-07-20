@@ -925,6 +925,44 @@ TEST_CASE("Extended ASCII in source", "[cpp][i18n]")
         }
     }
 
+TEST_CASE("Escaped Unicode in source", "[cpp][i18n]")
+    {
+    SECTION("Default style warns about escaped Unicode")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(bool MainWindow::importProject()
+{
+    if (true)
+    {
+        QMessageBox::critical(this, tr("Caf\xe9"), tr("Enter your \x82 code"), QMessageBox::Ok);
+        return false;
+    }
+})";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_escaped_unicode_strings().size() == 2);
+        CHECK(cpp.get_unencoded_ext_ascii_strings().size() == 0);
+        }
+
+    SECTION("check_unencoded_ext_ascii enabled scans raw characters instead")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_unencoded_ext_ascii);
+        const wchar_t* code = LR"(bool MainWindow::importProject()
+{
+    if (true)
+    {
+        QMessageBox::critical(this, tr("Błąd"), tr("Enter your \xe9 code"), QMessageBox::Ok);
+        return false;
+    }
+})";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_unencoded_ext_ascii_strings().size() == 1);
+        CHECK(cpp.get_escaped_unicode_strings().size() == 0);
+        }
+    }
+
 TEST_CASE("Deprecated functions & macros", "[cpp][i18n]")
     {
     SECTION("Functions")

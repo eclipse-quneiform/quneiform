@@ -13,6 +13,8 @@
 
 #include "convert_string_dlg.h"
 #include <algorithm>
+#include <cwchar>
+#include <cwctype>
 #include <wx/valgen.h>
 
 //-------------------------------------------------------------
@@ -64,11 +66,11 @@ void ConvertStringDlg::CreateControls()
     functionComboSzr->Add(new wxStaticText(this, wxID_STATIC, _(L"Convert:")),
                           wxSizerFlags{}.CenterVertical());
 
-    const wxArrayString choices = { _(L"7-bit numbers to full-width numbers"),
-                                    _(L"7-bit numbers to Devanagari numbers"),
-                                    _(L"Full-width numbers to 7-bit numbers"),
-                                    _(L"Devanagari numbers to 7-bit numbers"),
-                                    _(L"Encode extended ASCII characters") };
+    const wxArrayString choices = {
+        _(L"7-bit numbers to full-width numbers"), _(L"7-bit numbers to Devanagari numbers"),
+        _(L"Full-width numbers to 7-bit numbers"), _(L"Devanagari numbers to 7-bit numbers"),
+        _(L"Encode extended ASCII characters"),    _(L"Decode extended ASCII characters")
+    };
 
     functionComboSzr->Add(new wxChoice(this, ID_SELECTIONS, wxDefaultPosition, wxDefaultSize,
                                        choices, 0, wxGenericValidator(&m_selectedConversion)),
@@ -148,6 +150,61 @@ void ConvertStringDlg::OnTextChanged([[maybe_unused]] wxCommandEvent& event)
                 }
             }
         tempStr = std::move(encoded);
+        }
+    else if (m_selectedConversion == 5)
+        {
+        // reads up to [maxDigits] hex digits starting at [start]; returns the number consumed
+        const auto readHexDigits = [&tempStr](const size_t start, const size_t maxDigits)
+        {
+            size_t count{ 0 };
+            while (count < maxDigits && start + count < tempStr.size() &&
+                   std::iswxdigit(tempStr[start + count]) != 0)
+                {
+                ++count;
+                }
+            return count;
+        };
+
+        std::wstring decoded;
+        decoded.reserve(tempStr.size());
+
+        size_t i{ 0 };
+        while (i < tempStr.size())
+            {
+            // "\Uxxxxxxxx" (fixed 8 hex digits)
+            if (tempStr[i] == L'\\' && tempStr.compare(i + 1, 1, L"U") == 0 &&
+                readHexDigits(i + 2, 8) == 8)
+                {
+                decoded.push_back(static_cast<wchar_t>(
+                    std::wcstoul(tempStr.substr(i + 2, 8).c_str(), nullptr, 16)));
+                i += 10;
+                continue;
+                }
+            // "\uxxxx" (fixed 4 hex digits)
+            if (tempStr[i] == L'\\' && tempStr.compare(i + 1, 1, L"u") == 0 &&
+                readHexDigits(i + 2, 4) == 4)
+                {
+                decoded.push_back(static_cast<wchar_t>(
+                    std::wcstoul(tempStr.substr(i + 2, 4).c_str(), nullptr, 16)));
+                i += 6;
+                continue;
+                }
+            // "\xXX" (1-2 hex digits, byte range)
+            if (tempStr[i] == L'\\' && tempStr.compare(i + 1, 1, L"x") == 0)
+                {
+                const size_t digitCount = readHexDigits(i + 2, 2);
+                if (digitCount > 0)
+                    {
+                    decoded.push_back(static_cast<wchar_t>(
+                        std::wcstoul(tempStr.substr(i + 2, digitCount).c_str(), nullptr, 16)));
+                    i += 2 + digitCount;
+                    continue;
+                    }
+                }
+            decoded.push_back(tempStr[i]);
+            ++i;
+            }
+        tempStr = std::move(decoded);
         }
 
     m_outputTextCtrl->SetValue(tempStr);
