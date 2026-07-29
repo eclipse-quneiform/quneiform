@@ -98,7 +98,9 @@ class ConvertStringDlg final : public wxDialog
 
     wxString m_input;
 
-    int m_selectedConversion{ 0 };
+    // static so that the last selection is remembered across dialog instances
+    // for the duration of the program
+    static inline int m_selectedConversion{ 0 };
     };
 
     /** @}*/

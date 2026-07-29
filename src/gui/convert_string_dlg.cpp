@@ -175,8 +175,22 @@ void ConvertStringDlg::OnTextChanged([[maybe_unused]] wxCommandEvent& event)
             if (tempStr[i] == L'\\' && tempStr.compare(i + 1, 1, L"U") == 0 &&
                 readHexDigits(i + 2, 8) == 8)
                 {
-                decoded.push_back(static_cast<wchar_t>(
-                    std::wcstoul(tempStr.substr(i + 2, 8).c_str(), nullptr, 16)));
+                const auto codePoint = static_cast<std::uint32_t>(
+                    std::wcstoul(tempStr.substr(i + 2, 8).c_str(), nullptr, 16));
+                // encode as a UTF-16 surrogate pair when wchar_t is 16-bit
+                // (e.g., Windows) and the code point is outside the BMP
+                if constexpr (sizeof(wchar_t) == 2)
+                    {
+                    if (codePoint > 0xFFFF)
+                        {
+                        const std::uint32_t adjusted = codePoint - 0x10000;
+                        decoded.push_back(static_cast<wchar_t>(0xD800 + (adjusted >> 10)));
+                        decoded.push_back(static_cast<wchar_t>(0xDC00 + (adjusted & 0x3FF)));
+                        i += 10;
+                        continue;
+                        }
+                    }
+                decoded.push_back(static_cast<wchar_t>(codePoint));
                 i += 10;
                 continue;
                 }
