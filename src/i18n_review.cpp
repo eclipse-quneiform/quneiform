@@ -599,6 +599,8 @@ namespace i18n_check
             std::wregex(LR"(#[a-zA-Z0-9\-]{3,})"),
             // CSS
             std::wregex(LR"((background[-])?color[:] rgb[(].*)"),
+            std::wregex(
+                LR"(<style>[\d\D]*)"), // \d\D is a workaround to get ALL chars (including newlines)
             std::wregex(LR"(a[:](?:hover|link))", std::regex_constants::icase),
             std::wregex(LR"((?:width|height)[[:space:]]*\:[%]?[a-z]{2,4};)",
                         std::regex_constants::icase),
@@ -2257,6 +2259,7 @@ namespace i18n_check
             variableInfo.m_type != L"rgbRecord" && variableInfo.m_type != L"LPCTSTR" &&
             variableInfo.m_type != L"CDialog" && variableInfo.m_type != L"string_view" &&
             variableInfo.m_type != L"wstring_view" && variableInfo.m_type != L"LanguageInfo" &&
+            variableInfo.m_type != L"readability::readability_test" &&
             variableInfo.m_type != L"MessageParameters")
             {
             log_message(variableInfo.m_type, L"New variable type detected.", quotePosition);
@@ -2610,15 +2613,6 @@ namespace i18n_check
                 return std::make_pair(true, strToReview.length());
                 }
 
-            constexpr size_t MIN_MESSAGE_LENGTH{ 200 };
-            // if we know it has at least one word (and spaces) at this point,
-            // then it being more than 200 characters means that it probably is
-            // a real user-message (not an internal string)
-            if (strToReview.length() > MIN_MESSAGE_LENGTH)
-                {
-                return std::make_pair(false, strToReview.length());
-                }
-
             if (m_untranslatable_exceptions.contains(strToReview))
                 {
                 return std::make_pair(false, strToReview.length());
@@ -2638,6 +2632,17 @@ namespace i18n_check
                     return std::make_pair(true, strToReview.length());
                     }
                 }
+
+            constexpr size_t MIN_MESSAGE_LENGTH{ 200 };
+            // if we know it has at least one word (and spaces) at this point,
+            // and it doesn't match any known code/markup pattern above,
+            // then it being more than 200 characters means that it probably is
+            // a real user-message (not an internal string)
+            if (strToReview.length() > MIN_MESSAGE_LENGTH)
+                {
+                return std::make_pair(false, strToReview.length());
+                }
+
             return std::make_pair((is_font_name(strToReview.c_str()) ||
                                    is_file_extension(strToReview.c_str()) ||
                                    i18n_string_util::is_file_address(strToReview)),

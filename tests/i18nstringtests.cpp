@@ -106,6 +106,22 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK(reviewer.is_untranslatable_string(L"#somethingElse", false).first);
     // CSS
     CHECK(reviewer.is_untranslatable_string(L"height:%dpx;", false).first);
+    // long, multiline embedded stylesheet (should not be dismissed just because
+    // it is longer than the "probably a real message" length heuristic)
+    CHECK(reviewer
+              .is_untranslatable_string(
+                  LR"(<style>
+.hl-swatch { display: inline-block; width: 1.4em; height: 0.9em; margin-right: 0.3em;
+    border: 1px solid var(--border-color); border-radius: 3px; vertical-align: middle; }
+.legend-card { font-size: 0.9em; width: fit-content; max-width: 100%;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease; }
+.legend-card:hover { border-color: color-mix(in srgb, var(--banner-color) 50%, CanvasText);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+.legend-card .report-banner-content { line-height: 1.5; }
+)",
+                  false)
+              .first);
     // formatted percentage symbol should be translatable
     CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%% (%s)", false).first);
     CHECK_FALSE(reviewer.is_untranslatable_string(L"%s%%\n(%s)", false).first);
