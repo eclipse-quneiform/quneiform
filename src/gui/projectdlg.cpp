@@ -1224,7 +1224,8 @@ void NewProjectDialog::CreateControls()
                          wxGBPosition(currentRow++, 1), wxGBSpan{});
 
             gbSizer->Add(new wxCheckBox(formattingOptionsSizer->GetStaticBox(), wxID_ANY,
-                                        _(L"Unencoded extended ASCII characters"),
+                                        _(L"Unencoded extended ASCII characters "
+                                          "(recommended only for legacy applications)"),
                                         wxDefaultPosition, wxDefaultSize, 0,
                                         wxGenericValidator(&m_unencodedExtASCII)),
                          wxGBPosition(currentRow, 0), wxGBSpan{});

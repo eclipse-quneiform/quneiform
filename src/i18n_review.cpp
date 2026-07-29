@@ -2260,6 +2260,7 @@ namespace i18n_check
             variableInfo.m_type != L"CDialog" && variableInfo.m_type != L"string_view" &&
             variableInfo.m_type != L"wstring_view" && variableInfo.m_type != L"LanguageInfo" &&
             variableInfo.m_type != L"readability::readability_test" &&
+            variableInfo.m_type != L"string_util::string_tokenize" &&
             variableInfo.m_type != L"MessageParameters")
             {
             log_message(variableInfo.m_type, L"New variable type detected.", quotePosition);
