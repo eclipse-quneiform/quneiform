@@ -100,7 +100,7 @@ class ConvertStringDlg final : public wxDialog
 
     // static so that the last selection is remembered across dialog instances
     // for the duration of the program
-    static inline int m_selectedConversion{ 0 };
+    inline static int m_selectedConversion{ 0 };
     };
 
     /** @}*/
