@@ -202,7 +202,18 @@ namespace i18n_check
         L"MingLiU",
         L"MS PGothic",
         L"Gulim",
-        L"NSimSun"
+        L"NSimSun",
+        L"Brush Script MT",
+        L"Lucida Handwriting",
+        L"Snell Roundhand",
+        L"Apple Chancery",
+        L"Old English Text MT",
+        L"Cloister Black",
+        L"Blackadder ITC",
+        L"Copperplate Gothic Bold",
+        L"Engravers MT",
+        L"Book Antiqua",
+        L"Palatino Linotype"
     };
 
     // documents
