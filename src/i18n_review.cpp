@@ -95,6 +95,10 @@ namespace i18n_check
         std::regex_constants::icase
     };
 
+    const std::wregex i18n_review::m_generic_xml_markup_regex{
+        LR"([^[:alnum:]<]*<(?=[\d\D]*[=:\/<])[\d\D]*>[[:space:]]*)"
+    };
+
     // not really XML/HTMl ("<No Name Specified>")
     const std::wregex i18n_review::m_not_xml_element_regex{
         LR"(<\/?(([a-zA-Z0-9]){2,}\s+){1,}([a-zA-Z0-9]){2,}[[:punct:]]?\/?>)",
@@ -747,8 +751,9 @@ namespace i18n_check
             std::wregex(LR"([.]DS_Store)"),           // macOS file
             // file name (supports multiple extensions)
             std::wregex(LR"([\\/]?[[:alnum:]_~!@#$%&;',+={}().^\[\]\-]+([.][a-zA-Z0-9]{1,4})+)"),
-            // ultra simple relative file path (e.g., "shaders/player1.vert")
-            std::wregex(LR"(([[:alnum:]_-]+[\\/]){1,2}[[:alnum:]_-]+([.][a-zA-Z0-9]{1,4})+)"),
+            // ultra simple relative file path (e.g., "shaders/player1.vert");
+            // basename can be empty for a dotfile (e.g., "_rels/.rels")
+            std::wregex(LR"(([[:alnum:]_-]+[\\/]){1,2}[[:alnum:]_-]*([.][a-zA-Z0-9]{1,4})+)"),
             std::wregex(LR"(\*[.][a-zA-Z0-9]{1,5})"), // wild card file extension
             // UNIX or web folder (needs at least 1 folder in path)
             std::wregex(LR"((\/{1,2}[[:alnum:]_~!@#$%&;',+={}().^\[\]\-]+){2,}/?)"),
@@ -2280,6 +2285,16 @@ namespace i18n_check
         // For large string values, a 1024 substring will suffice for classifying it.
         // This is more optimal and will prevent memory exhaustion with regex comparisons.
         std::wstring clippedValue{ value.length() >= 1024 ? value.substr(0, 1024) : value };
+        // Avoid leaving a dangling, unclosed tag at the end of the clip, which would
+        // otherwise be mistaken for real text and make the whole value look translatable.
+        if (value.length() >= 1024)
+            {
+            if (const auto lastTagEnd{ clippedValue.find_last_of(L'>') };
+                lastTagEnd != std::wstring::npos && lastTagEnd + 1 < clippedValue.length())
+                {
+                clippedValue.erase(lastTagEnd + 1);
+                }
+            }
         if (get_ignored_variable_types().contains(variableInfo.m_type))
             {
             m_internal_strings.emplace_back(
@@ -2486,7 +2501,8 @@ namespace i18n_check
                 std::regex_match(strToReview, m_html_regex) ||
                 std::regex_match(strToReview, m_html_element_with_content_regex) ||
                 std::regex_match(strToReview, m_html_tag_regex) ||
-                std::regex_match(strToReview, m_html_tag_unicode_regex))
+                std::regex_match(strToReview, m_html_tag_unicode_regex) ||
+                std::regex_match(strToReview, m_generic_xml_markup_regex))
                 {
                 // it's really something like "<enter comment.>", which can be translatable
                 if (std::regex_match(strToReview, m_not_xml_element_regex))

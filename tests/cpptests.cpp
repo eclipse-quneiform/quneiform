@@ -1712,6 +1712,9 @@ TEST_CASE("File Paths", "[cpp]")
         CHECK(cpp.is_untranslatable_string(str, false).first);
         str = L"resources\\shaders\\player1.vert";
         CHECK(cpp.is_untranslatable_string(str, false).first);
+        // dotfile with no basename (e.g., an OOXML relationship part)
+        str = L"_rels/.rels";
+        CHECK(cpp.is_untranslatable_string(str, false).first);
         // not really a file name, the ending is deceptively like a file extension
         str = L"The maximum number of notes must be in the range 1..128";
         CHECK_FALSE(cpp.is_untranslatable_string(str, false).first);
@@ -2521,6 +2524,22 @@ TEST_CASE("HTML", "[cpp]")
         CHECK(cpp.is_untranslatable_string(str = L"<ice> <ice>", false).first);
         CHECK(cpp.is_untranslatable_string(str = L"<unrecognized version=\"3\">", false).first);
         }
+
+    SECTION("OOXML namespaced elements")
+        {
+        cpp_i18n_review cpp(false);
+        std::wstring str;
+        CHECK(cpp.is_untranslatable_string(
+            str = LR"(<mc:AlternateContent xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"><mc:Choice xmlns:p159=\"http://schemas.microsoft.com/office/powerpoint/2015/09/main\" Requires=\"p159\"><p:transition%s><p159:morph option=\"byObject\"/></p:transition></mc:Choice><mc:Fallback><p:transition%s><p:fade/></p:transition></mc:Fallback></mc:AlternateContent>)",
+            false).first);
+        CHECK(cpp.is_untranslatable_string(
+            str = LR"(<a:off x=\"%s\" y=\"%s\"/><a:ext cx=\"%s\" cy=\"%s\"/>)", false).first);
+        CHECK(cpp.is_untranslatable_string(
+            str = LR"(<a:solidFill><a:srgbClr val=\"%s\"/></a:solidFill>)", false).first);
+        CHECK(cpp.is_untranslatable_string(
+            str = LR"(<a:solidFill><a:srgbClr val=\"%s\"><a:alpha val=\"%d\"/></a:srgbClr></a:solidFill>)",
+            false).first);
+        }
     }
 
 TEST_CASE("String in CTORs", "[cpp]")
@@ -2993,6 +3012,24 @@ if (std::regex_match(str, m_html_regex) ||
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         REQUIRE(cpp.get_wide_lines().size() == 1);
         CHECK(cpp.get_wide_lines()[0].m_usage.m_value == L"122");
+        }
+
+    SECTION("XML variable value longer than internal clip length")
+        {
+        cpp_i18n_review cpp(false);
+        std::wstring xmlContent{
+            L"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"yes\\\"?>"
+        };
+        for (size_t i = 0; i < 60; ++i)
+            {
+            xmlContent += L"<a:off x=\\\"0\\\" y=\\\"0\\\"/><a:ext cx=\\\"0\\\" cy=\\\"0\\\"/>";
+            }
+        const std::wstring code{ L"const wchar_t* NOTES_MASTER_XML = L\"" + xmlContent + L"\";" };
+        REQUIRE(code.length() > 1024);
+        cpp(code.c_str(), L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        REQUIRE(cpp.get_internal_strings().size() == 1);
         }
     }
 
