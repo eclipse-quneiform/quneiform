@@ -311,8 +311,13 @@ namespace i18n_string_util
         {
         for (size_t i = 0; i < str.length(); /* in loop*/)
             {
-            // '\' that is not escaped by a proceeding '\'
-            if (str[i] == L'\\' && (i == 0 || str[(i - 1)] != L'\\'))
+            // '\' that is not itself escaped by a preceding, odd-length run of '\'
+            size_t precedingBackslashes{ 0 };
+            for (size_t j = i; j > 0 && str[j - 1] == L'\\'; --j)
+                {
+                ++precedingBackslashes;
+                }
+            if (str[i] == L'\\' && (precedingBackslashes % 2) == 0)
                 {
                 // "\u266F" format
                 if (i + 5 < str.length() && str[i + 1] == L'u' &&

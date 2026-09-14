@@ -59,6 +59,15 @@ TEST_CASE("Text decode", "[decode]")
         remove_escaped_unicode_values(str);
         CHECK(str == L"F\\u2H6f/G\\u266");
         }
+
+    SECTION("Escaped Backslash Before Real Escape")
+        {
+        // an escaped backslash pair, followed by a real hex escape (Pound Sterling);
+        // the backslash pair must not make that hex escape look escaped too.
+        std::wstring str = LR"(\\\xA3)";
+        remove_escaped_unicode_values(str);
+        CHECK(str == LR"(\\    )");
+        }
     }
 // NOLINTEND
 // clang-format on
