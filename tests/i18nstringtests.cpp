@@ -205,6 +205,33 @@ TEST_CASE("i18n string utils", "[i18nstringutil]")
         }
     }
 
+TEST_CASE("Replace escaped control chars", "[i18nstringutil]")
+    {
+    SECTION("Simple")
+        {
+        // the backslash and the 'n' are each replaced with a space (not collapsed to one)
+        std::wstring str{ LR"(Hello\nworld)" };
+        replace_escaped_control_chars(str);
+        CHECK(str == L"Hello  world");
+        }
+    SECTION("Escaped backslash before real escape")
+        {
+        // "\\\n" is an escaped backslash ("\\") followed by a real "\n" escape --
+        // the "\n" must still be converted, even though it's directly preceded
+        // by a backslash pair.
+        std::wstring str{ LR"(Hello\\\nworld)" };
+        replace_escaped_control_chars(str);
+        CHECK(str == LR"(Hello\\  world)");
+        }
+    SECTION("Escaped backslash only")
+        {
+        // "\\" on its own is just an escaped backslash; there is no "\n" here to convert.
+        std::wstring str{ LR"(Hello\\nworld)" };
+        replace_escaped_control_chars(str);
+        CHECK(str == LR"(Hello\\nworld)");
+        }
+    }
+
 TEST_CASE("File Paths", "[i18nstringutil]")
     {
     SECTION("Null")

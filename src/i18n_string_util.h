@@ -267,9 +267,20 @@ namespace i18n_string_util
         {
         for (size_t i = 0; i < str.length(); ++i)
             {
-            if (str[i] == L'\\' &&
-                (str[i + 1] == L'n' || str[i + 1] == L'r' || str[i + 1] == L't') &&
-                (i == 0 || str[i - 1] != L'\\'))
+            if (str[i] != L'\\')
+                {
+                continue;
+                }
+            // Count the backslashes immediately before this one. An odd count means this
+            // backslash is itself escaped (the second half of a "\\" pair), not the start
+            // of a "\n"/"\r"/"\t" escape sequence.
+            size_t precedingBackslashes{ 0 };
+            for (size_t j = i; j > 0 && str[j - 1] == L'\\'; --j)
+                {
+                ++precedingBackslashes;
+                }
+            if ((precedingBackslashes % 2) == 0 &&
+                (str[i + 1] == L'n' || str[i + 1] == L'r' || str[i + 1] == L't'))
                 {
                 str[i] = str[i + 1] = L' ';
                 }
