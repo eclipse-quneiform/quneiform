@@ -3648,8 +3648,14 @@ namespace i18n_check
                 {
                 return { false, std::wstring{}, std::wstring::npos, std::wstring::npos };
                 }
-            // skip escaped quotes
-            if (idEndPos > 0 && poCatalogEntry[idEndPos - 1] == L'\\')
+            // Skip escaped quotes: an odd run of backslashes before the quote escapes it,
+            // an even run (e.g., a msgid ending in a real, escaped backslash "\\") doesn't.
+            size_t precedingBackslashes{ 0 };
+            for (size_t j = idEndPos; j > 0 && poCatalogEntry[j - 1] == L'\\'; --j)
+                {
+                ++precedingBackslashes;
+                }
+            if ((precedingBackslashes % 2) != 0)
                 {
                 ++idEndPos;
                 continue;

@@ -634,6 +634,26 @@ msgstr "%d%d ﾂｱ 0x%02x｡")";
 	CHECK(issues == 1);
 	}
 
+TEST_CASE("Escaped Backslash At String End", "[po][l10n]")
+	{
+	// gettext escapes a literal backslash as "\\", so a msgid/msgstr ending in a real
+	// backslash (e.g., a Windows path) closes with "\\" directly before the closing quote.
+	// That must not be mistaken for an escaped closing quote.
+	po_file_review po(false);
+	const wchar_t* code = LR"(
+
+#: ../src/common/file.cpp:604
+msgid "C:\\Program Files\\"
+msgstr "C:\\Archivos de programa\\")";
+
+	po(code, L"");
+	po.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+
+	REQUIRE(po.get_catalog_entries().size() == 1);
+	CHECK(po.get_catalog_entries()[0].second.m_source == LR"(C:\\Program Files\\)");
+	CHECK(po.get_catalog_entries()[0].second.m_translation == LR"(C:\\Archivos de programa\\)");
+	}
+
 TEST_CASE("Printf c-format positionals", "[po][l10n]")
 	{
 	SECTION("C-format positionals")
