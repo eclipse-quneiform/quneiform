@@ -2009,9 +2009,14 @@ namespace i18n_check
 
         if (!variableInfo.m_name.empty())
             {
-            process_variable(
-                variableInfo,
-                std::wstring_view{ currentTextPos, static_cast<size_t>(quoteEnd - currentTextPos) },
+            // Adjacent string literals (e.g., a long value split across multiple lines) are
+            // scanned as a single quote here, but the raw text in between still contains the
+            // closing/opening quotes (and possibly an 'L' prefix) of each fragment.
+            // Collapse those out first so that classification sees the actual joined string value,
+            // rather than being thrown off by that leftover punctuation.
+            process_variable(variableInfo,
+                             collapse_multipart_string(
+                                 std::wstring{ currentTextPos, quoteEnd - currentTextPos }),
                 (currentTextPos - m_file_start));
             }
         else if (!functionName.empty())
@@ -2689,8 +2694,9 @@ namespace i18n_check
     std::wstring i18n_review::collapse_multipart_string(std::wstring str) const
         {
         // for strings that span multiple lines, remove the start/end quotes and newlines
-        // between them, combining this into one string
-        const std::wregex multilineRegex(LR"(([^\\])("[\s]+"))");
+        // between them, combining this into one string; the next fragment may also be
+        // prefixed with a wide/UTF encoding-prefix (e.g., L"...", u8"...", u"...", U"...")
+        const std::wregex multilineRegex(LR"(([^\\])("[\s]+(?:u8|[LuU])?"))");
         str = std::regex_replace(str, multilineRegex, L"$1");
         // replace any doubled-up quotes with single
         // (C# does this for raw strings)

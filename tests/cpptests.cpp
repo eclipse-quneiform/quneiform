@@ -3031,6 +3031,24 @@ if (std::regex_match(str, m_html_regex) ||
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         REQUIRE(cpp.get_internal_strings().size() == 1);
         }
+
+    SECTION("OOXML document properties template with printf placeholders")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(const wchar_t* appProps =
+            L"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+            L"<Properties "
+            L"xmlns=\"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties\" "
+            L"xmlns:vt=\"http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes\">"
+            L"<Application>%s</Application><Slides>%zu</Slides><ScaleCrop>false</ScaleCrop>"
+            L"<LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc>"
+            L"<HyperlinksChanged>false</HyperlinksChanged>%s<AppVersion>16.0000</AppVersion>"
+            L"</Properties>";)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        REQUIRE(cpp.get_internal_strings().size() == 1);
+        }
     }
 
 TEST_CASE("Casing", "[cpp]")
