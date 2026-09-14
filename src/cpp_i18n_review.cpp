@@ -270,7 +270,23 @@ namespace i18n_check
                 // find the end of the string now and feed it into the system
                 std::advance(cppText, 1);
                 wchar_t* end = cppText;
-                if (isRawString)
+                // A C++ raw string is R"delimiter(content)delimiter", where the delimiter tag
+                // can be empty or a name up to 16 characters. Read it and match it exactly at
+                // the close, rather than assuming it's empty -- a named delimiter is often
+                // chosen specifically so the content can contain ")\"" without ending the string
+                // early.
+                std::wstring rawDelimiter;
+                if (isRawString && currentRawStringMarker == L'R')
+                    {
+                    if (wchar_t * parenPos{ std::wcschr(cppText, L'(') }; parenPos != nullptr)
+                        {
+                        rawDelimiter.assign(cppText, static_cast<size_t>(parenPos - cppText));
+                        cppText = std::next(parenPos);
+                        }
+                    const std::wstring closingSequence{ L")" + rawDelimiter + L"\"" };
+                    end = std::wcsstr(cppText, closingSequence.c_str());
+                    }
+                else if (isRawString)
                     {
                     cppText = raw_step_into_string(cppText, currentRawStringMarker);
                     end = find_raw_string_end(cppText, currentRawStringMarker);
@@ -421,8 +437,16 @@ namespace i18n_check
                 // if we found the end of the quote
                 if (end != nullptr && end < endSentinel)
                     {
-                    const wchar_t* nextChar = std::next(
-                        end, (isRawString ? get_raw_step_size(currentRawStringMarker) + 1 : 1));
+                    // number of characters making up the closing sequence (e.g., ")\"" for an
+                    // empty-delimiter raw string, or ")raw\"" for a named one)
+                    const ptrdiff_t closingSize{
+                        isRawString ? (currentRawStringMarker == L'R' ?
+                                           static_cast<ptrdiff_t>(rawDelimiter.length() + 2) :
+                                           static_cast<ptrdiff_t>(
+                                               get_raw_step_size(currentRawStringMarker) + 1)) :
+                                      1
+                    };
+                    const wchar_t* nextChar = std::next(end, closingSize);
                     while (std::next(nextChar) < endSentinel && (std::iswspace(*nextChar) != 0))
                         {
                         ++nextChar;
@@ -430,8 +454,16 @@ namespace i18n_check
                     process_quote(cppText, end, functionVarNamePos, functionName, variableInfo,
                                   deprecatedMacroEncountered, parameterPosition, *nextChar == L',');
                     // closing quote was just cleared; now, clear the opening one
-                    if (isRawString && std::prev(cppText, 2) >= m_file_start &&
-                        *std::prev(cppText) == L'(' && *std::prev(cppText, 2) == L'\"')
+                    if (isRawString && currentRawStringMarker == L'R')
+                        {
+                        const auto openingSize{ static_cast<ptrdiff_t>(rawDelimiter.length() + 2) };
+                        if (std::prev(cppText, openingSize) >= m_file_start)
+                            {
+                            clear_section(std::prev(cppText, openingSize), cppText);
+                            }
+                        }
+                    else if (isRawString && std::prev(cppText, 2) >= m_file_start &&
+                             *std::prev(cppText) == L'(' && *std::prev(cppText, 2) == L'\"')
                         {
                         *std::prev(cppText, 2) = L' ';
                         *std::prev(cppText) = L' ';
@@ -440,8 +472,7 @@ namespace i18n_check
                         {
                         *std::prev(cppText) = L' ';
                         }
-                    cppText = std::next(
-                        end, (isRawString ? get_raw_step_size(currentRawStringMarker) + 1 : 1));
+                    cppText = std::next(end, closingSize);
                     if (cppText >= endSentinel)
                         {
                         break;

@@ -360,6 +360,23 @@ TEST_CASE("Raw Strings", "[cpp][i18n]")
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         }
+    SECTION("Raw String With Custom Delimiter")
+        {
+        cpp_i18n_review cpp(false);
+        // The "raw" delimiter is used here (rather than the plain R"(...)" form) because
+        // the content below contains a bare ")\"" sequence that must NOT be treated as the
+        // end of the string -- only the matching ")raw\"" delimiter should close it. This is
+        // exactly why real code uses named delimiters (embedding HTML/CSS/JSON that itself
+        // contains ")\"").
+        const wchar_t* code = LR"TESTCODE(wxString html = _DT(LR"raw(before )" after)raw");
+html += L"</div></section>";)TESTCODE";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_marked_as_non_localizable_strings().size() == 1);
+        CHECK(cpp.get_marked_as_non_localizable_strings()[0].m_string == std::wstring{ L"before )\" after" });
+        REQUIRE(cpp.get_internal_strings().size() == 1);
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_variableInfo.m_name == std::wstring{ L"html" });
+        }
     }
 
 TEST_CASE("QLabel", "[cpp][i18n][qt]")
@@ -3048,6 +3065,22 @@ if (std::regex_match(str, m_html_regex) ||
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         REQUIRE(cpp.get_internal_strings().size() == 1);
+        }
+
+    SECTION("HTML template split across wxString::Format argument literals")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(
+            html += wxString::Format(L"<div class='tile%s' data-type='%s' title='%s' tabindex='0'>"
+                                     L"<div class='tile-icon'><img src='%s' alt='' "
+                                     L"draggable='false'></div>"
+                                     L"<div class='tile-label'>%s</div></div>",
+                                     isDisabled ? L" disabled" : L"",
+                                     GalleryItemTypeToId(item.m_id), EscapeForHtml(tooltipText),
+                                     iconDataUri, EscapeForHtml(item.m_displayName));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         }
     }
 
