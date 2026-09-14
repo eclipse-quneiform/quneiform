@@ -239,7 +239,7 @@ namespace i18n_check
                     }
                 // step back over UTF-8 'u8' symbol
                 if (startPos > std::next(m_file_start) && *startPos == L'8' &&
-                    *std::prev(startPos) != L'u')
+                    *std::prev(startPos) == L'u')
                     {
                     std::advance(startPos, -2);
                     }

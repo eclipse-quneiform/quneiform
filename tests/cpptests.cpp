@@ -2262,6 +2262,20 @@ TEST_CASE("Variable Assignment", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::string");
         }
 
+    SECTION("Variable assignment with u8 string literal")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = L"std::string userMessage = u8\"Enter your ID.\")";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings().size() == 0);
+        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cpp.get_internal_strings().size() == 0);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"Enter your ID.");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"userMessage");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_variableInfo.m_type == L"std::string");
+        }
+
     SECTION("Variable assignment add")
         {
         cpp_i18n_review cpp(false);
