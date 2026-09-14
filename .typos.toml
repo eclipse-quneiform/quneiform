@@ -14,6 +14,7 @@ ommand = "ommand"
 tring = "tring"
 optin = "optin"
 Caf = "Caf"
+programa = "programa"
 
 [type.svg]
 extend-glob = ["*.svg"]
