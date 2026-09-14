@@ -25,3 +25,4 @@
 /installers/windows/output
 /installers/windows/release
 /gui/wxWidgets_lib
+/docs/manual/issues/.quarto/grviz-cache

@@ -32,8 +32,8 @@ When multiple strings are pieced together at runtime, this creates a concatenate
 Consider the following code sample:
 
 ```{Rcpp}
-#| include: true
-#| eval: false
+//| include: true
+//| eval: false
 
 wxString TOO_DIFFICULT_DESCRIPTION =
         _(L"Text is too difficult to be classified to a specific grade level because "
@@ -121,8 +121,8 @@ It is better to pass singular and plural variations to a pluralizing function in
 For example:
 
 ```{Rcpp}
-#| include: true
-#| eval: false
+//| include: true
+//| eval: false
 
 wxPLURAL("%zu item", "%zu item", items.size())
 ```
@@ -163,8 +163,8 @@ Consider the following example:
 
 ::: {.minipage data-latex="{\textwidth}"}
 ```{Rcpp}
-#| include: true
-#| eval: false
+//| include: true
+//| eval: false
 ...
 else if (selectedTest == _(L"Dolch Sight Words"))
     {
@@ -183,8 +183,8 @@ If any instance changes, however, then it will break not only localized products
 Consider the following example:
 
 ```{Rcpp}
-#| include: true
-#| eval: false
+//| include: true
+//| eval: false
 static wxString FormatClozeValuesLabel(const wxString& testName)
     {
     return testName + L" " + _(L"(predicted cloze scores)");
@@ -211,8 +211,8 @@ This will ensure that if this string needs to be changed or have context added t
 For example, this string could be returned from a common function:
 
 ```{Rcpp}
-#| include: true
-#| eval: false
+//| include: true
+//| eval: false
 static wxString GetPredClozeLabel()
     { return _(L"(predicted cloze scores)"); }
 ...
@@ -234,11 +234,13 @@ As it turns out, an application may be splitting this string into 10-character s
 
 ```{r}
 #| echo: false
-#| fig-format: png
 #| fig-height: 2
 #| fig-width: 2
 #| fig-align: center
 library(DiagrammeR)
+library(DiagrammeRsvg)
+library(rsvg)
+library(digest)
 
 words_graph <-
   create_graph() %>%
@@ -272,7 +274,7 @@ words_graph <-
             fillcolor = "orange"),
            to = c(1:3))
 
-render_graph(words_graph)
+render_grviz(render_graph(words_graph))
 ```
 
 Then, it will use each of these sections as a separate resource.
