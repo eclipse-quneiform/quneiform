@@ -1471,6 +1471,10 @@ namespace i18n_check
         std::vector<std::wregex> m_translatable_regexes;
 
       private:
+        void init_deprecated();
+        void init_untranslatables();
+        void init_internal_functions();
+
         [[nodiscard]]
         static std::wstring process_po_msg(std::wstring_view msg)
             {

@@ -313,7 +313,7 @@ namespace i18n_check
     };
 
     //--------------------------------------------------
-    i18n_review::i18n_review(const bool verbose) : m_verbose(verbose)
+    void i18n_review::init_deprecated()
         {
         m_deprecated_string_macros = {
             { L"wxT", _WXTRANS_WSTR(L"wxT() macro can be removed.") },
@@ -494,71 +494,11 @@ namespace i18n_check
             { L"wxConvLibc", _WXTRANS_WSTR(L"Relying on wxConvLibc can be unpredictable on some "
                                            "platforms. Prefer calling utf8_str() instead.") }
         };
+        }
 
-        if (verbose)
-            {
-            // not i18n related, just legacy wx functions that can be modernized
-            if (m_min_cpp_version >= 2011)
-                {
-                m_deprecated_string_functions.insert(
-                    { L"_STATIC_ASSERT",
-                      _WXTRANS_WSTR(L"Use static_assert() instead of _STATIC_ASSERT().") });
-                m_deprecated_string_functions.insert(
-                    { L"wxMEMBER_DELETE",
-                      _WXTRANS_WSTR(L"Use '= delete' instead of wxMEMBER_DELETE.") });
-                m_deprecated_string_functions.insert(
-                    { L"wxOVERRIDE",
-                      _WXTRANS_WSTR(L"Use override or final instead of wxOVERRIDE.") });
-                }
-            if (m_min_cpp_version >= 2017)
-                {
-                m_deprecated_string_functions.insert(
-                    { L"wxNODISCARD",
-                      _WXTRANS_WSTR(L"Use [[nodiscard]] instead of wxNODISCARD.") });
-                m_deprecated_string_functions.insert(
-                    { L"WXSIZEOF", _WXTRANS_WSTR(L"Use std::size() instead of WXSIZEOF().") });
-                m_deprecated_string_functions.insert(
-                    { L"wxUnusedVar",
-                      _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of wxUnusedVar.") });
-                m_deprecated_string_functions.insert(
-                    { L"WXUNUSED", _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of WXUNUSED().") });
-                m_deprecated_string_functions.insert(
-                    { L"Q_UNUSED", _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of Q_UNUSED().") });
-                }
-            m_deprecated_string_functions.insert(
-                { L"wxEXPAND",
-                  _WXTRANS_WSTR(L"Call wxSizer::Add() with a wxSizerFlags object using Expand() "
-                                "instead of wxEXPAND.") });
-            m_deprecated_string_functions.insert(
-                { L"wxGROW",
-                  _WXTRANS_WSTR(L"Call wxSizer::Add() with a wxSizerFlags object using Expand() "
-                                "instead of wxGROW.") });
-            m_deprecated_string_functions.insert(
-                { L"DECLARE_NO_COPY_CLASS",
-                  _WXTRANS_WSTR(L"Delete the copy CTOR and assignment operator "
-                                "instead of DECLARE_NO_COPY_CLASS.") });
-            m_deprecated_string_functions.insert(
-                { L"wxDECLARE_NO_COPY_CLASS",
-                  _WXTRANS_WSTR(L"Delete the copy CTOR and assignment operator instead of "
-                                "wxDECLARE_NO_COPY_CLASS.") });
-            m_deprecated_string_functions.insert(
-                { L"wxMin", _WXTRANS_WSTR(L"Use std::min() instead of wxMin().") });
-            m_deprecated_string_functions.insert(
-                { L"wxMax", _WXTRANS_WSTR(L"Use std::max() instead of wxMax().") });
-            m_deprecated_string_functions.insert(
-                { L"wxIsNan", _WXTRANS_WSTR(L"Use std::isnan() instead of wxIsNan().") });
-            m_deprecated_string_functions.insert(
-                { L"wxNOEXCEPT", _WXTRANS_WSTR(L"Use noexcept instead of wxNOEXCEPT.") });
-            m_deprecated_string_functions.insert(
-                { L"__WXMAC__", _WXTRANS_WSTR(L"Use __WXOSX__ instead of __WXMAC__.") });
-            m_deprecated_string_functions.insert(
-                { L"wxDIALOG_EX_METAL", _WXTRANS_WSTR(L"This style is deprecated; remove it.") });
-            }
-
-        m_translatable_regexes = { std::wregex(LR"(Q[0-9][FA]Y.*)"),
-                                   std::wregex(LR"(p\-(value|level)[s]?)"),
-                                   std::wregex(LR"([xyz]-(?:axis|axes))") };
-
+    //--------------------------------------------------
+    void i18n_review::init_untranslatables()
+        {
         m_untranslatable_regexes = {
             // nothing but numbers, punctuation, or control characters?
             std::wregex(LR"(([[:digit:][:space:][:punct:][:cntrl:]]|\\[rnt])+)"),
@@ -816,86 +756,11 @@ namespace i18n_check
             // image formats
             std::wregex(LR"(TARGA|PNG|JPEG|JPG|BMP|GIF)")
         };
+        }
 
-        // functions/macros that indicate that a string will be localizable
-        m_localization_functions = {
-            // GNU's gettext C/C++ functions
-            L"_", L"gettext", L"dgettext", L"ngettext", L"dngettext", L"pgettext", L"dpgettext",
-            L"npgettext", L"dnpgettext", L"dcgettext",
-            // GNU's propername module
-            L"proper_name", L"proper_name_utf8",
-            // wxWidgets gettext wrapper functions
-            L"wxPLURAL", L"wxGETTEXT_IN_CONTEXT", L"wxGETTEXT_IN_CONTEXT_PLURAL", L"wxTRANSLATE",
-            L"wxTRANSLATE_IN_CONTEXT", L"wxGetTranslation",
-            // Qt (note that NOOP functions actually do load something for translation,
-            // just not in-place)
-            L"tr", L"trUtf8", L"translate", L"QT_TR_NOOP", L"QT_TRANSLATE_NOOP",
-            L"QApplication::translate", L"QApplication::tr", L"QApplication::trUtf8",
-            // KDE (ki18n)
-            L"i18n", L"i18np", L"i18ncp", L"i18nc", L"xi18n", L"xi18nc", L"ki18n", L"ki18np",
-            L"ki18ncp", L"ki18nc",
-            // our own functions
-            L"_WXTRANS_WSTR"
-        };
-
-        // note that tr (in Qt) takes an optional disambiguation argument, but because its
-        // optional we don't include it in this list
-        m_localization_with_context_functions = { _DT(L"translate"),
-                                                  L"i18nc",
-                                                  L"i18ncp",
-                                                  L"ki18ncp",
-                                                  L"ki18nc",
-                                                  L"QApplication::translate",
-                                                  L"QCoreApplication::translate",
-                                                  L"QT_TRANSLATE_NOOP",
-                                                  L"wxTRANSLATE_IN_CONTEXT",
-                                                  L"wxGETTEXT_IN_CONTEXT_PLURAL",
-                                                  L"wxGETTEXT_IN_CONTEXT",
-                                                  L"wxGetTranslation" };
-
-        // functions that indicate that a string is explicitly marked to not be translatable
-        m_non_localizable_functions = {
-            L"_DT", L"DONTTRANSLATE",
-            // these are not defined explicitly in gettext, but their documentation suggests
-            // that you can add them as defines in your code and use them
-            L"gettext_noop", L"N_"
-        };
-
-        // Constructors and macros that should be ignored
-        // (when backtracing, these are skipped over, and the parser moves to the
-        //  function/variable assignment to the left of these).
-        m_ctors_to_ignore = {
-            // Win32 text macros that should be skipped over
-            L"_T", L"TEXT", L"_TEXT", L"__TEXT", L"_WIDE", L"W",
-            // macOS
-            L"CFSTR", L"CFStringRef",
-            // similar macros from other libraries
-            L"T",
-            // wxWidgets
-            L"wxT", L"wxT_2", L"wxS", L"wxString", L"wxBasicString", L"wxCFStringRef",
-            L"wxASCII_STR", L"wxFile",
-            // Qt
-            L"QString", L"QLatin1String", L"QStringLiteral", L"setStyleSheet", L"QFile",
-            // standard string objects
-            L"basic_string", L"string", L"wstring", L"u8string", L"u16string", L"u32string",
-            L"std::basic_string", L"std::string", L"std::wstring", L"std::u8string",
-            L"std::u16string", L"std::u32string", L"std::pmr::basic_string", L"std::pmr::string",
-            L"std::pmr::wstring", L"std::pmr::u8string", L"std::pmr::u16string",
-            L"std::pmr::u32string", L"pmr::basic_string", L"pmr::string", L"pmr::wstring",
-            L"pmr::u8string", L"pmr::u16string", L"pmr::u32string", L"std::ifstream",
-            L"std::ofstream",
-            // MFC, ATL, COM
-            L"CString", L"_bstr_t", L"OLESTR", L"T2COLE", L"T2OLE", L"OLE2CT", L"OLE2T",
-            L"CComBSTR", L"SysAllocString",
-            // Java
-            L"Locale",
-            // formatting functions (not actually a CTOR) that should be skipped over
-            L"wxString::Format", L"string.Format"
-        };
-
-        // Debugging, system call, and other internal functions that should never have
-        // their string parameters translated. This can also include resource
-        // loading functions that take a string ID.
+    //--------------------------------------------------
+    void i18n_review::init_internal_functions()
+        {
         m_internal_functions = {
             // Java resource/key functions
             L"getBundle", L"getObject", L"handleGetObject", L"getString", L"getStringArray",
@@ -1034,6 +899,159 @@ namespace i18n_check
             // assembly calls
             L"asm"
         };
+        }
+
+    //--------------------------------------------------
+    i18n_review::i18n_review(const bool verbose) : m_verbose(verbose)
+        {
+        init_deprecated();
+
+        if (verbose)
+            {
+            // not i18n related, just legacy wx functions that can be modernized
+            if (m_min_cpp_version >= 2011)
+                {
+                m_deprecated_string_functions.insert(
+                    { L"_STATIC_ASSERT",
+                      _WXTRANS_WSTR(L"Use static_assert() instead of _STATIC_ASSERT().") });
+                m_deprecated_string_functions.insert(
+                    { L"wxMEMBER_DELETE",
+                      _WXTRANS_WSTR(L"Use '= delete' instead of wxMEMBER_DELETE.") });
+                m_deprecated_string_functions.insert(
+                    { L"wxOVERRIDE",
+                      _WXTRANS_WSTR(L"Use override or final instead of wxOVERRIDE.") });
+                }
+            if (m_min_cpp_version >= 2017)
+                {
+                m_deprecated_string_functions.insert(
+                    { L"wxNODISCARD",
+                      _WXTRANS_WSTR(L"Use [[nodiscard]] instead of wxNODISCARD.") });
+                m_deprecated_string_functions.insert(
+                    { L"WXSIZEOF", _WXTRANS_WSTR(L"Use std::size() instead of WXSIZEOF().") });
+                m_deprecated_string_functions.insert(
+                    { L"wxUnusedVar",
+                      _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of wxUnusedVar.") });
+                m_deprecated_string_functions.insert(
+                    { L"WXUNUSED", _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of WXUNUSED().") });
+                m_deprecated_string_functions.insert(
+                    { L"Q_UNUSED", _WXTRANS_WSTR(L"Use [[maybe_unused]] instead of Q_UNUSED().") });
+                }
+            m_deprecated_string_functions.insert(
+                { L"wxEXPAND",
+                  _WXTRANS_WSTR(L"Call wxSizer::Add() with a wxSizerFlags object using Expand() "
+                                "instead of wxEXPAND.") });
+            m_deprecated_string_functions.insert(
+                { L"wxGROW",
+                  _WXTRANS_WSTR(L"Call wxSizer::Add() with a wxSizerFlags object using Expand() "
+                                "instead of wxGROW.") });
+            m_deprecated_string_functions.insert(
+                { L"DECLARE_NO_COPY_CLASS",
+                  _WXTRANS_WSTR(L"Delete the copy CTOR and assignment operator "
+                                "instead of DECLARE_NO_COPY_CLASS.") });
+            m_deprecated_string_functions.insert(
+                { L"wxDECLARE_NO_COPY_CLASS",
+                  _WXTRANS_WSTR(L"Delete the copy CTOR and assignment operator instead of "
+                                "wxDECLARE_NO_COPY_CLASS.") });
+            m_deprecated_string_functions.insert(
+                { L"wxMin", _WXTRANS_WSTR(L"Use std::min() instead of wxMin().") });
+            m_deprecated_string_functions.insert(
+                { L"wxMax", _WXTRANS_WSTR(L"Use std::max() instead of wxMax().") });
+            m_deprecated_string_functions.insert(
+                { L"wxIsNan", _WXTRANS_WSTR(L"Use std::isnan() instead of wxIsNan().") });
+            m_deprecated_string_functions.insert(
+                { L"wxNOEXCEPT", _WXTRANS_WSTR(L"Use noexcept instead of wxNOEXCEPT.") });
+            m_deprecated_string_functions.insert(
+                { L"__WXMAC__", _WXTRANS_WSTR(L"Use __WXOSX__ instead of __WXMAC__.") });
+            m_deprecated_string_functions.insert(
+                { L"wxDIALOG_EX_METAL", _WXTRANS_WSTR(L"This style is deprecated; remove it.") });
+            }
+
+        m_translatable_regexes = { std::wregex(LR"(Q[0-9][FA]Y.*)"),
+                                   std::wregex(LR"(p\-(value|level)[s]?)"),
+                                   std::wregex(LR"([xyz]-(?:axis|axes))") };
+
+        init_untranslatables();
+
+        // functions/macros that indicate that a string will be localizable
+        m_localization_functions = {
+            // GNU's gettext C/C++ functions
+            L"_", L"gettext", L"dgettext", L"ngettext", L"dngettext", L"pgettext", L"dpgettext",
+            L"npgettext", L"dnpgettext", L"dcgettext",
+            // GNU's propername module
+            L"proper_name", L"proper_name_utf8",
+            // wxWidgets gettext wrapper functions
+            L"wxPLURAL", L"wxGETTEXT_IN_CONTEXT", L"wxGETTEXT_IN_CONTEXT_PLURAL", L"wxTRANSLATE",
+            L"wxTRANSLATE_IN_CONTEXT", L"wxGetTranslation",
+            // Qt (note that NOOP functions actually do load something for translation,
+            // just not in-place)
+            L"tr", L"trUtf8", L"translate", L"QT_TR_NOOP", L"QT_TRANSLATE_NOOP",
+            L"QApplication::translate", L"QApplication::tr", L"QApplication::trUtf8",
+            // KDE (ki18n)
+            L"i18n", L"i18np", L"i18ncp", L"i18nc", L"xi18n", L"xi18nc", L"ki18n", L"ki18np",
+            L"ki18ncp", L"ki18nc",
+            // our own functions
+            L"_WXTRANS_WSTR"
+        };
+
+        // note that tr (in Qt) takes an optional disambiguation argument, but because its
+        // optional we don't include it in this list
+        m_localization_with_context_functions = { _DT(L"translate"),
+                                                  L"i18nc",
+                                                  L"i18ncp",
+                                                  L"ki18ncp",
+                                                  L"ki18nc",
+                                                  L"QApplication::translate",
+                                                  L"QCoreApplication::translate",
+                                                  L"QT_TRANSLATE_NOOP",
+                                                  L"wxTRANSLATE_IN_CONTEXT",
+                                                  L"wxGETTEXT_IN_CONTEXT_PLURAL",
+                                                  L"wxGETTEXT_IN_CONTEXT",
+                                                  L"wxGetTranslation" };
+
+        // functions that indicate that a string is explicitly marked to not be translatable
+        m_non_localizable_functions = {
+            L"_DT", L"DONTTRANSLATE",
+            // these are not defined explicitly in gettext, but their documentation suggests
+            // that you can add them as defines in your code and use them
+            L"gettext_noop", L"N_"
+        };
+
+        // Constructors and macros that should be ignored
+        // (when backtracing, these are skipped over, and the parser moves to the
+        //  function/variable assignment to the left of these).
+        m_ctors_to_ignore = {
+            // Win32 text macros that should be skipped over
+            L"_T", L"TEXT", L"_TEXT", L"__TEXT", L"_WIDE", L"W",
+            // macOS
+            L"CFSTR", L"CFStringRef",
+            // similar macros from other libraries
+            L"T",
+            // wxWidgets
+            L"wxT", L"wxT_2", L"wxS", L"wxString", L"wxBasicString", L"wxCFStringRef",
+            L"wxASCII_STR", L"wxFile",
+            // Qt
+            L"QString", L"QLatin1String", L"QStringLiteral", L"setStyleSheet", L"QFile",
+            // standard string objects
+            L"basic_string", L"string", L"wstring", L"u8string", L"u16string", L"u32string",
+            L"std::basic_string", L"std::string", L"std::wstring", L"std::u8string",
+            L"std::u16string", L"std::u32string", L"std::pmr::basic_string", L"std::pmr::string",
+            L"std::pmr::wstring", L"std::pmr::u8string", L"std::pmr::u16string",
+            L"std::pmr::u32string", L"pmr::basic_string", L"pmr::string", L"pmr::wstring",
+            L"pmr::u8string", L"pmr::u16string", L"pmr::u32string", L"std::ifstream",
+            L"std::ofstream",
+            // MFC, ATL, COM
+            L"CString", L"_bstr_t", L"OLESTR", L"T2COLE", L"T2OLE", L"OLE2CT", L"OLE2T",
+            L"CComBSTR", L"SysAllocString",
+            // Java
+            L"Locale",
+            // formatting functions (not actually a CTOR) that should be skipped over
+            L"wxString::Format", L"string.Format"
+        };
+
+        // Debugging, system call, and other internal functions that should never have
+        // their string parameters translated. This can also include resource
+        // loading functions that take a string ID.
+        init_internal_functions();
 
         m_log_functions = {
             // wxWidgets
