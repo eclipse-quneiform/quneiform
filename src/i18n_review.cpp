@@ -2004,7 +2004,9 @@ namespace i18n_check
                                             std::wstring{ foundMessage->second } :
                                             std::wstring{},
                                         std::wstring{}, variableInfo.m_operator),
-                m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                m_file_name,
+                get_line_and_column(static_cast<size_t>(
+                    std::distance<const wchar_t*>(m_file_start, currentTextPos))));
             }
 
         if (!variableInfo.m_name.empty())
@@ -2014,20 +2016,25 @@ namespace i18n_check
             // closing/opening quotes (and possibly an 'L' prefix) of each fragment.
             // Collapse those out first so that classification sees the actual joined string value,
             // rather than being thrown off by that leftover punctuation.
-            process_variable(variableInfo,
-                             collapse_multipart_string(
-                                 std::wstring{ currentTextPos, quoteEnd - currentTextPos }),
-                (currentTextPos - m_file_start));
+            process_variable(
+                variableInfo,
+                collapse_multipart_string(std::wstring{
+                    currentTextPos,
+                    static_cast<size_t>(std::distance<const wchar_t*>(currentTextPos, quoteEnd)) }),
+                static_cast<size_t>(std::distance<const wchar_t*>(m_file_start, currentTextPos)));
             }
         else if (!functionName.empty())
             {
             if (is_diagnostic_function(functionName))
                 {
                 m_internal_strings.emplace_back(
-                    std::wstring(currentTextPos, quoteEnd - currentTextPos),
+                    std::wstring{ currentTextPos, static_cast<size_t>(std::distance<const wchar_t*>(
+                                                      currentTextPos, quoteEnd)) },
                     string_info::usage_info(string_info::usage_info::usage_type::function,
                                             functionName, std::wstring{}, variableInfo.m_operator),
-                    m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                    m_file_name,
+                    get_line_and_column(static_cast<size_t>(
+                        std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                 }
             else if (is_i18n_function(functionName))
                 {
@@ -2061,7 +2068,9 @@ namespace i18n_check
                         string_info::usage_info(string_info::usage_info::usage_type::function,
                                                 functionName, std::wstring{},
                                                 variableInfo.m_operator),
-                        m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                        m_file_name,
+                        get_line_and_column(static_cast<size_t>(
+                            std::distance<const wchar_t*>(m_file_start, currentTextPos))));
 
                     const auto contextLength{ quoteEnd - currentTextPos };
                     if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage) &&
@@ -2086,7 +2095,9 @@ namespace i18n_check
                                   "string arguments possibly transposed?"),
 #endif
                                 std::wstring{}, variableInfo.m_operator, true),
-                            m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                            m_file_name,
+                            get_line_and_column(static_cast<size_t>(
+                                std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                         }
                     }
                 else if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage) &&
@@ -2112,7 +2123,9 @@ namespace i18n_check
                                   "Are you sure the provided argument is an ID?"),
 #endif
                                 std::wstring{}, variableInfo.m_operator, true),
-                            m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                            m_file_name,
+                            get_line_and_column(static_cast<size_t>(
+                                std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                         }
                     }
                 else
@@ -2126,7 +2139,9 @@ namespace i18n_check
                              functionName == L"wxPLURAL" ||
                              (isFollowedByComma && extract_base_function(functionName) == L"tr") ||
                              m_context_comment_active)),
-                        m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                        m_file_name,
+                        get_line_and_column(static_cast<size_t>(
+                            std::distance<const wchar_t*>(m_file_start, currentTextPos))));
 
                     assert(functionVarNamePos);
                     if (functionVarNamePos != nullptr &&
@@ -2147,7 +2162,9 @@ namespace i18n_check
                                 string_info::usage_info(
                                     string_info::usage_info::usage_type::function, std::wstring{},
                                     std::wstring{}, variableInfo.m_operator),
-                                m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                                m_file_name,
+                                get_line_and_column(static_cast<size_t>(
+                                    std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                             }
                         // internal functions
                         if (is_diagnostic_function(functionNameOuter) ||
@@ -2159,7 +2176,9 @@ namespace i18n_check
                                 string_info::usage_info(
                                     string_info::usage_info::usage_type::function,
                                     functionNameOuter, std::wstring{}, variableInfo.m_operator),
-                                m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                                m_file_name,
+                                get_line_and_column(static_cast<size_t>(
+                                    std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                             }
                         // untranslatable variable types
                         else if (m_variable_types_to_ignore.contains(outerVariable.m_type))
@@ -2170,7 +2189,9 @@ namespace i18n_check
                                     string_info::usage_info::usage_type::variable,
                                     outerVariable.m_name, outerVariable.m_type,
                                     outerVariable.m_operator),
-                                m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                                m_file_name,
+                                get_line_and_column(static_cast<size_t>(
+                                    std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                             }
                         // untranslatable variable names (e.g., debugMsg)
                         else if (!outerVariable.m_name.empty())
@@ -2188,7 +2209,9 @@ namespace i18n_check
                                                 outerVariable.m_name, outerVariable.m_type,
                                                 outerVariable.m_operator),
                                             m_file_name,
-                                            get_line_and_column(currentTextPos - m_file_start));
+                                            get_line_and_column(
+                                                static_cast<size_t>(std::distance<const wchar_t*>(
+                                                    m_file_start, currentTextPos))));
                                         break;
                                         }
                                     }
@@ -2197,7 +2220,8 @@ namespace i18n_check
                                 {
                                 log_message(outerVariable.m_name,
                                             i18n_string_util::lazy_string_to_wstring(exp.what()),
-                                            (currentTextPos - m_file_start));
+                                            static_cast<size_t>(std::distance<const wchar_t*>(
+                                                m_file_start, currentTextPos)));
                                 }
                             }
                         }
@@ -2211,7 +2235,9 @@ namespace i18n_check
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
                                             functionName, std::wstring{}, variableInfo.m_operator),
-                    m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                    m_file_name,
+                    get_line_and_column(static_cast<size_t>(
+                        std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                 }
             else if (m_variable_types_to_ignore.contains(functionName))
                 {
@@ -2219,7 +2245,9 @@ namespace i18n_check
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
                                             functionName, std::wstring{}, variableInfo.m_operator),
-                    m_file_name, get_line_and_column(currentTextPos - m_file_start));
+                    m_file_name,
+                    get_line_and_column(static_cast<size_t>(
+                        std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                 }
             else if (is_keyword(functionName))
                 {
@@ -2228,7 +2256,9 @@ namespace i18n_check
                                 string_info::usage_info(string_info::usage_info::usage_type::orphan,
                                                         std::wstring{}, std::wstring{},
                                                         variableInfo.m_operator),
-                                m_file_name, get_line_and_column(currentTextPos - m_file_start)));
+                                m_file_name,
+                                get_line_and_column(static_cast<size_t>(
+                                    std::distance<const wchar_t*>(m_file_start, currentTextPos)))));
                 }
             else
                 {
@@ -2236,7 +2266,9 @@ namespace i18n_check
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),
                     string_info::usage_info(string_info::usage_info::usage_type::function,
                                             functionName, std::wstring{}, variableInfo.m_operator),
-                    m_file_name, get_line_and_column(currentTextPos - m_file_start)));
+                    m_file_name,
+                    get_line_and_column(static_cast<size_t>(
+                        std::distance<const wchar_t*>(m_file_start, currentTextPos)))));
                 }
             }
         else
@@ -2245,7 +2277,9 @@ namespace i18n_check
                 std::wstring(currentTextPos, quoteEnd - currentTextPos),
                 string_info::usage_info(string_info::usage_info::usage_type::orphan, std::wstring{},
                                         std::wstring{}, variableInfo.m_operator),
-                m_file_name, get_line_and_column(currentTextPos - m_file_start)));
+                m_file_name,
+                get_line_and_column(static_cast<size_t>(
+                    std::distance<const wchar_t*>(m_file_start, currentTextPos)))));
             }
         clear_section(currentTextPos, std::next(quoteEnd));
         }
