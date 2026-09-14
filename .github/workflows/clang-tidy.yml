@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -114,6 +114,7 @@ jobs:
             clang-tidy -p "$BUILD_DIR" -fix=false "$file" \
               --extra-arg=-fno-color-diagnostics \
               --extra-arg=-fdiagnostics-color=never \
+              --exclude-header-filter='(^|/)donttranslate\.h$' \
               > "logs/${base}.txt" 2>&1 || true
           done <<< "${{ steps.files.outputs.files }}"
 

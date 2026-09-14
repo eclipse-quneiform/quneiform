@@ -10,7 +10,7 @@ jobs:
     name: unit-tests
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - name: Build & run tests
