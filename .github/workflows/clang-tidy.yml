@@ -114,7 +114,7 @@ jobs:
             clang-tidy -p "$BUILD_DIR" -fix=false "$file" \
               --extra-arg=-fno-color-diagnostics \
               --extra-arg=-fdiagnostics-color=never \
-              --exclude-header-filter='(^|/)donttranslate\.h$' \
+              --exclude-header-filter='(^|/)(unicode_extract_text|donttranslate)\.h$' \
               > "logs/${base}.txt" 2>&1 || true
           done <<< "${{ steps.files.outputs.files }}"
 

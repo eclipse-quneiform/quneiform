@@ -96,493 +96,511 @@ int main(int argc, char* argv[])
         return 0;
         }
 
-    // helper to get a boolean option (option not being present returns default)
-    const auto readBoolOption = [&result](const std::string& option, const bool defaultValue)
-    {
-        if (result.count(option) > 0)
+    try
+        {
+        // helper to get a boolean option (option not being present returns default)
+        const auto readBoolOption = [&result](const std::string& option, const bool defaultValue)
+        {
+            if (result.count(option) > 0)
+                {
+                return result[option].as<bool>();
+                }
+            return defaultValue;
+        };
+
+        const auto readIntOption = [&result](const std::string& option, const int defaultValue)
+        {
+            if (result.count(option) > 0)
+                {
+                return result[option].as<int>();
+                }
+
+            return defaultValue;
+        };
+
+        fs::path inputFolder;
+        if (result.count("input") != 0)
             {
-            return result[option].as<bool>();
-            }
-        return defaultValue;
-    };
-
-    const auto readIntOption = [&result](const std::string& option, const int defaultValue)
-    {
-        if (result.count(option) > 0)
-            {
-            return result[option].as<int>();
-            }
-
-        return defaultValue;
-    };
-
-    fs::path inputFolder;
-    if (result.count("input") != 0)
-        {
-        inputFolder = fs::path{ result["input"].as<std::string>(), fs::path::native_format };
-        if (!fs::exists(inputFolder))
-            {
-            std::wcout << L"Input path does not exist: " << inputFolder;
-            return 0;
-            }
-        inputFolder = std::filesystem::weakly_canonical(
-            inputFolder.is_relative() ? std::filesystem::current_path() / inputFolder :
-                                        inputFolder);
-        }
-    else
-        {
-        std::wcout << L"You must pass in at least one folder to analyze.\n\n";
-        std::wcout << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
-        return 0;
-        }
-
-    if (!readBoolOption("quiet", false))
-        {
-        std::wcout << L"\n###################################################\n# "
-                   << i18n_string_util::lazy_string_to_wstring(options.program())
-                   << L":\n# Internationalization/localization analysis system\n# (c) 2021-2026 "
-                      L"Blake Madden\n"
-                   << L"###################################################\n\n";
-        std::wcout << L"Searching for files to analyze in " << inputFolder << L"...\n\n";
-        }
-
-    const std::vector<std::string> providedIgnoredPaths{
-        (result["ignore"].count() > 0) ? result["ignore"].as<std::vector<std::string>>() :
-                                         std::vector<std::string>{}
-    };
-
-    std::vector<fs::path> providedIgnoredPathsWidened;
-    providedIgnoredPathsWidened.reserve(providedIgnoredPaths.size());
-    for (const auto& iPath : providedIgnoredPaths)
-        {
-        providedIgnoredPathsWidened.emplace_back(i18n_string_util::lazy_string_to_wstring(iPath));
-        }
-    // paths being ignored
-    const auto excludedInfo =
-        i18n_check::get_paths_files_to_exclude(inputFolder, providedIgnoredPathsWidened);
-
-    // input folder
-    const auto filesToAnalyze = i18n_check::get_files_to_analyze(
-        inputFolder, excludedInfo.m_excludedPaths, excludedInfo.m_excludedFiles);
-
-    const std::vector<std::string> untranslatableNames{
-        (result["untranslatables"].count() > 0) ?
-            result["untranslatables"].as<std::vector<std::string>>() :
-            std::vector<std::string>{}
-    };
-
-    for (const auto& untransName : untranslatableNames)
-        {
-        i18n_check::translation_catalog_review::get_untranslatable_names().push_back(
-            i18n_string_util::lazy_string_to_wstring(untransName));
-        }
-
-    const auto setSourceParserInfo = [&readBoolOption, &readIntOption](auto& parser)
-    {
-        parser.log_messages_can_be_translatable(readBoolOption("log-l10n-allowed", true));
-        parser.allow_translating_punctuation_only_strings(
-            readBoolOption("punct-l10n-allowed", false));
-        parser.exceptions_should_be_translatable(readBoolOption("exceptions-l10n-required", true));
-        parser.set_min_words_for_classifying_unavailable_string(
-            readIntOption("min-l10n-wordcount", 2));
-        parser.set_min_cpp_version(readIntOption("cpp-version", 2014));
-    };
-
-    i18n_check::cpp_i18n_review cpp(readBoolOption("verbose", false));
-    setSourceParserInfo(cpp);
-    i18n_check::csharp_i18n_review csharp(readBoolOption("verbose", false));
-    setSourceParserInfo(csharp);
-
-    i18n_check::rc_file_review rc(readBoolOption("verbose", false));
-    rc.allow_translating_punctuation_only_strings(readBoolOption("punct-l10n-allowed", false));
-
-    i18n_check::po_file_review po(readBoolOption("verbose", false));
-    po.review_fuzzy_translations(readBoolOption("fuzzy", false));
-
-    i18n_check::info_plist_file_review infoPlist(readBoolOption("verbose", false));
-    i18n_check::quarto_review quartoReview;
-
-    // see which checks are being performed
-    if (result.count("enable") != 0)
-        {
-        const auto& styles = result["enable"].as<std::vector<std::string>>();
-        int64_t rs{ i18n_check::review_style::no_checks };
-        for (const auto& r : styles)
-            {
-            if (r == "allI18N")
-                {
-                rs |= i18n_check::review_style::all_i18n_checks;
-                }
-            else if (r == "allL10N")
-                {
-                rs |= i18n_check::review_style::all_l10n_checks;
-                }
-            else if (r == "allCodeFormatting")
-                {
-                rs |= i18n_check::review_style::all_code_formatting_checks;
-                }
-            else if (r == "suspectL10NString")
-                {
-                rs |= i18n_check::review_style::check_l10n_strings;
-                }
-            else if (r == "suspectL10NUsage")
-                {
-                rs |= i18n_check::review_style::check_suspect_l10n_string_usage;
-                }
-            else if (r == "suspectI18NUsage")
-                {
-                rs |= i18n_check::review_style::check_suspect_i18n_usage;
-                }
-            else if (r == "printfMismatch")
-                {
-                rs |= i18n_check::review_style::check_mismatching_printf_commands;
-                }
-            else if (r == "acceleratorMismatch")
-                {
-                rs |= i18n_check::review_style::check_accelerators;
-                }
-            else if (r == "transInconsistency")
-                {
-                rs |= i18n_check::review_style::check_consistency;
-                }
-            else if (r == "halfWidth")
-                {
-                rs |= i18n_check::review_style::check_halfwidth;
-                }
-            else if (r == "numberInconsistency")
-                {
-                rs |= i18n_check::review_style::check_numbers;
-                }
-            else if (r == "lengthInconsistency")
-                {
-                rs |= i18n_check::review_style::check_length;
-                }
-            else if (r == "L10NStringNeedsContext")
-                {
-                rs |= i18n_check::review_style::check_needing_context;
-                }
-            else if (r == "urlInL10NString")
-                {
-                rs |= i18n_check::review_style::check_l10n_contains_url;
-                }
-            else if (r == "excessiveNonL10NContent")
-                {
-                rs |= i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
-                }
-            else if (r == "multipartString")
-                {
-                rs |= i18n_check::review_style::check_multipart_strings;
-                }
-            else if (r == "pluralization")
-                {
-                rs |= i18n_check::review_style::check_pluralization;
-                }
-            else if (r == "articleOrPronoun")
-                {
-                rs |= i18n_check::review_style::check_articles_proceeding_placeholder;
-                }
-            else if (r == "concatenatedStrings")
-                {
-                rs |= i18n_check::review_style::check_l10n_concatenated_strings;
-                }
-            else if (r == "literalL10NStringCompare")
-                {
-                rs |= i18n_check::review_style::check_literal_l10n_string_comparison;
-                }
-            else if (r == "notL10NAvailable")
-                {
-                rs |= i18n_check::review_style::check_not_available_for_l10n;
-                }
-            else if (r == "deprecatedMacro")
-                {
-                rs |= i18n_check::review_style::check_deprecated_macros;
-                }
-            else if (r == "nonUTF8File")
-                {
-                rs |= i18n_check::review_style::check_utf8_encoded;
-                }
-            else if (r == "UTF8FileWithBOM")
-                {
-                rs |= i18n_check::review_style::check_utf8_with_signature;
-                }
-            else if (r == "unencodedExtASCII")
-                {
-                rs |= i18n_check::review_style::check_unencoded_ext_ascii;
-                }
-            else if (r == "printfSingleNumber")
-                {
-                rs |= i18n_check::review_style::check_printf_single_number;
-                }
-            else if (r == "numberAssignedToId")
-                {
-                rs |= i18n_check::review_style::check_number_assigned_to_id;
-                }
-            else if (r == "dupValAssignedToIds")
-                {
-                rs |= i18n_check::review_style::check_duplicate_value_assigned_to_ids;
-                }
-            else if (r == "malformedString")
-                {
-                rs |= i18n_check::review_style::check_malformed_strings;
-                }
-            else if (r == "fontIssue")
-                {
-                rs |= i18n_check::review_style::check_fonts;
-                }
-            else if (r == "trailingSpaces")
-                {
-                rs |= i18n_check::review_style::check_trailing_spaces;
-                }
-            else if (r == "tabs")
-                {
-                rs |= i18n_check::review_style::check_tabs;
-                }
-            else if (r == "wideLine")
-                {
-                rs |= i18n_check::review_style::check_line_width;
-                }
-            else if (r == "commentMissingSpace")
-                {
-                rs |= i18n_check::review_style::check_space_after_comment;
-                }
-            else
-                {
-                std::wcout << L"Unknown option passed to --enable: "
-                           << i18n_string_util::lazy_string_to_wstring(r) << L"\n\n"
-                           << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
-                return 1;
-                }
-            }
-        cpp.set_style(static_cast<i18n_check::review_style>(rs));
-        csharp.set_style(static_cast<i18n_check::review_style>(rs));
-        po.set_style(static_cast<i18n_check::review_style>(rs));
-        rc.set_style(static_cast<i18n_check::review_style>(rs));
-        }
-    // ...and if any checks are being excluded
-    if (result.count("disable") != 0)
-        {
-        const auto& styles = result["disable"].as<std::vector<std::string>>();
-        int64_t rs{ static_cast<int64_t>(cpp.get_style()) };
-        for (const auto& r : styles)
-            {
-            if (r == "allI18N")
-                {
-                rs = rs & ~i18n_check::review_style::all_i18n_checks;
-                }
-            else if (r == "allL10N")
-                {
-                rs = rs & ~i18n_check::review_style::all_l10n_checks;
-                }
-            else if (r == "allCodeFormatting")
-                {
-                rs = rs & ~i18n_check::review_style::all_code_formatting_checks;
-                }
-            else if (r == "suspectL10NString")
-                {
-                rs = rs & ~i18n_check::review_style::check_l10n_strings;
-                }
-            else if (r == "suspectL10NUsage")
-                {
-                rs = rs & ~i18n_check::review_style::check_suspect_l10n_string_usage;
-                }
-            else if (r == "suspectI18NUsage")
-                {
-                rs = rs & ~i18n_check::review_style::check_suspect_i18n_usage;
-                }
-            else if (r == "printfMismatch")
-                {
-                rs = rs & ~i18n_check::review_style::check_mismatching_printf_commands;
-                }
-            else if (r == "acceleratorMismatch")
-                {
-                rs = rs & ~i18n_check::review_style::check_accelerators;
-                }
-            else if (r == "transInconsistency")
-                {
-                rs = rs & ~i18n_check::review_style::check_consistency;
-                }
-            else if (r == "halfWidth")
-                {
-                rs = rs & ~i18n_check::review_style::check_halfwidth;
-                }
-            else if (r == "numberInconsistency")
-                {
-                rs = rs & ~i18n_check::review_style::check_numbers;
-                }
-            else if (r == "lengthInconsistency")
-                {
-                rs = rs & ~i18n_check::review_style::check_length;
-                }
-            else if (r == "L10NStringNeedsContext")
-                {
-                rs = rs & ~i18n_check::review_style::check_needing_context;
-                }
-            else if (r == "urlInL10NString")
-                {
-                rs = rs & ~i18n_check::review_style::check_l10n_contains_url;
-                }
-            else if (r == "excessiveNonL10NContent")
-                {
-                rs = rs & ~i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
-                }
-            else if (r == "multipartString")
-                {
-                rs = rs & ~i18n_check::review_style::check_multipart_strings;
-                }
-            else if (r == "pluralization")
-                {
-                rs = rs & ~i18n_check::review_style::check_pluralization;
-                }
-            else if (r == "articleOrPronoun")
-                {
-                rs = rs & ~i18n_check::review_style::check_articles_proceeding_placeholder;
-                }
-            else if (r == "concatenatedStrings")
-                {
-                rs = rs & ~i18n_check::review_style::check_l10n_concatenated_strings;
-                }
-            else if (r == "literalL10NStringCompare")
-                {
-                rs = rs & ~i18n_check::review_style::check_literal_l10n_string_comparison;
-                }
-            else if (r == "notL10NAvailable")
-                {
-                rs = rs & ~i18n_check::review_style::check_not_available_for_l10n;
-                }
-            else if (r == "deprecatedMacro")
-                {
-                rs = rs & ~i18n_check::review_style::check_deprecated_macros;
-                }
-            else if (r == "nonUTF8File")
-                {
-                rs = rs & ~i18n_check::review_style::check_utf8_encoded;
-                }
-            else if (r == "UTF8FileWithBOM")
-                {
-                rs = rs & ~i18n_check::review_style::check_utf8_with_signature;
-                }
-            else if (r == "unencodedExtASCII")
-                {
-                rs = rs & ~i18n_check::review_style::check_unencoded_ext_ascii;
-                }
-            else if (r == "printfSingleNumber")
-                {
-                rs = rs & ~i18n_check::review_style::check_printf_single_number;
-                }
-            else if (r == "numberAssignedToId")
-                {
-                rs = rs & ~i18n_check::review_style::check_number_assigned_to_id;
-                }
-            else if (r == "dupValAssignedToIds")
-                {
-                rs = rs & ~i18n_check::review_style::check_duplicate_value_assigned_to_ids;
-                }
-            else if (r == "malformedString")
-                {
-                rs = rs & ~i18n_check::review_style::check_malformed_strings;
-                }
-            else if (r == "fontIssue")
-                {
-                rs = rs & ~i18n_check::review_style::check_fonts;
-                }
-            else if (r == "trailingSpaces")
-                {
-                rs = rs & ~i18n_check::review_style::check_trailing_spaces;
-                }
-            else if (r == "tabs")
-                {
-                rs = rs & ~i18n_check::review_style::check_tabs;
-                }
-            else if (r == "wideLine")
-                {
-                rs = rs & ~i18n_check::review_style::check_line_width;
-                }
-            else if (r == "commentMissingSpace")
-                {
-                rs = rs & ~i18n_check::review_style::check_space_after_comment;
-                }
-            else
-                {
-                std::wcout << L"Unknown option passed to --disable: "
-                           << i18n_string_util::lazy_string_to_wstring(r) << L"\n\n"
-                           << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
-                return 1;
-                }
-            }
-        cpp.set_style(static_cast<i18n_check::review_style>(rs));
-        csharp.set_style(static_cast<i18n_check::review_style>(rs));
-        po.set_style(static_cast<i18n_check::review_style>(rs));
-        rc.set_style(static_cast<i18n_check::review_style>(rs));
-        }
-
-    const bool isQuiet{ readBoolOption("quiet", false) };
-    i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist, &quartoReview);
-    analyzer.analyze(
-        filesToAnalyze, [](const size_t) {},
-        [&filesToAnalyze, isQuiet](const size_t currentFileIndex, const fs::path& file)
-        {
-            if (!isQuiet)
-                {
-                std::wcout << L"Examining " << currentFileIndex << L" of " << filesToAnalyze.size()
-                           << L" files (" << file.filename() << L")\n";
-                }
-            return true;
-        });
-
-    const std::wstringstream report = analyzer.format_results(readBoolOption("verbose", false));
-
-    // write the output to file (if requested)
-    if (result.count("output") != 0U)
-        {
-        const fs::path outPath{ result["output"].as<std::string>() };
-        std::ofstream ofs(outPath);
-
-        // write the results report in UTF-8
-        std::string utf8Str;
-        const auto resText = report.str();
-        if constexpr (sizeof(wchar_t) == sizeof(uint16_t))
-            {
-            utf8::utf16to8(resText.cbegin(), resText.cend(), std::back_inserter(utf8Str));
-            }
-        else if constexpr (sizeof(wchar_t) == sizeof(uint32_t))
-            {
-            utf8::utf32to8(resText.cbegin(), resText.cend(), std::back_inserter(utf8Str));
-            }
-
-        if (outPath.extension().compare(L"csv") == 0)
-            {
-            string_util::replace_all<std::string>(utf8Str, "\t", ",");
-            }
-
-        ofs << utf8Str;
-        }
-    // ...otherwise, send it to the console
-    else
-        {
-        std::wcout << report.str();
-        }
-
-    if (!readBoolOption("quiet", false))
-        {
-        const auto endTime{ std::chrono::high_resolution_clock::now() };
-
-        if (std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count() < 1)
-            {
-            std::wcout << L"\nFinished in "
-                       << std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime)
-                              .count()
-                       << L" milliseconds.\n\n";
+            inputFolder = fs::path{ result["input"].as<std::string>(), fs::path::native_format };
+            if (!fs::exists(inputFolder))
+                {
+                std::wcout << L"Input path does not exist: " << inputFolder;
+                return 0;
+                }
+            inputFolder = std::filesystem::weakly_canonical(
+                inputFolder.is_relative() ? std::filesystem::current_path() / inputFolder :
+                                            inputFolder);
             }
         else
             {
-            std::wcout
-                << L"\nFinished in "
-                << std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count()
-                << L" seconds.\n\n";
+            std::wcout << L"You must pass in at least one folder to analyze.\n\n";
+            std::wcout << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
+            return 0;
             }
 
-        std::wcout << analyzer.format_summary(true).str();
-        }
+        if (!readBoolOption("quiet", false))
+            {
+            std::wcout
+                << L"\n###################################################\n# "
+                << i18n_string_util::lazy_string_to_wstring(options.program())
+                << L":\n# Internationalization/localization analysis system\n# (c) 2021-2026 "
+                   L"Blake Madden\n"
+                << L"###################################################\n\n";
+            std::wcout << L"Searching for files to analyze in " << inputFolder << L"...\n\n";
+            }
 
-    return 0;
+        const std::vector<std::string> providedIgnoredPaths{
+            (result["ignore"].count() > 0) ? result["ignore"].as<std::vector<std::string>>() :
+                                             std::vector<std::string>{}
+        };
+
+        std::vector<fs::path> providedIgnoredPathsWidened;
+        providedIgnoredPathsWidened.reserve(providedIgnoredPaths.size());
+        for (const auto& iPath : providedIgnoredPaths)
+            {
+            providedIgnoredPathsWidened.emplace_back(
+                i18n_string_util::lazy_string_to_wstring(iPath));
+            }
+        // paths being ignored
+        const auto excludedInfo =
+            i18n_check::get_paths_files_to_exclude(inputFolder, providedIgnoredPathsWidened);
+
+        // input folder
+        const auto filesToAnalyze = i18n_check::get_files_to_analyze(
+            inputFolder, excludedInfo.m_excludedPaths, excludedInfo.m_excludedFiles);
+
+        const std::vector<std::string> untranslatableNames{
+            (result["untranslatables"].count() > 0) ?
+                result["untranslatables"].as<std::vector<std::string>>() :
+                std::vector<std::string>{}
+        };
+
+        for (const auto& untransName : untranslatableNames)
+            {
+            i18n_check::translation_catalog_review::get_untranslatable_names().push_back(
+                i18n_string_util::lazy_string_to_wstring(untransName));
+            }
+
+        const auto setSourceParserInfo = [&readBoolOption, &readIntOption](auto& parser)
+        {
+            parser.log_messages_can_be_translatable(readBoolOption("log-l10n-allowed", true));
+            parser.allow_translating_punctuation_only_strings(
+                readBoolOption("punct-l10n-allowed", false));
+            parser.exceptions_should_be_translatable(
+                readBoolOption("exceptions-l10n-required", true));
+            parser.set_min_words_for_classifying_unavailable_string(
+                readIntOption("min-l10n-wordcount", 2));
+            parser.set_min_cpp_version(readIntOption("cpp-version", 2014));
+        };
+
+        i18n_check::cpp_i18n_review cpp(readBoolOption("verbose", false));
+        setSourceParserInfo(cpp);
+        i18n_check::csharp_i18n_review csharp(readBoolOption("verbose", false));
+        setSourceParserInfo(csharp);
+
+        i18n_check::rc_file_review rc(readBoolOption("verbose", false));
+        rc.allow_translating_punctuation_only_strings(readBoolOption("punct-l10n-allowed", false));
+
+        i18n_check::po_file_review po(readBoolOption("verbose", false));
+        po.review_fuzzy_translations(readBoolOption("fuzzy", false));
+
+        i18n_check::info_plist_file_review infoPlist(readBoolOption("verbose", false));
+        i18n_check::quarto_review quartoReview;
+
+        // see which checks are being performed
+        if (result.count("enable") != 0)
+            {
+            const auto& styles = result["enable"].as<std::vector<std::string>>();
+            int64_t rs{ i18n_check::review_style::no_checks };
+            for (const auto& r : styles)
+                {
+                if (r == "allI18N")
+                    {
+                    rs |= i18n_check::review_style::all_i18n_checks;
+                    }
+                else if (r == "allL10N")
+                    {
+                    rs |= i18n_check::review_style::all_l10n_checks;
+                    }
+                else if (r == "allCodeFormatting")
+                    {
+                    rs |= i18n_check::review_style::all_code_formatting_checks;
+                    }
+                else if (r == "suspectL10NString")
+                    {
+                    rs |= i18n_check::review_style::check_l10n_strings;
+                    }
+                else if (r == "suspectL10NUsage")
+                    {
+                    rs |= i18n_check::review_style::check_suspect_l10n_string_usage;
+                    }
+                else if (r == "suspectI18NUsage")
+                    {
+                    rs |= i18n_check::review_style::check_suspect_i18n_usage;
+                    }
+                else if (r == "printfMismatch")
+                    {
+                    rs |= i18n_check::review_style::check_mismatching_printf_commands;
+                    }
+                else if (r == "acceleratorMismatch")
+                    {
+                    rs |= i18n_check::review_style::check_accelerators;
+                    }
+                else if (r == "transInconsistency")
+                    {
+                    rs |= i18n_check::review_style::check_consistency;
+                    }
+                else if (r == "halfWidth")
+                    {
+                    rs |= i18n_check::review_style::check_halfwidth;
+                    }
+                else if (r == "numberInconsistency")
+                    {
+                    rs |= i18n_check::review_style::check_numbers;
+                    }
+                else if (r == "lengthInconsistency")
+                    {
+                    rs |= i18n_check::review_style::check_length;
+                    }
+                else if (r == "L10NStringNeedsContext")
+                    {
+                    rs |= i18n_check::review_style::check_needing_context;
+                    }
+                else if (r == "urlInL10NString")
+                    {
+                    rs |= i18n_check::review_style::check_l10n_contains_url;
+                    }
+                else if (r == "excessiveNonL10NContent")
+                    {
+                    rs |= i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
+                    }
+                else if (r == "multipartString")
+                    {
+                    rs |= i18n_check::review_style::check_multipart_strings;
+                    }
+                else if (r == "pluralization")
+                    {
+                    rs |= i18n_check::review_style::check_pluralization;
+                    }
+                else if (r == "articleOrPronoun")
+                    {
+                    rs |= i18n_check::review_style::check_articles_proceeding_placeholder;
+                    }
+                else if (r == "concatenatedStrings")
+                    {
+                    rs |= i18n_check::review_style::check_l10n_concatenated_strings;
+                    }
+                else if (r == "literalL10NStringCompare")
+                    {
+                    rs |= i18n_check::review_style::check_literal_l10n_string_comparison;
+                    }
+                else if (r == "notL10NAvailable")
+                    {
+                    rs |= i18n_check::review_style::check_not_available_for_l10n;
+                    }
+                else if (r == "deprecatedMacro")
+                    {
+                    rs |= i18n_check::review_style::check_deprecated_macros;
+                    }
+                else if (r == "nonUTF8File")
+                    {
+                    rs |= i18n_check::review_style::check_utf8_encoded;
+                    }
+                else if (r == "UTF8FileWithBOM")
+                    {
+                    rs |= i18n_check::review_style::check_utf8_with_signature;
+                    }
+                else if (r == "unencodedExtASCII")
+                    {
+                    rs |= i18n_check::review_style::check_unencoded_ext_ascii;
+                    }
+                else if (r == "printfSingleNumber")
+                    {
+                    rs |= i18n_check::review_style::check_printf_single_number;
+                    }
+                else if (r == "numberAssignedToId")
+                    {
+                    rs |= i18n_check::review_style::check_number_assigned_to_id;
+                    }
+                else if (r == "dupValAssignedToIds")
+                    {
+                    rs |= i18n_check::review_style::check_duplicate_value_assigned_to_ids;
+                    }
+                else if (r == "malformedString")
+                    {
+                    rs |= i18n_check::review_style::check_malformed_strings;
+                    }
+                else if (r == "fontIssue")
+                    {
+                    rs |= i18n_check::review_style::check_fonts;
+                    }
+                else if (r == "trailingSpaces")
+                    {
+                    rs |= i18n_check::review_style::check_trailing_spaces;
+                    }
+                else if (r == "tabs")
+                    {
+                    rs |= i18n_check::review_style::check_tabs;
+                    }
+                else if (r == "wideLine")
+                    {
+                    rs |= i18n_check::review_style::check_line_width;
+                    }
+                else if (r == "commentMissingSpace")
+                    {
+                    rs |= i18n_check::review_style::check_space_after_comment;
+                    }
+                else
+                    {
+                    std::wcout << L"Unknown option passed to --enable: "
+                               << i18n_string_util::lazy_string_to_wstring(r) << L"\n\n"
+                               << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
+                    return 1;
+                    }
+                }
+            cpp.set_style(static_cast<i18n_check::review_style>(rs));
+            csharp.set_style(static_cast<i18n_check::review_style>(rs));
+            po.set_style(static_cast<i18n_check::review_style>(rs));
+            rc.set_style(static_cast<i18n_check::review_style>(rs));
+            }
+        // ...and if any checks are being excluded
+        if (result.count("disable") != 0)
+            {
+            const auto& styles = result["disable"].as<std::vector<std::string>>();
+            int64_t rs{ static_cast<int64_t>(cpp.get_style()) };
+            for (const auto& r : styles)
+                {
+                if (r == "allI18N")
+                    {
+                    rs = rs & ~i18n_check::review_style::all_i18n_checks;
+                    }
+                else if (r == "allL10N")
+                    {
+                    rs = rs & ~i18n_check::review_style::all_l10n_checks;
+                    }
+                else if (r == "allCodeFormatting")
+                    {
+                    rs = rs & ~i18n_check::review_style::all_code_formatting_checks;
+                    }
+                else if (r == "suspectL10NString")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_l10n_strings;
+                    }
+                else if (r == "suspectL10NUsage")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_suspect_l10n_string_usage;
+                    }
+                else if (r == "suspectI18NUsage")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_suspect_i18n_usage;
+                    }
+                else if (r == "printfMismatch")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_mismatching_printf_commands;
+                    }
+                else if (r == "acceleratorMismatch")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_accelerators;
+                    }
+                else if (r == "transInconsistency")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_consistency;
+                    }
+                else if (r == "halfWidth")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_halfwidth;
+                    }
+                else if (r == "numberInconsistency")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_numbers;
+                    }
+                else if (r == "lengthInconsistency")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_length;
+                    }
+                else if (r == "L10NStringNeedsContext")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_needing_context;
+                    }
+                else if (r == "urlInL10NString")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_l10n_contains_url;
+                    }
+                else if (r == "excessiveNonL10NContent")
+                    {
+                    rs = rs &
+                         ~i18n_check::review_style::check_l10n_contains_excessive_nonl10n_content;
+                    }
+                else if (r == "multipartString")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_multipart_strings;
+                    }
+                else if (r == "pluralization")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_pluralization;
+                    }
+                else if (r == "articleOrPronoun")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_articles_proceeding_placeholder;
+                    }
+                else if (r == "concatenatedStrings")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_l10n_concatenated_strings;
+                    }
+                else if (r == "literalL10NStringCompare")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_literal_l10n_string_comparison;
+                    }
+                else if (r == "notL10NAvailable")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_not_available_for_l10n;
+                    }
+                else if (r == "deprecatedMacro")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_deprecated_macros;
+                    }
+                else if (r == "nonUTF8File")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_utf8_encoded;
+                    }
+                else if (r == "UTF8FileWithBOM")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_utf8_with_signature;
+                    }
+                else if (r == "unencodedExtASCII")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_unencoded_ext_ascii;
+                    }
+                else if (r == "printfSingleNumber")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_printf_single_number;
+                    }
+                else if (r == "numberAssignedToId")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_number_assigned_to_id;
+                    }
+                else if (r == "dupValAssignedToIds")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_duplicate_value_assigned_to_ids;
+                    }
+                else if (r == "malformedString")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_malformed_strings;
+                    }
+                else if (r == "fontIssue")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_fonts;
+                    }
+                else if (r == "trailingSpaces")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_trailing_spaces;
+                    }
+                else if (r == "tabs")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_tabs;
+                    }
+                else if (r == "wideLine")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_line_width;
+                    }
+                else if (r == "commentMissingSpace")
+                    {
+                    rs = rs & ~i18n_check::review_style::check_space_after_comment;
+                    }
+                else
+                    {
+                    std::wcout << L"Unknown option passed to --disable: "
+                               << i18n_string_util::lazy_string_to_wstring(r) << L"\n\n"
+                               << i18n_string_util::lazy_string_to_wstring(options.help()) << L"\n";
+                    return 1;
+                    }
+                }
+            cpp.set_style(static_cast<i18n_check::review_style>(rs));
+            csharp.set_style(static_cast<i18n_check::review_style>(rs));
+            po.set_style(static_cast<i18n_check::review_style>(rs));
+            rc.set_style(static_cast<i18n_check::review_style>(rs));
+            }
+
+        const bool isQuiet{ readBoolOption("quiet", false) };
+        i18n_check::batch_analyze analyzer(&cpp, &rc, &po, &csharp, &infoPlist, &quartoReview);
+        analyzer.analyze(
+            filesToAnalyze, [](const size_t) {},
+            [&filesToAnalyze, isQuiet](const size_t currentFileIndex, const fs::path& file)
+            {
+                if (!isQuiet)
+                    {
+                    std::wcout << L"Examining " << currentFileIndex << L" of "
+                               << filesToAnalyze.size() << L" files (" << file.filename() << L")\n";
+                    }
+                return true;
+            });
+
+        const std::wstringstream report = analyzer.format_results(readBoolOption("verbose", false));
+
+        // write the output to file (if requested)
+        if (result.count("output") != 0U)
+            {
+            const fs::path outPath{ result["output"].as<std::string>() };
+            std::ofstream ofs(outPath);
+
+            // write the results report in UTF-8
+            std::string utf8Str;
+            const auto resText = report.str();
+            if constexpr (sizeof(wchar_t) == sizeof(uint16_t))
+                {
+                utf8::utf16to8(resText.cbegin(), resText.cend(), std::back_inserter(utf8Str));
+                }
+            else if constexpr (sizeof(wchar_t) == sizeof(uint32_t))
+                {
+                utf8::utf32to8(resText.cbegin(), resText.cend(), std::back_inserter(utf8Str));
+                }
+
+            if (outPath.extension().compare(L"csv") == 0)
+                {
+                string_util::replace_all<std::string>(utf8Str, "\t", ",");
+                }
+
+            ofs << utf8Str;
+            }
+        // ...otherwise, send it to the console
+        else
+            {
+            std::wcout << report.str();
+            }
+
+        if (!readBoolOption("quiet", false))
+            {
+            const auto endTime{ std::chrono::high_resolution_clock::now() };
+
+            if (std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count() < 1)
+                {
+                std::wcout << L"\nFinished in "
+                           << std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
+                                                                                    startTime)
+                                  .count()
+                           << L" milliseconds.\n\n";
+                }
+            else
+                {
+                std::wcout
+                    << L"\nFinished in "
+                    << std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count()
+                    << L" seconds.\n\n";
+                }
+
+            std::wcout << analyzer.format_summary(true).str();
+            }
+
+        return 0;
+        }
+    catch (const std::exception& exp)
+        {
+        std::wcerr << L"Error: " << i18n_string_util::lazy_string_to_wstring(exp.what()) << L"\n";
+        return 1;
+        }
+    catch (...)
+        {
+        std::wcerr << L"An unknown error occurred.\n";
+        return 1;
+        }
     }

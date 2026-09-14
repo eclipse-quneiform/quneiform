@@ -677,7 +677,7 @@ namespace i18n_check
                 }
             if (*asmStart == L'(')
                 {
-                const auto* end =
+                const auto* const end =
                     string_util::find_matching_close_tag(std::next(asmStart), L'(', L')', false);
                 if (end == nullptr)
                     {
@@ -685,8 +685,9 @@ namespace i18n_check
                                 (asmStart - m_file_start));
                     return std::next(asmStart, 1);
                     }
-                clear_section(originalStart, std::next(end));
-                return std::next(const_cast<wchar_t*>(end));
+                wchar_t* const closeTag = std::next(asmStart, std::next(end) - asmStart);
+                clear_section(originalStart, closeTag);
+                return closeTag;
                 }
             if (*asmStart != 0)
                 {
@@ -707,7 +708,7 @@ namespace i18n_check
                 }
             if (*asmStart == L'{')
                 {
-                const auto* end =
+                const auto* const end =
                     string_util::find_matching_close_tag(std::next(asmStart), L'{', L'}', false);
                 if (end == nullptr)
                     {
@@ -715,8 +716,9 @@ namespace i18n_check
                                 (asmStart - m_file_start));
                     return std::next(asmStart);
                     }
-                clear_section(originalStart, std::next(end));
-                return std::next(const_cast<wchar_t*>(end));
+                wchar_t* const closeTag = std::next(asmStart, std::next(end) - asmStart);
+                clear_section(originalStart, closeTag);
+                return closeTag;
                 }
             if (*asmStart != 0)
                 {
