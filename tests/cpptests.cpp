@@ -3098,6 +3098,20 @@ if (std::regex_match(str, m_html_regex) ||
         }
     }
 
+TEST_CASE("Collapse Multipart String", "[cpp]")
+    {
+    SECTION("Fragment Ending In Escaped Backslash")
+        {
+        cpp_i18n_review cpp(false);
+        // Simulates the raw text seen between the outer quotes of two concatenated
+        // literals: L"C:\\Program Files\\" L"MyApp\\config.xml". The first fragment
+        // ends in an escaped backslash right before the closing quote, which must not
+        // prevent the "\" L\"" junk between the fragments from being collapsed away.
+        const std::wstring raw{ LR"(C:\\Program Files\\" L"MyApp\\config.xml)" };
+        CHECK(cpp.collapse_multipart_string(raw) == LR"(C:\\Program Files\\MyApp\\config.xml)");
+        }
+    }
+
 TEST_CASE("Casing", "[cpp]")
     {
     SECTION("Pascal Case")

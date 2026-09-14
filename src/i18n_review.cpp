@@ -2747,8 +2747,11 @@ namespace i18n_check
         {
         // for strings that span multiple lines, remove the start/end quotes and newlines
         // between them, combining this into one string; the next fragment may also be
-        // prefixed with a wide/UTF encoding-prefix (e.g., L"...", u8"...", u"...", U"...")
-        const std::wregex multilineRegex(LR"(([^\\])("[\s]+(?:u8|[LuU])?"))");
+        // prefixed with a wide/UTF encoding-prefix (e.g., L"...", u8"...", u"...", U"...").
+        // The leading "(?:^|[^\\])(?:\\\\)*" consumes any run of escaped-backslash pairs
+        // before the closing quote (e.g., a path ending in "\\"), so that quote is still
+        // recognized as the real end of the fragment.
+        const std::wregex multilineRegex(LR"(((?:^|[^\\])(?:\\\\)*)("[\s]+(?:u8|[LuU])?"))");
         str = std::regex_replace(str, multilineRegex, L"$1");
         // replace any doubled-up quotes with single
         // (C# does this for raw strings)
