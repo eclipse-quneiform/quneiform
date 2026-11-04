@@ -201,24 +201,24 @@ namespace i18n_check
                 if (auto [readUtf8Ok, fileUtf8Text] = read_utf8_file(file, startsWithBom);
                     readUtf8Ok)
                     {
-                        trans.translate_po_file(fileUtf8Text);
-                        outputFile(outPath, fileUtf8Text);
-                        }
+                    trans.translate_po_file(fileUtf8Text);
+                    outputFile(outPath, fileUtf8Text);
+                    }
                 else if (auto [readUtf16Ok, fileUtf16Text] = read_utf16_file(file); readUtf16Ok)
                     {
                     // UTF-16 may not be supported consistently on all platforms and compilers
-                        trans.translate_po_file(fileUtf16Text);
-                        outputFile(outPath, fileUtf16Text);
-                        }
+                    trans.translate_po_file(fileUtf16Text);
+                    outputFile(outPath, fileUtf16Text);
+                    }
                 else
                     {
                     std::wifstream ifs(file);
                     std::wstring str((std::istreambuf_iterator<wchar_t>(ifs)),
                                      std::istreambuf_iterator<wchar_t>());
-                        trans.translate_po_file(str);
-                        outputFile(outPath, str);
-                        }
+                    trans.translate_po_file(str);
+                    outputFile(outPath, str);
                     }
+                }
             catch (const std::exception& expt)
                 {
                 m_logReport.append(i18n_string_util::lazy_string_to_wstring(expt.what()))
@@ -868,8 +868,8 @@ namespace i18n_check
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
                 report << _(L"String available for translation that contains a "
-                            "large amount of non-translatable.");
-                report << L"\t\"[excessiveNonL10NContent]\n";
+                            "large amount of non-translatable content.");
+                report << L"\"\t[excessiveNonL10NContent]\n";
                 }
 
             for (const auto& val : sourceParser->get_suspect_i18n_usage())
@@ -877,7 +877,7 @@ namespace i18n_check
                 report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
                 report << val.m_usage.m_value;
-                report << L"\t\"[suspectI18NUsage]\n";
+                report << L"\"\t[suspectI18NUsage]\n";
                 }
 
             for (const auto& val :
@@ -887,7 +887,7 @@ namespace i18n_check
                        << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
                 report << _(L"Ambiguous string available for translation that is "
                             "lacking a translator comment.");
-                report << L"\t\"[L10NStringNeedsContext]\n";
+                report << L"\"\t[L10NStringNeedsContext]\n";
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_being_concatenated())
@@ -932,7 +932,7 @@ namespace i18n_check
 
             for (const auto& val : sourceParser->get_article_issue_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
                        << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                        << _(L"An article is proceeding dynamic content, or a pronoun is being "
                             "formatted into a larger message. It is recommended to create "
@@ -1026,8 +1026,8 @@ namespace i18n_check
 
             for (const auto& val : sourceParser->get_duplicates_value_assigned_to_ids())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t\t"
-                       << replaceSpecialSpaces(val.m_string) << L"\t\""
+                report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                        << _(L"Verify that duplicate assignment was intended. "
                             "If correct, consider assigning the first ID variable by name "
                             "to the second one to make this intention clear.")
@@ -1036,8 +1036,8 @@ namespace i18n_check
 
             for (const auto& val : sourceParser->get_ids_assigned_number())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t\t"
-                       << replaceSpecialSpaces(val.m_string) << L"\t\""
+                report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
+                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
                        << _(L"Prefer using ID constants provided by your framework when "
                             "assigning values to an ID variable.")
                        << L"\"\t[numberAssignedToId]\n";
@@ -1064,10 +1064,10 @@ namespace i18n_check
                         // as a \U value of a lone surrogate is not valid C++.
                         if (codePoint >= 0xD800 && codePoint <= 0xDBFF &&
                             i + 1 < untabbedStr.length())
-                    {
+                            {
                             const auto lowSurrogate{ static_cast<uint32_t>(untabbedStr[i + 1]) };
                             if (lowSurrogate >= 0xDC00 && lowSurrogate <= 0xDFFF)
-                        {
+                                {
                                 codePoint = 0x10000 + ((codePoint - 0xD800) << 10) +
                                             (lowSurrogate - 0xDC00);
                                 ++i;
