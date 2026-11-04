@@ -597,9 +597,27 @@ namespace i18n_check
             {
             str.pop_back();
             }
+        // Finds the '<' matching the trailing '>', accounting for nested templates
+        // (e.g., the first '<' in "findChild<std::vector<int>>").
+        const auto findTemplateStart = [](const std::wstring& val)
+        {
+            int32_t angleDepth{ 0 };
+            for (size_t i = val.length(); i > 0; --i)
+                {
+                if (val[i - 1] == L'>')
+                    {
+                    ++angleDepth;
+                    }
+                else if (val[i - 1] == L'<' && --angleDepth == 0)
+                    {
+                    return i - 1;
+                    }
+                }
+            return std::wstring::npos;
+        };
         if (!str.empty() && str.back() == L'>')
             {
-            const auto templateStart = str.find_last_of(L'<');
+            const auto templateStart = findTemplateStart(str);
             if (templateStart != std::wstring::npos)
                 {
                 // if constructing a shared_ptr, then use the type that it is constructing
@@ -610,6 +628,16 @@ namespace i18n_check
                     {
                     str.erase(0, templateStart + 1);
                     str.pop_back();
+                    // if the constructed type is a template itself
+                    // (e.g., "std::make_shared<std::vector<int>>"), then use its root type
+                    if (!str.empty() && str.back() == L'>')
+                        {
+                        if (const auto innerTemplateStart = findTemplateStart(str);
+                            innerTemplateStart != std::wstring::npos)
+                            {
+                            str.erase(innerTemplateStart);
+                            }
+                        }
                     }
                 // use the root type of the variable with template info stripped off
                 else

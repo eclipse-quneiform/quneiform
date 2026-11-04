@@ -2815,6 +2815,78 @@ TEST_CASE("Loggers", "[cpp]")
         REQUIRE(cpp.get_localizable_strings_in_internal_call().size() == 1);
         CHECK(cpp.get_localizable_strings_in_internal_call()[0].m_string == std::wstring{ L"My ID" });
         }
+
+    SECTION("Third-party Log Functions")
+        {
+        const std::vector<std::wstring> logFunctions{
+            L"spdlog::info", L"spdlog::warn", L"spdlog::error", L"spdlog::critical",
+            L"SPDLOG_INFO", L"SPDLOG_ERROR", L"NSLog", L"os_log_error",
+            L"__android_log_print", L"syslog", L"std::print", L"std::println",
+            L"fmt::print", L"fmt::println" };
+        for (const auto& logFunction : logFunctions)
+            {
+            cpp_i18n_review cpp(false);
+            const std::wstring code{ logFunction + LR"(("The file could not be opened.");)" };
+            cpp(code, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            // Catch2 can only log narrow strings (these names are all ASCII)
+            std::string narrowName;
+            for (const auto ch : logFunction) { narrowName += static_cast<char>(ch); }
+            INFO(narrowName);
+            CHECK(cpp.get_localizable_strings().size() == 0);
+            CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+            }
+        }
+
+    SECTION("Non-log Function Still Flagged")
+        {
+        // the same message sent to a UI function should still be flagged
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(SetLabel("The file could not be opened.");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == std::wstring{ L"The file could not be opened." });
+        }
+    }
+
+TEST_CASE("Framework Internal Functions", "[cpp]")
+    {
+    SECTION("Qt, wxWidgets, and Win32")
+        {
+        const std::vector<std::wstring> snippets{
+            // Qt
+            LR"(button->setObjectName("The main window toolbar");)",
+            LR"(parent->findChild<QWidget*>("The main window toolbar");)",
+            LR"(parent->findChild<QList<QWidget*>>("The main window toolbar");)",
+            LR"(findChildren<std::map<int, QWidget*>>("The main window toolbar");)",
+            LR"(QMetaObject::invokeMethod(obj, "The main window toolbar");)",
+            LR"(obj->property("The main window toolbar");)",
+            LR"(QCoreApplication::setOrganizationName("The Example Software Company");)",
+            LR"(QIcon::fromTheme("The main window toolbar");)",
+            LR"(qgetenv("The main window toolbar");)",
+            // wxWidgets
+            LR"(wxGetEnv("The main window toolbar", &value);)",
+            LR"(wxXmlResource::Get()->LoadDialog(this, "The main window toolbar");)",
+            LR"(XRCCTRL(*this, "The main window toolbar", wxButton);)",
+            LR"(lib.GetSymbol("The main window toolbar");)",
+            LR"(image.SetOption("The main window toolbar", 80);)",
+            // Win32
+            LR"(CreateMutexW(nullptr, FALSE, L"The main window toolbar");)",
+            LR"(RegQueryValueExW(hKey, L"The main window toolbar", nullptr, nullptr, nullptr, nullptr);)",
+            LR"(GetEnvironmentVariableW(L"The main window toolbar", buffer, 256);)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            // Catch2 can only log narrow strings (these snippets are all ASCII)
+            std::string narrowSnippet;
+            for (const auto ch : snippet) { narrowSnippet += static_cast<char>(ch); }
+            INFO(narrowSnippet);
+            CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+            }
+        }
     }
 
 TEST_CASE("Internal Strings", "[cpp]")
@@ -3293,6 +3365,28 @@ TEST_CASE("Strings", "[cpp]")
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"My ID");
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == i18n_review::string_info::usage_info::usage_type::function);
         CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"Add");
+        }
+
+    SECTION("Casts non-pointer")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(Add(static_cast<CString>("My ID"));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings().size() == 0);
+        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == L"My ID");
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == L"Add");
+        }
+
+    SECTION("Casts in internal function")
+        {
+        // the cast is skipped over, so the outer (internal) function is what is seen
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(wxASSERT_MSG(ok, static_cast<const wchar_t*>("The file could not be opened."));)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
         }
 
     SECTION("With Email")
