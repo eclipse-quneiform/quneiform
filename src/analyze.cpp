@@ -29,7 +29,9 @@ namespace i18n_check
     bool valid_utf8_file(const std::filesystem::path& filePath, bool& startsWithBom)
         {
         startsWithBom = false;
-        const std::ifstream ifs(filePath);
+        // read as binary so that the entire file is validated
+        // (text mode on Windows stops reading at a 0x1A byte)
+        const std::ifstream ifs(filePath, std::ios::binary);
         if (!ifs)
             {
             return false;
@@ -50,21 +52,31 @@ namespace i18n_check
     //------------------------------------------------------
     std::pair<bool, std::wstring> read_utf16_file(const std::filesystem::path& filePath)
         {
-        std::ifstream fs8(filePath);
+        // Must be read as binary: in text mode, the Microsoft C runtime converts CRLF byte pairs to
+        // LF and treats 0x1A as EOF, both of which can legitimately appear inside of UTF-16 text
+        // (e.g., 'К' [U+041A] is stored as "1A 04" in UTF-16LE).
+        std::ifstream fs8(filePath, std::ios::binary);
         if (!fs8.is_open())
             {
             std::wcout << L"Could not open " << filePath << L"\n";
             return std::make_pair(false, std::wstring{});
             }
 
-        std::string buffer;
-        buffer.reserve(static_cast<size_t>(std::filesystem::file_size(filePath)));
-
         fs8.seekg(0, std::ios_base::end);
         const auto fileLength = fs8.tellg();
         fs8.seekg(0);
+        // need at least a 2-byte BOM to be UTF-16
+        if (fileLength < 2)
+            {
+            return std::make_pair(false, std::wstring{});
+            }
         std::vector<char> fileData(static_cast<size_t>(fileLength));
         fs8.read(fileData.data(), fileLength);
+        fileData.resize(static_cast<size_t>(fs8.gcount()));
+        if (fileData.size() < 2)
+            {
+            return std::make_pair(false, std::wstring{});
+            }
 
         if (lily_of_the_valley::unicode_extract_text::is_unicode(fileData.data()))
             {
@@ -132,13 +144,18 @@ namespace i18n_check
         const auto outputFile =
             [this](const std::filesystem::path& filePath, const std::wstring& content)
         {
-            std::u32string outBuffer;
-            outBuffer.reserve(content.size());
-            for (const auto& chr : content)
+            // wchar_t is UTF-16 on Windows (where characters outside of the BMP are
+            // surrogate pairs), but UTF-32 on most other platforms.
+            std::string utfBuffer;
+            utfBuffer.reserve(content.size());
+            if constexpr (sizeof(wchar_t) == 2)
                 {
-                outBuffer += static_cast<char32_t>(chr);
+                utf8::utf16to8(content.cbegin(), content.cend(), std::back_inserter(utfBuffer));
                 }
-            const std::string utfBuffer{ utf8::utf32to8(outBuffer) };
+            else
+                {
+                utf8::utf32to8(content.cbegin(), content.cend(), std::back_inserter(utfBuffer));
+                }
 
             if (std::ofstream out(filePath); out.is_open())
                 {
@@ -1042,17 +1059,31 @@ namespace i18n_check
                 {
                 std::wstringstream encodingRecommendations;
                 auto untabbedStr{ replaceSpecialSpaces(val.m_string) };
-                for (const auto& ch : untabbedStr)
+                for (size_t i = 0; i < untabbedStr.length(); ++i)
                     {
-                    if (ch > 127)
+                    auto codePoint{ static_cast<uint32_t>(untabbedStr[i]) };
+                    if (codePoint > 127)
                         {
+                        // On Windows, wchar_t is UTF-16, so characters outside of the BMP
+                        // are stored as surrogate pairs. Combine them into a single code point,
+                        // as a \U value of a lone surrogate is not valid C++.
+                        if (codePoint >= 0xD800 && codePoint <= 0xDBFF &&
+                            i + 1 < untabbedStr.length())
+                    {
+                            const auto lowSurrogate{ static_cast<uint32_t>(untabbedStr[i + 1]) };
+                            if (lowSurrogate >= 0xDC00 && lowSurrogate <= 0xDFFF)
+                        {
+                                codePoint = 0x10000 + ((codePoint - 0xD800) << 10) +
+                                            (lowSurrogate - 0xDC00);
+                                ++i;
+                                }
+                            }
                         encodingRecommendations << LR"(\U)" << std::setfill(L'0') << std::setw(8)
-                                                << std::uppercase << std::hex
-                                                << static_cast<int>(ch);
+                                                << std::uppercase << std::hex << codePoint;
                         }
                     else
                         {
-                        encodingRecommendations << ch;
+                        encodingRecommendations << untabbedStr[i];
                         }
                     }
 
