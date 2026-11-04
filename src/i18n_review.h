@@ -1223,6 +1223,18 @@ namespace i18n_check
         [[nodiscard]]
         bool is_diagnostic_function(const std::wstring& functionName) const;
 
+        /// @returns Whether @c functionName is a logging function.
+        /// @details Matches either the full name (e.g., "Log.Information") or the base
+        ///     function name of a member call (e.g., "_logger.LogInformation" matches
+        ///     "LogInformation").
+        /// @param functionName The name of the function to review.
+        [[nodiscard]]
+        bool is_log_function(const std::wstring& functionName) const
+            {
+            return m_log_functions.contains(functionName) ||
+                   m_log_functions.contains(extract_base_function(functionName));
+            }
+
         /// @returns Just the function name from a full function call, stripping
         ///     off any class or namespace information.
         /// @param str The string to extract the function name from.

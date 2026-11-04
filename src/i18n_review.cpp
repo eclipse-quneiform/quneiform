@@ -786,6 +786,16 @@ namespace i18n_check
             L"AddTranslator", L"MarkerSetBackground", L"SetProperty", L"SetAppName",
             L"SetPrintToFile", L"GetAttribute", L"SetAuthor", L"GetPropertyAsSize",
             L"GetPropertyAsInteger", L"FoundSwitch", L"GetPane", L"SetVendorName",
+            // environment
+            L"wxGetEnv", L"wxSetEnv", L"wxUnsetEnv",
+            // window lookup and XRC resources
+            // (usually member calls, e.g., wxXmlResource::Get()->LoadDialog())
+            L"FindWindowByName", L"wxWindow::FindWindowByName", L"LoadDialog", L"LoadFrame",
+            L"LoadPanel", L"LoadMenuBar", L"LoadToolBar", L"LoadObject", L"XRCCTRL",
+            // dynamic libraries (member calls on wxDynamicLibrary)
+            L"GetSymbol", L"HasSymbol", L"GetSymbolAorW",
+            // image/handler options (e.g., wxImage::SetOption())
+            L"SetOption", L"GetOption", L"GetOptionInt", L"HasOption",
             // Wisteria
             L"ContinuousColumns", L"CategoricalColumns", L"IdColumn", L"RemoveColumnNamesFromList",
             L"ImportCSV",
@@ -794,6 +804,15 @@ namespace i18n_check
             L"addShaderFromSourceCode", L"QStandardPaths::findExecutable", L"QDateTime::fromString",
             L"QFileInfo", L"qCDebug", L"qDebug", L"Q_MOC_INCLUDE", L"Q_CLASSINFO",
             L"setApplicationName", L"QApplication::setApplicationName",
+            // object names, properties, and meta-object calls
+            L"setObjectName", L"findChild", L"findChildren", L"QMetaObject::invokeMethod",
+            L"property",
+            // organization info (used for settings paths)
+            L"setOrganizationName", L"setOrganizationDomain",
+            // themes, processes, and environment
+            L"QIcon::fromTheme", L"QIcon::hasThemeIcon", L"QProcess::startDetached",
+            L"QProcess::execute", L"qEnvironmentVariable", L"qEnvironmentVariableIsSet",
+            L"qEnvironmentVariableIsEmpty", L"qgetenv", L"qputenv", L"qunsetenv",
             // l10n functions that take a string ID, not a literal string meant for translation
             L"QT_TRID_NOOP", L"QT_TRID_N_NOOP", L"qtTrId",
             // Catch2
@@ -877,6 +896,14 @@ namespace i18n_check
             L"RegDeleteKeyEx", L"RegDeleteKeyValue", L"RegDeleteTree", L"RegLoadAppKey",
             L"RegOpenKey", L"RegRenameKey", L"RegSaveKey", L"RegSaveKeyEx", L"RegSetKeyValue",
             L"RegSetKeyValueEx", L"RegOpenKeyTransactedA", L"GetDataSource", L"TraceMsg",
+            // named kernel objects, files, resources, registry values, and environment
+            L"CreateMutex", L"CreateMutexW", L"CreateMutexA", L"CreateMutexEx", L"OpenMutex",
+            L"OpenMutexW", L"CreateEvent", L"CreateEventW", L"CreateEventA", L"CreateEventEx",
+            L"OpenEvent", L"OpenEventW", L"CreateFile", L"CreateFileW", L"CreateFileA",
+            L"RegQueryValueEx", L"RegQueryValueExW", L"RegQueryValueExA", L"FindResource",
+            L"FindResourceW", L"FindResourceA", L"FindResourceEx", L"GetEnvironmentVariable",
+            L"GetEnvironmentVariableW", L"GetEnvironmentVariableA", L"SetEnvironmentVariable",
+            L"SetEnvironmentVariableW", L"SetEnvironmentVariableA",
             // .NET
             L"FindSystemTimeZoneById", L"CreateSpecificCulture", L"DebuggerDisplay", L"Debug.Fail",
             L"DeriveKey", L"Assert.Fail", L"Debug.Assert", L"Debug.Print", L"Debug.WriteLine",
@@ -884,6 +911,20 @@ namespace i18n_check
             L"noway_assert", L"DISASM_DUMP", L"NO_WAY", L"printfAlloc", L"Directory.GetFiles",
             L"Directory.EnumerateFiles", L"Utils.RunProcess", L"Utils.TryRunProcess",
             L"System.Diagnostics.Debug.Print",
+            // environment, processes, and reflection
+            L"Environment.GetEnvironmentVariable", L"Environment.SetEnvironmentVariable",
+            L"Environment.ExpandEnvironmentVariables", L"Process.Start", L"Type.GetType",
+            L"GetMethod", L"GetField", L"GetManifestResourceStream",
+            // static regex calls (the Regex CTOR is handled as an ignored variable type)
+            L"Regex.Match", L"Regex.Matches", L"Regex.IsMatch", L"Regex.Replace", L"Regex.Split",
+            // culture-invariant parsing formats and culture names
+            L"DateTime.ParseExact", L"DateTime.TryParseExact", L"CultureInfo.GetCultureInfo",
+            // .NET attributes whose arguments are library names, serialization keys,
+            // routes, GUIDs, or developer-facing messages
+            L"DllImport", L"LibraryImport", L"JsonPropertyName", L"JsonProperty", L"XmlElement",
+            L"XmlAttribute", L"XmlRoot", L"XmlType", L"XmlArray", L"XmlArrayItem", L"DataMember",
+            L"Route", L"HttpGet", L"HttpPost", L"HttpPut", L"HttpPatch", L"HttpDelete", L"Obsolete",
+            L"SuppressMessage", L"InternalsVisibleTo", L"Guid",
             // zlib
             L"Tracev", L"Trace", L"Tracevv",
             // libpng
@@ -1045,7 +1086,9 @@ namespace i18n_check
             // Java
             L"Locale",
             // formatting functions (not actually a CTOR) that should be skipped over
-            L"wxString::Format", L"string.Format"
+            L"wxString::Format", L"string.Format",
+            // casts (the string really belongs to the function or variable outside of the cast)
+            L"static_cast", L"const_cast", L"reinterpret_cast", L"dynamic_cast"
         };
 
         // Debugging, system call, and other internal functions that should never have
@@ -1069,17 +1112,37 @@ namespace i18n_check
             // SDL
             L"SDL_Log", L"SDL_LogCritical", L"SDL_LogDebug", L"SDL_LogError", L"SDL_LogInfo",
             L"SDL_LogMessage", L"SDL_LogMessageV", L"SDL_LogVerbose", L"SDL_LogWarn",
+            // spdlog (SPDLOG_DEBUG and SPDLOG_TRACE are already handled as diagnostic functions)
+            L"spdlog::trace", L"spdlog::debug", L"spdlog::info", L"spdlog::warn", L"spdlog::error",
+            L"spdlog::critical", L"SPDLOG_INFO", L"SPDLOG_WARN", L"SPDLOG_ERROR",
+            L"SPDLOG_CRITICAL",
+            // Apple
+            L"NSLog", L"os_log", L"os_log_info", L"os_log_debug", L"os_log_error", L"os_log_fault",
+            // Android
+            L"__android_log_print", L"__android_log_write",
+            // POSIX
+            L"syslog",
             // GnuCash
             L"PERR", L"PWARN", L"PINFO", L"ENTER", L"LEAVE",
             // actual console (or file) functions
             // (we will consider that most console apps are not localized, or if being used
             //  in a GUI then the message is meant for developers)
             L"printf", L"Console.WriteLine", L"dprintf", L"WriteLine", L"System.Console.WriteLine",
-            L"_tprintf", L"wprintf",
+            L"_tprintf", L"wprintf", L"Console.Write", L"System.Console.Write",
+            L"Console.Error.WriteLine", L"Console.Error.Write", L"System.Console.Error.WriteLine",
+            L"System.Console.Error.Write", L"std::print", L"std::println", L"fmt::print",
+            L"fmt::println",
             // .NET
             L"LoggerMessage", L"JITDUMP", L"LOG", L"LogSpew", L"LOG_HANDLE_OBJECT_CLASS",
             L"LOG_HANDLE_OBJECT", L"CorDisToolsLogERROR", L"LOG_ERROR", L"LOG_INFO", L"LogError",
             L"LogMessage", L"LogAsErrorException", L"LogVerbose", L"LogEvent", L"LogLine", L"Log",
+            L"Trace.WriteLine", L"Trace.Write", L"Trace.TraceError", L"Trace.TraceWarning",
+            L"Trace.TraceInformation", L"System.Diagnostics.Trace.WriteLine",
+            // Microsoft.Extensions.Logging (ILogger extension methods)
+            L"LogInformation", L"LogWarning", L"LogDebug", L"LogTrace", L"LogCritical",
+            // Serilog (static logger)
+            L"Log.Verbose", L"Log.Debug", L"Log.Information", L"Log.Warning", L"Log.Error",
+            L"Log.Fatal",
             // TinyXML
             L"TIXML_LOG",
             // other programs
@@ -1418,7 +1481,7 @@ namespace i18n_check
                 {
                 return;
                 }
-            if (m_log_functions.contains(str.m_usage.m_value))
+            if (is_log_function(str.m_usage.m_value))
                 {
                 return;
                 }
@@ -2467,12 +2530,11 @@ namespace i18n_check
         {
         try
             {
-            return (
-                std::regex_match(functionName, m_diagnostic_function_regex) ||
-                (m_internal_functions.contains(functionName)) ||
-                (m_internal_functions.contains(extract_base_function(functionName))) ||
-                functionName.ends_with(L"_TRACE") || functionName.ends_with(L"_DEBUG") ||
-                (!can_log_messages_be_translatable() && m_log_functions.contains(functionName)));
+            return (std::regex_match(functionName, m_diagnostic_function_regex) ||
+                    (m_internal_functions.contains(functionName)) ||
+                    (m_internal_functions.contains(extract_base_function(functionName))) ||
+                    functionName.ends_with(L"_TRACE") || functionName.ends_with(L"_DEBUG") ||
+                    (!can_log_messages_be_translatable() && is_log_function(functionName)));
             }
         catch (const std::exception& exp)
             {
@@ -2977,6 +3039,45 @@ namespace i18n_check
                     std::advance(startPos, -1);
                     }
                 functionOrVarNamePos = startPos;
+                // Step over template arguments in front of a function call
+                // (e.g., the "<QWidget*>" in "findChild<QWidget*>("), as these can contain
+                // characters (e.g., '*', '&', ',', spaces) that would otherwise end the scan
+                // for the function name. If this doesn't look like a template argument list
+                // (e.g., "a > (b)"), then leave the scan as it was.
+                if (currentOpeningChar == L'(' && *functionOrVarNamePos == L'>')
+                    {
+                    const wchar_t* templateStart{ functionOrVarNamePos };
+                    int32_t angleDepth{ 0 };
+                    bool foundTemplateStart{ false };
+                    while (templateStart > startSentinel)
+                        {
+                        if (*templateStart == L'>')
+                            {
+                            ++angleDepth;
+                            }
+                        else if (*templateStart == L'<')
+                            {
+                            if (--angleDepth == 0)
+                                {
+                                foundTemplateStart = true;
+                                break;
+                                }
+                            }
+                        // characters that can't be inside of template arguments
+                        else if (*templateStart == L';' || *templateStart == L'{' ||
+                                 *templateStart == L'}' || *templateStart == L'(' ||
+                                 *templateStart == L')' || *templateStart == L'"')
+                            {
+                            break;
+                            }
+                        std::advance(templateStart, -1);
+                        }
+                    if (foundTemplateStart && templateStart > startSentinel &&
+                        is_valid_name_char(*std::prev(templateStart)))
+                        {
+                        functionOrVarNamePos = std::prev(templateStart);
+                        }
+                    }
                 while (functionOrVarNamePos > startSentinel &&
                        is_valid_name_char_ex(*functionOrVarNamePos))
                     {
