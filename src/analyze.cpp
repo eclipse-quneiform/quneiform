@@ -180,7 +180,11 @@ namespace i18n_check
                 return;
                 }
 
-            const file_review_type fileType = get_file_type(file);
+            // only PO (and POT) files are pseudo-translated, so don't bother reading anything else
+            if (get_file_type(file) != file_review_type::po)
+                {
+                continue;
+                }
 
             std::filesystem::path outPath = std::filesystem::path{ file };
             outPath.replace_filename(L"pseudo_" + outPath.filename().wstring());
@@ -197,33 +201,24 @@ namespace i18n_check
                 if (auto [readUtf8Ok, fileUtf8Text] = read_utf8_file(file, startsWithBom);
                     readUtf8Ok)
                     {
-                    if (fileType == file_review_type::po)
-                        {
                         trans.translate_po_file(fileUtf8Text);
                         outputFile(outPath, fileUtf8Text);
                         }
-                    }
                 else if (auto [readUtf16Ok, fileUtf16Text] = read_utf16_file(file); readUtf16Ok)
                     {
                     // UTF-16 may not be supported consistently on all platforms and compilers
-                    if (fileType == file_review_type::po)
-                        {
                         trans.translate_po_file(fileUtf16Text);
                         outputFile(outPath, fileUtf16Text);
                         }
-                    }
                 else
                     {
                     std::wifstream ifs(file);
                     std::wstring str((std::istreambuf_iterator<wchar_t>(ifs)),
                                      std::istreambuf_iterator<wchar_t>());
-                    if (fileType == file_review_type::po)
-                        {
                         trans.translate_po_file(str);
                         outputFile(outPath, str);
                         }
                     }
-                }
             catch (const std::exception& expt)
                 {
                 m_logReport.append(i18n_string_util::lazy_string_to_wstring(expt.what()))
