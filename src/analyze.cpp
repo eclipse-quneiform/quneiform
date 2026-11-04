@@ -16,7 +16,9 @@
 #include "i18n_string_util.h"
 #include "unicode_extract_text.h"
 #include "utfcpp/source/utf8.h"
+#include <cstdint>
 #include <iostream>
+#include <iterator>
 #ifdef wxVERSION_NUMBER
     #include <wx/file.h>
 #endif
@@ -378,6 +380,7 @@ namespace i18n_check
         try
             {
             m_cpp->review_strings(resetCallback, callback);
+            m_csharp->review_strings(resetCallback, callback);
             m_po->review_strings(resetCallback, callback);
             }
         catch (const std::exception& expt)

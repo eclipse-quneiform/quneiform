@@ -465,19 +465,6 @@ namespace i18n_check
         /// @private
         virtual ~i18n_review() = default;
 
-        /** @brief Adds a function to be considered as internal (e.g., debug functions).
-            @details Strings passed to this function will not be considered translatable.
-            @param func The function to ignore.*/
-        void add_function_to_ignore(const std::wstring& func) { m_internal_functions.insert(func); }
-
-        /** @brief Adds a function that loads hard-coded strings as translatable resources.
-            @details This is usually functions like those found in the gettext library.
-            @param func The function to consider as a resource-loading function.*/
-        void add_translation_extraction_function(const std::wstring& func)
-            {
-            m_localization_functions.insert(func);
-            }
-
         /** @brief Sets which checks are being performed.
             @param sty The checks to perform.*/
         void set_style(const review_style sty) noexcept { m_review_styles = sty; }
