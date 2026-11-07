@@ -136,6 +136,56 @@ TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         REQUIRE(cpp.get_suspect_i18n_usage().size() == 0);
         }
+    SECTION("Short and snake-case variables")
+        {
+        const std::vector<std::pair<std::wstring, std::wstring>> snippets{
+            { LR"(var = _(s);)", L"s" },
+            { LR"(var = _(id);)", L"id" },
+            { LR"(var = _(m_label);)", L"m_label" },
+            { LR"(var = _( my_var );)", L"my_var" },
+            { LR"(var = wxPLURAL(sg, pl, n);)", L"sg" } };
+        for (const auto& [snippet, expectedArg] : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp.set_style(check_suspect_i18n_usage);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            // Catch2 can only log narrow strings (these snippets are all ASCII)
+            std::string narrowSnippet;
+            for (const auto ch : snippet) { narrowSnippet += static_cast<char>(ch); }
+            INFO(narrowSnippet);
+            REQUIRE(cpp.get_suspect_i18n_usage().size() == 1);
+            CHECK(cpp.get_suspect_i18n_usage().at(0).m_string == expectedArg);
+            }
+        }
+    SECTION("String literal prefixes are OK")
+        {
+        const std::vector<std::wstring> snippets{
+            LR"(var = _(L"Open");)",
+            LR"(var = _(u8"Open");)",
+            LR"x(var = _(LR"(Open)");)x",
+            LR"(var = _( "Open" );)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp.set_style(check_suspect_i18n_usage);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            std::string narrowSnippet;
+            for (const auto ch : snippet) { narrowSnippet += static_cast<char>(ch); }
+            INFO(narrowSnippet);
+            CHECK(cpp.get_suspect_i18n_usage().size() == 0);
+            }
+        }
+    SECTION("Macro definition is OK")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_suspect_i18n_usage);
+        const wchar_t* code = L"#define _(s) gettext(s)\n#  define wxPLURAL(s, p, n) ngettext(s, p, n)\n";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_suspect_i18n_usage().size() == 0);
+        }
     }
 
 TEST_CASE("Empty Translation Strings", "[cpp][i18n]")

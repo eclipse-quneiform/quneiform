@@ -114,7 +114,9 @@ This will check for issues such as:
   It is recommended to use other functions (e.g., `CString::LoadString()`) that are not limited to fixed buffer sizes; otherwise, translated strings may become truncated.
 - Context arguments passed to l10n functions (e.g., `tr()`) that are longer than 32 characters.\
   This may indicate that the context and translatable string arguments are reversed.
-- String literals being passed to `_()` and `wxPLURAL()`.
+- Non-literal values (e.g., variables or function calls) being passed to `_()` and `wxPLURAL()`.\
+  Extraction tools such as *xgettext* can only extract string literals.
+  Use `wxGetTranslation()` for strings determined at runtime.
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
 - Empty strings being passed to translation functions (e.g., `_("")`).\
   With *gettext*, an empty string returns the translation catalog's header, not an empty string.

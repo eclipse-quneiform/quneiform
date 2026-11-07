@@ -1620,7 +1620,25 @@ namespace i18n_check
             // _(), wxPLURAL() not taking a literal string
             {
             const std::wregex l10nStringNonStringLiteralArgRegEx{
-                LR"(\b(_|wxPLURAL)\([\(\s]*([a-zA-Z0-9]+)([[:punct:]]))"
+                LR"(\b(_|wxPLURAL)\([\(\s]*([a-zA-Z0-9_]+)\s*([[:punct:]]))"
+            };
+            // whether the text at the given offset is on a #define line
+            // (e.g., "#define _(s) gettext(s)")
+            const auto isInMacroDefinition = [&fileText](const size_t offset)
+            {
+                const size_t foundNewLine = fileText.find_last_of(L"\r\n", offset);
+                const size_t lineStart =
+                    (foundNewLine == std::wstring_view::npos) ? 0 : foundNewLine + 1;
+                auto line = fileText.substr(lineStart, offset - lineStart);
+                const size_t firstChar = line.find_first_not_of(L" \t");
+                if (firstChar == std::wstring_view::npos || line[firstChar] != L'#')
+                    {
+                    return false;
+                    }
+                line.remove_prefix(firstChar + 1);
+                const size_t directiveStart = line.find_first_not_of(L" \t");
+                return directiveStart != std::wstring_view::npos &&
+                       line.substr(directiveStart).starts_with(L"define");
             };
             auto currentTextBlock{ fileText };
             std::match_results<decltype(currentTextBlock)::const_iterator> stPositions;
@@ -1630,9 +1648,17 @@ namespace i18n_check
                 {
                 currentTextBlock = currentTextBlock.substr(stPositions.position(1));
                 currentBlockOffset += stPositions.position(1);
+                // String literals have already been blanked out of the text at this point,
+                // so a literal's prefix (e.g., the L in L"text") may be left on its own.
+                static const std::set<std::wstring_view> stringLiteralPrefixes{
+                    L"L", L"u", L"U", L"u8", L"R", L"LR", L"uR", L"UR", L"u8R"
+                };
                 if (stPositions.size() >= 3 &&
-                    // only something like LR, L, u8, etc. can be in front of a quote
-                    stPositions[2].length() > 2 && stPositions[3].str() != L"\"")
+                    // a string literal prefix (e.g., L, LR, u8) followed by a quote is OK
+                    stPositions[3].str() != L"\"" &&
+                    !stringLiteralPrefixes.contains(stPositions[2].str()) &&
+                    // the macro itself being defined
+                    !isInMacroDefinition(currentBlockOffset))
                     {
                     m_suspect_i18n_usage.emplace_back(
                         stPositions[2].str(),
