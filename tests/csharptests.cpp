@@ -136,5 +136,52 @@ public string Name { get; set; })";
         }
     }
 
+TEST_CASE("C# subscript and lookup keys", "[csharp][i18n]")
+    {
+    const auto runCode = [](csharp_i18n_review& cs, const wchar_t* code)
+        {
+        cs.clear_results();
+        cs(code, L"");
+        cs.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        };
+
+    SECTION("Subscript keys")
+        {
+        csharp_i18n_review cs(false);
+        runCode(cs, LR"(var folder = ConfigurationManager.AppSettings["Last opened project folder"];)");
+        CHECK(cs.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cs.get_internal_strings().size() == 1);
+
+        runCode(cs, LR"(var folder = settings[@"Last opened project folder"];)");
+        CHECK(cs.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cs.get_internal_strings().size() == 1);
+        }
+
+    SECTION("Lookup functions")
+        {
+        csharp_i18n_review cs(false);
+        runCode(cs, LR"(if (settings.ContainsKey("Last opened project folder")) {})");
+        CHECK(cs.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cs.get_internal_strings().size() == 1);
+
+        runCode(cs, LR"(if (settings.TryGetValue("Last opened project folder", out var folder)) {})");
+        CHECK(cs.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cs.get_internal_strings().size() == 1);
+        }
+
+    SECTION("Values are still reviewed")
+        {
+        csharp_i18n_review cs(false);
+        runCode(cs, LR"(labels["open_prompt"] = "Please select a file to open.";)");
+        REQUIRE(cs.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cs.get_not_available_for_localization_strings()[0].m_string ==
+              L"Please select a file to open.");
+
+        // collection expression, not a subscript
+        runCode(cs, LR"(string[] items = ["Please select a file to open."];)");
+        CHECK(cs.get_not_available_for_localization_strings().size() == 1);
+        }
+    }
+
 // NOLINTEND
 // clang-format on

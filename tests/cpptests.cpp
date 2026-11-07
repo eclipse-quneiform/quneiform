@@ -3714,5 +3714,73 @@ QString example = tr("UNTITLED");)";
         }
     }
 
+TEST_CASE("Subscript and lookup keys", "[cpp][i18n]")
+    {
+    const auto runCode = [](cpp_i18n_review& cpp, const wchar_t* code)
+        {
+        cpp.clear_results();
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        };
+
+    SECTION("Subscript keys")
+        {
+        cpp_i18n_review cpp(false);
+        runCode(cpp, LR"(auto val = settings["Last opened project folder"];)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+
+        runCode(cpp, LR"(return settings[ L"Last opened project folder" ];)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+
+        runCode(cpp, LR"(json["Main window state"]["Last known size"] = 5;)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 2);
+
+        runCode(cpp, LR"(auto val = GetSettings()["Last opened project folder"];)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+        }
+
+    SECTION("Lookup functions")
+        {
+        cpp_i18n_review cpp(false);
+        runCode(cpp, LR"(auto val = settings.at("Last opened project folder");)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+
+        runCode(cpp, LR"(if (settings->contains("Last opened project folder")) {})");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+
+        runCode(cpp, LR"(if (settings.count("Last opened project folder") > 0) {})");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+
+        runCode(cpp, LR"(settings.erase("Last opened project folder");)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        CHECK(cpp.get_internal_strings().size() == 1);
+        }
+
+    SECTION("Values are still reviewed")
+        {
+        cpp_i18n_review cpp(false);
+        // the key is internal, but the value assigned to it is not
+        runCode(cpp, LR"(labels["open_prompt"] = "Please select a file to open.";)");
+        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string ==
+              L"Please select a file to open.");
+
+        // not a subscript, just a string followed by an array
+        runCode(cpp, LR"(ShowMessage("Please select a file to open.", items[0]);)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
+
+        // braced list, not a subscript
+        runCode(cpp, LR"(const char* items[] = { "Please select a file to open." };)");
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
+        }
+    }
+
 // NOLINTEND
 // clang-format on

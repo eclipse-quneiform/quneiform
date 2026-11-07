@@ -248,6 +248,22 @@ namespace i18n_check
                     {
                     std::advance(startPos, -1);
                     }
+                // See if the quote is directly inside of a subscript (e.g., map["key"]).
+                // The '[' must follow something being indexed (a name, ']', or ')'),
+                // so that array initializers like C# collection expressions are not included.
+                // (The closing ']' is checked after the end of the quote is found.)
+                bool isSubscriptStart{ false };
+                if (startPos > m_file_start && *startPos == L'[')
+                    {
+                    const wchar_t* indexedEnd{ std::prev(startPos) };
+                    while (indexedEnd > m_file_start &&
+                           static_cast<bool>(std::iswspace(*indexedEnd)))
+                        {
+                        std::advance(indexedEnd, -1);
+                        }
+                    isSubscriptStart = (is_valid_name_char(*indexedEnd) || *indexedEnd == L']' ||
+                                        *indexedEnd == L')');
+                    }
                 // if we are on a character that can be part of a variable
                 // (and not punctuation) at this point,
                 // then this might be a #defined variable
@@ -452,7 +468,8 @@ namespace i18n_check
                         ++nextChar;
                         }
                     process_quote(cppText, end, functionVarNamePos, functionName, variableInfo,
-                                  deprecatedMacroEncountered, parameterPosition, *nextChar == L',');
+                                  deprecatedMacroEncountered, parameterPosition, *nextChar == L',',
+                                  isSubscriptStart && *nextChar == L']');
                     // closing quote was just cleared; now, clear the opening one
                     if (isRawString && currentRawStringMarker == L'R')
                         {

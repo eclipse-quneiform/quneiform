@@ -2111,7 +2111,8 @@ namespace i18n_check
                                     const std::wstring& functionName,
                                     const variable_info& variableInfo,
                                     const std::wstring& deprecatedMacroEncountered,
-                                    const size_t parameterPosition, const bool isFollowedByComma)
+                                    const size_t parameterPosition, const bool isFollowedByComma,
+                                    const bool isSubscriptKey)
         {
         // Note that we always pass 'variableInfo.m_operator' as the operator value, even if this
         // quote is really being sent to a function. This will pick up any + or ?: operations in
@@ -2133,7 +2134,19 @@ namespace i18n_check
                     std::distance<const wchar_t*>(m_file_start, currentTextPos))));
             }
 
-        if (!variableInfo.m_name.empty())
+        // a lookup key (e.g., map["key"]) is internal (or at least it should be!)
+        if (isSubscriptKey)
+            {
+            m_internal_strings.emplace_back(
+                std::wstring{ currentTextPos, static_cast<size_t>(std::distance<const wchar_t*>(
+                                                  currentTextPos, quoteEnd)) },
+                string_info::usage_info(string_info::usage_info::usage_type::orphan, std::wstring{},
+                                        std::wstring{}, variableInfo.m_operator),
+                m_file_name,
+                get_line_and_column(static_cast<size_t>(
+                    std::distance<const wchar_t*>(m_file_start, currentTextPos))));
+            }
+        else if (!variableInfo.m_name.empty())
             {
             // Adjacent string literals (e.g., a long value split across multiple lines) are
             // scanned as a single quote here, but the raw text in between still contains the
@@ -2382,7 +2395,8 @@ namespace i18n_check
                     get_line_and_column(static_cast<size_t>(
                         std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                 }
-            else if (m_variable_types_to_ignore.contains(functionName))
+            else if (m_variable_types_to_ignore.contains(functionName) ||
+                     is_key_lookup_function(functionName))
                 {
                 m_internal_strings.emplace_back(
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),

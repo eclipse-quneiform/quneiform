@@ -1121,12 +1121,29 @@ namespace i18n_check
             @param deprecatedMacroEncountered If the quote is inside a deprecated
                 macro, then name of this macro.
             @param parameterPosition The string's position in the function call (if applicable).
-            @param isFollowedByComma Whether the quote is followed by a comma.*/
+            @param isFollowedByComma Whether the quote is followed by a comma.
+            @param isSubscriptKey Whether the quote is the only thing inside of a
+                subscript (e.g., @c map["key"]), meaning that it is a lookup key.*/
         void process_quote(wchar_t* currentTextPos, const wchar_t* quoteEnd,
                            const wchar_t* functionVarNamePos, const std::wstring& functionName,
                            const variable_info& variableInfo,
                            const std::wstring& deprecatedMacroEncountered,
-                           const size_t parameterPosition, const bool isFollowedByComma);
+                           const size_t parameterPosition, const bool isFollowedByComma,
+                           const bool isSubscriptKey = false);
+
+        /// @returns @c true if a function is a container lookup function whose
+        ///     string argument is a key (e.g., `map.at("key")` or
+        ///     `dict.ContainsKey("key"))`.
+        /// @param functionName The function name to review.
+        [[nodiscard]]
+        static bool is_key_lookup_function(std::wstring_view functionName)
+            {
+            static const std::set<std::wstring_view> lookupFunctions{
+                _DT(L"at"),    _DT(L"contains"), _DT(L"count"),
+                _DT(L"erase"), L"ContainsKey",   L"TryGetValue"
+            };
+            return lookupFunctions.contains(extract_base_function(functionName));
+            }
 
         /// @brief Determines whether a hard-coded string should actually be
         ///     exposed for translation or not.
