@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <iostream>
 #include <iterator>
+#include <optional>
 #ifdef wxVERSION_NUMBER
     #include <wx/file.h>
 #endif
@@ -256,6 +257,32 @@ namespace i18n_check
 
             const file_review_type fileType = get_file_type(file);
 
+            // sends the file's text to the analyzer for its file type
+            const auto loadIntoAnalyzer = [this, fileType, &file](const std::wstring_view text)
+            {
+                switch (fileType)
+                    {
+                case file_review_type::rc:
+                    (*m_rc)(text, file);
+                    break;
+                case file_review_type::infoplist:
+                    (*m_plist)(text, file);
+                    break;
+                case file_review_type::po:
+                    (*m_po)(text, file);
+                    break;
+                case file_review_type::cs:
+                    (*m_csharp)(text, file);
+                    break;
+                case file_review_type::quarto:
+                    (*m_quarto)(text, file);
+                    break;
+                default:
+                    (*m_cpp)(text, file);
+                    break;
+                    }
+            };
+
             try
                 {
                 bool startsWithBom{ false };
@@ -266,30 +293,7 @@ namespace i18n_check
                         {
                         m_filesThatContainUTF8Signature.push_back(file);
                         }
-                    if (fileType == file_review_type::rc)
-                        {
-                        (*m_rc)(fileUtf8Text, file);
-                        }
-                    else if (fileType == file_review_type::infoplist)
-                        {
-                        (*m_plist)(fileUtf8Text, file);
-                        }
-                    else if (fileType == file_review_type::po)
-                        {
-                        (*m_po)(fileUtf8Text, file);
-                        }
-                    else if (fileType == file_review_type::cs)
-                        {
-                        (*m_csharp)(fileUtf8Text, file);
-                        }
-                    else if (fileType == file_review_type::quarto)
-                        {
-                        (*m_quarto)(fileUtf8Text, file);
-                        }
-                    else
-                        {
-                        (*m_cpp)(fileUtf8Text, file);
-                        }
+                    loadIntoAnalyzer(fileUtf8Text);
                     }
                 else if (const auto [readUtf16Ok, fileUtf16Text] = read_utf16_file(file);
                          readUtf16Ok)
@@ -303,30 +307,7 @@ namespace i18n_check
                         {
                         m_filesThatShouldBeConvertedToUTF8.push_back(file);
                         }
-                    if (fileType == file_review_type::rc)
-                        {
-                        (*m_rc)(fileUtf16Text, file);
-                        }
-                    else if (fileType == file_review_type::infoplist)
-                        {
-                        (*m_plist)(fileUtf16Text, file);
-                        }
-                    else if (fileType == file_review_type::po)
-                        {
-                        (*m_po)(fileUtf16Text, file);
-                        }
-                    else if (fileType == file_review_type::cs)
-                        {
-                        (*m_csharp)(fileUtf16Text, file);
-                        }
-                    else if (fileType == file_review_type::quarto)
-                        {
-                        (*m_quarto)(fileUtf16Text, file);
-                        }
-                    else
-                        {
-                        (*m_cpp)(fileUtf16Text, file);
-                        }
+                    loadIntoAnalyzer(fileUtf16Text);
                     }
                 else
                     {
@@ -354,30 +335,7 @@ namespace i18n_check
                     const std::wstring str((std::istreambuf_iterator<wchar_t>(ifs)),
                                            std::istreambuf_iterator<wchar_t>());
 #endif
-                    if (fileType == file_review_type::rc)
-                        {
-                        (*m_rc)(str, file);
-                        }
-                    else if (fileType == file_review_type::infoplist)
-                        {
-                        (*m_plist)(str, file);
-                        }
-                    else if (fileType == file_review_type::po)
-                        {
-                        (*m_po)(str, file);
-                        }
-                    else if (fileType == file_review_type::cs)
-                        {
-                        (*m_csharp)(str, file);
-                        }
-                    else if (fileType == file_review_type::quarto)
-                        {
-                        (*m_quarto)(str, file);
-                        }
-                    else
-                        {
-                        (*m_cpp)(str, file);
-                        }
+                    loadIntoAnalyzer(str);
                     }
                 }
             catch (const std::exception& expt)
@@ -519,535 +477,478 @@ namespace i18n_check
             // TRANSLATORS: Column header in output
             _(L"Warning ID") << L"\n";
 
+        // Writes a row in the format:
+        // File\tLine\tColumn\t"Value"\t"Explanation"\t[ID]
+        // An empty line, column, or value is written as an empty field.
+        const auto writeRow = [&report](const auto& fileName, const std::optional<size_t> line,
+                                        const std::optional<size_t> column,
+                                        const std::wstring_view value, const auto& explanation,
+                                        const std::wstring_view warningId)
+        {
+            report << fileName << L"\t";
+            if (line)
+                {
+                report << *line;
+                }
+            report << L"\t";
+            if (column)
+                {
+                report << *column;
+                }
+            report << L"\t";
+            if (!value.empty())
+                {
+                report << L"\"" << value << L"\"";
+                }
+            report << L"\t\"" << explanation << L"\"\t[" << warningId << L"]\n";
+        };
+
+        // Writes a row for a string_info result.
+        const auto writeInfoRow = [&writeRow, &replaceSpecialSpaces](
+                                      const auto& val, const auto& explanation,
+                                      const std::wstring_view warningId, const bool withColumn)
+        {
+            writeRow(val.m_file_name, val.m_line,
+                     withColumn ? std::optional<size_t>{ val.m_column } : std::nullopt,
+                     replaceSpecialSpaces(val.m_string), explanation, warningId);
+        };
+
         // Windows resource file warnings
         for (const auto& val : m_rc->get_unsafe_localizable_strings())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"String available for translation that probably should not be.")
-                   << L"\"\t[suspectL10NString]\n";
+            writeInfoRow(val, _(L"String available for translation that probably should not be."),
+                         L"suspectL10NString", false);
             }
 
         for (const auto& val : m_rc->get_localizable_strings_with_urls())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"String available for translation that contains an URL or email address.")
-                   << L"\"\t[urlInL10NString]\n";
+            writeInfoRow(
+                val, _(L"String available for translation that contains an URL or email address."),
+                L"urlInL10NString", false);
             }
 
         for (const auto& val : m_rc->get_localizable_strings_with_unlocalizable_content())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"String available for translation that contains a "
-                        "large amount of non-translatable content")
-                   << L"\"\t[excessiveNonL10NContent]\n";
+            writeInfoRow(val,
+                         _(L"String available for translation that contains a "
+                           "large amount of non-translatable content"),
+                         L"excessiveNonL10NContent", false);
             }
 
         for (const auto& val : m_rc->get_localizable_strings_being_concatenated())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"String available for translation that may be getting concatenated "
-                        "at runtime with other content.")
-                   << L"\"\t[concatenatedStrings]\n";
+            writeInfoRow(val,
+                         _(L"String available for translation that may be getting concatenated "
+                           "at runtime with other content."),
+                         L"concatenatedStrings", false);
             }
 
         for (const auto& val : m_rc->get_multipart_strings())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"String available for translation may contain multiple sections "
-                        "being sliced at runtime. Consider splitting each section into "
-                        "a separate resource.")
-                   << L"\"\t[multipartString]\n";
+            writeInfoRow(val,
+                         _(L"String available for translation may contain multiple sections "
+                           "being sliced at runtime. Consider splitting each section into "
+                           "a separate resource."),
+                         L"multipartString", false);
             }
 
         for (const auto& val : m_rc->get_faux_plural_strings())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"The same string is used for singular and plural situations. "
-                        "Consider using a pluralizing function (if available) or "
-                        "reword the message.")
-                   << L"\"\t[pluralization]\n";
+            writeInfoRow(val,
+                         _(L"The same string is used for singular and plural situations. "
+                           "Consider using a pluralizing function (if available) or "
+                           "reword the message."),
+                         L"pluralization", false);
             }
 
         for (const auto& val : m_rc->get_article_issue_strings())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"An article is proceeding dynamic content, or a pronoun is being "
-                        "formatted into a larger message. It is recommended to create "
-                        "multiple versions of this string for all possible contexts instead "
-                        "of using dynamic placeholders.")
-                   << L"\"\t[articleOrPronoun]\n";
+            writeInfoRow(val,
+                         _(L"An article is proceeding dynamic content, or a pronoun is being "
+                           "formatted into a larger message. It is recommended to create "
+                           "multiple versions of this string for all possible contexts instead "
+                           "of using dynamic placeholders."),
+                         L"articleOrPronoun", false);
             }
 
         for (const auto& val : m_rc->get_localizable_strings_with_halfwidths())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                   << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-            report << _(L"String available for translation that contains halfwidth characters. "
-                        "Fullwidth characters are recommended.");
-            report << L"\"\t[halfWidth]\n";
+            writeInfoRow(val,
+                         _(L"String available for translation that contains halfwidth characters. "
+                           "Fullwidth characters are recommended."),
+                         L"halfWidth", true);
             }
 
+        // the usage value provides more detailed info about the font issue
         for (const auto& val : m_rc->get_bad_dialog_font_sizes())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string)
-                   << L"\"\t\""
-                   // this provides more detailed info about the issue
-                   << replaceSpecialSpaces(val.m_usage.m_value) << L"\"\t[fontIssue]\n";
+            writeInfoRow(val, replaceSpecialSpaces(val.m_usage.m_value), L"fontIssue", false);
             }
 
         for (const auto& val : m_rc->get_non_system_dialog_fonts())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << replaceSpecialSpaces(val.m_usage.m_value) << L"\"\t[fontIssue]\n";
+            writeInfoRow(val, replaceSpecialSpaces(val.m_usage.m_value), L"fontIssue", false);
             }
 
         // macOS manifest files
         for (const auto& val : m_plist->get_missing_localization_bundles())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"No languages included in macOS Info.plist file. "
-                        "This file should have a CFBundleLocalizations section with "
-                        "an array of strings under it; otherwise, no translations will be loaded "
-                        "at runtime.")
-                   << L"\"\t[suspectI18NUsage]\n";
+            writeInfoRow(
+                val,
+                _(L"No languages included in macOS Info.plist file. "
+                  "This file should have a CFBundleLocalizations section with "
+                  "an array of strings under it; otherwise, no translations will be loaded "
+                  "at runtime."),
+                L"suspectI18NUsage", false);
             }
 
+        // Quarto files
         for (const auto& val : m_quarto->get_multi_sentence_lines())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"Line contains more than one sentence. Consider placing each sentence on "
-                        "its own line to simplify resource extraction.")
-                   << L"\"\t[suspectL10NString]\n";
+            writeInfoRow(val,
+                         _(L"Line contains more than one sentence. Consider placing each sentence "
+                           "on its own line to simplify resource extraction."),
+                         L"suspectL10NString", true);
             }
 
         for (const auto& val : m_quarto->get_multi_line_sentences())
             {
-            report
-                << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                << _(L"Sentence is split across multiple lines. Consider placing each sentence on "
-                     "its own line to simplify resource extraction.")
-                << L"\"\t[suspectL10NString]\n";
+            writeInfoRow(val,
+                         _(L"Sentence is split across multiple lines. Consider placing each "
+                           "sentence on its own line to simplify resource extraction."),
+                         L"suspectL10NString", true);
             }
 
         for (const auto& val : m_quarto->get_malformed_content())
             {
-            report
-                << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                << _(L"Shortcodes should have a blank line between them and any following content.")
-                << L"\"\t[malformedString]\n";
+            writeInfoRow(
+                val,
+                _(L"Shortcodes should have a blank line between them and any following content."),
+                L"malformedString", true);
             }
 
         for (const auto& val : m_quarto->get_smart_quotes())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"Prefer straight quotes instead of smart quotes. "
-                        "Pandoc will automatically convert them to "
-                        "language-appropriate quotation marks.")
-                   << L"\"\t[malformedString]\n";
+            writeInfoRow(val,
+                         _(L"Prefer straight quotes instead of smart quotes. "
+                           "Pandoc will automatically convert them to "
+                           "language-appropriate quotation marks."),
+                         L"malformedString", true);
             }
 
         for (const auto& val : m_quarto->get_range_dash_issues())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"Use an en dash (–) for ranges (e.g., 141–48, A–Z).")
-                   << L"\"\t[malformedString]\n";
+            writeInfoRow(val, _(L"Use an en dash (–) for ranges (e.g., 141–48, A–Z)."),
+                         L"malformedString", true);
             }
 
         for (const auto& val : m_quarto->get_malformed_image_links())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"Image link is malformed.") << L"\"\t[malformedString]\n";
+            writeInfoRow(val, _(L"Image link is malformed."), L"malformedString", true);
             }
 
         for (const auto& val : m_quarto->get_absolute_path_links())
             {
-            report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << "\t\""
-                   << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                   << _(L"Use relative paths instead of absolute or site-root paths.")
-                   << L"\"\t[malformedString]\n";
+            writeInfoRow(val, _(L"Use relative paths instead of absolute or site-root paths."),
+                         L"malformedString", true);
             }
 
         // gettext catalogs
         for (const auto& catEntry : m_po->get_catalog_entries())
             {
+            const auto writePoRow = [&writeRow, &catEntry](const std::wstring_view value,
+                                                           const auto& explanation,
+                                                           const std::wstring_view warningId)
+            {
+                writeRow(catEntry.first, catEntry.second.m_line, std::nullopt, value, explanation,
+                         warningId);
+            };
+
             for (const auto& issue : catEntry.second.m_issues)
                 {
                 if (issue.first == translation_issue::printf_issue)
                     {
-                    report
-                        << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                        << issue.second << L"\"\t\""
-                        << _(L"Mismatching printf command between source and translation strings.")
-                        << "\"\t[printfMismatch]\n";
+                    writePoRow(
+                        issue.second,
+                        _(L"Mismatching printf command between source and translation strings."),
+                        L"printfMismatch");
                     }
                 else if (issue.first == translation_issue::suspect_source_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"String available for translation that probably should not be, or "
-                                "contains a hard-coded URL or email address.")
-                           << "\"\t[suspectL10NString]\n";
+                    writePoRow(issue.second,
+                               _(L"String available for translation that probably should not be, "
+                                 "or contains a hard-coded URL or email address."),
+                               L"suspectL10NString");
                     }
                 else if (issue.first == translation_issue::excessive_nonl10n_content)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"String available for translation that contains a "
-                                "large amount of non-translatable content.")
-                           << "\"\t[excessiveNonL10NContent]\n";
+                    writePoRow(issue.second,
+                               _(L"String available for translation that contains a "
+                                 "large amount of non-translatable content."),
+                               L"excessiveNonL10NContent");
                     }
                 else if (issue.first == translation_issue::malformed_translation)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"String available for translation that is possibly malformed.")
-                           << "\"\t[malformedString]\n";
+                    writePoRow(issue.second,
+                               _(L"String available for translation that is possibly malformed."),
+                               L"malformedString");
                     }
                 else if (issue.first == translation_issue::concatenation_issue)
                     {
-                    report
-                        << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                        << issue.second << L"\"\t\""
-                        << _(L"String available for translation that may be getting concatenated "
-                             "at runtime with other content.")
-                        << "\"\t[concatenatedStrings]\n";
+                    writePoRow(
+                        issue.second,
+                        _(L"String available for translation that may be getting concatenated "
+                          "at runtime with other content."),
+                        L"concatenatedStrings");
                     }
                 else if (issue.first == translation_issue::source_needing_context_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"Ambiguous string available for translation that is "
-                                "lacking a translator comment.")
-                           << "\"\t[L10NStringNeedsContext]\n";
+                    writePoRow(issue.second,
+                               _(L"Ambiguous string available for translation that is "
+                                 "lacking a translator comment."),
+                               L"L10NStringNeedsContext");
                     }
                 else if (issue.first == translation_issue::multipart_string)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"String available for translation may contain multiple sections "
-                                "being sliced at runtime. Consider splitting each section into "
-                                "a separate resource.")
-                           << "\"\t[multipartString]\n";
+                    writePoRow(issue.second,
+                               _(L"String available for translation may contain multiple sections "
+                                 "being sliced at runtime. Consider splitting each section into "
+                                 "a separate resource."),
+                               L"multipartString");
                     }
                 else if (issue.first == translation_issue::article_issue)
                     {
-                    report
-                        << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                        << issue.second << L"\"\t\""
-                        << _(L"An article is proceeding dynamic content, or a pronoun is being "
-                             "formatted into a larger message. It is recommended to create "
-                             "multiple versions of this string for all possible contexts instead "
-                             "of using dynamic placeholders.")
-                        << "\"\t[articleOrPronoun]\n";
+                    writePoRow(
+                        issue.second,
+                        _(L"An article is proceeding dynamic content, or a pronoun is being "
+                          "formatted into a larger message. It is recommended to create "
+                          "multiple versions of this string for all possible contexts instead "
+                          "of using dynamic placeholders."),
+                        L"articleOrPronoun");
                     }
                 else if (issue.first == translation_issue::pluralization)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"The same string is used for singular and plural situations. "
-                                "Consider using a pluralizing function (if available) or "
-                                "reword the message.")
-                           << "\"\t[pluralization]\n";
+                    writePoRow(issue.second,
+                               _(L"The same string is used for singular and plural situations. "
+                                 "Consider using a pluralizing function (if available) or "
+                                 "reword the message."),
+                               L"pluralization");
                     }
                 else if (issue.first == translation_issue::accelerator_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"Mismatching keyboard accelerators between source "
-                                "and translation strings.")
-                           << "\"\t[acceleratorMismatch]\n";
+                    writePoRow(issue.second,
+                               _(L"Mismatching keyboard accelerators between source "
+                                 "and translation strings."),
+                               L"acceleratorMismatch");
                     }
                 else if (issue.first == translation_issue::number_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"Mismatching numbers between source "
-                                "and translation strings.")
-                           << "\"\t[numberInconsistency]\n";
+                    writePoRow(issue.second,
+                               _(L"Mismatching numbers between source "
+                                 "and translation strings."),
+                               L"numberInconsistency");
                     }
                 else if (issue.first == translation_issue::length_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"Translation is suspiciously longer than the source string.")
-                           << "\"\t[lengthInconsistency]\n";
+                    writePoRow(issue.second,
+                               _(L"Translation is suspiciously longer than the source string."),
+                               L"lengthInconsistency");
                     }
                 else if (issue.first == translation_issue::consistency_issue)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\t\""
-                           << issue.second << "\"\t[transInconsistency]\n";
+                    // the issue text is the explanation, there is no value
+                    writePoRow(std::wstring_view{}, issue.second, L"transInconsistency");
                     }
                 else if (issue.first == translation_issue::halfwidth)
                     {
-                    report << catEntry.first << L"\t" << catEntry.second.m_line << L"\t\t\""
-                           << issue.second << L"\"\t\""
-                           << _(L"Halfwidth characters detected. "
-                                "Fullwidth characters are recommended.")
-                           << "\"\t[halfWidth]\n";
+                    writePoRow(issue.second,
+                               _(L"Halfwidth characters detected. "
+                                 "Fullwidth characters are recommended."),
+                               L"halfWidth");
                     }
                 }
             }
 
         // Source code warnings
         const auto formatSourceFileWarnings =
-            [&replaceSpecialSpaces, &report, &verbose](const auto* sourceParser)
+            [&replaceSpecialSpaces, &writeRow, &writeInfoRow, &verbose](const auto* sourceParser)
         {
+            using usage_type = i18n_review::string_info::usage_info::usage_type;
+
             for (const auto& val : sourceParser->get_unsafe_localizable_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                if (val.m_usage.m_type ==
-                    i18n_review::string_info::usage_info::usage_type::function)
-                    {
-                    report << _(L"String available for translation that probably "
-                                "should not be in function call: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else if (val.m_usage.m_type ==
-                         i18n_review::string_info::usage_info::usage_type::variable)
-                    {
-                    report << _(L"String available for translation that probably "
-                                "should not be assigned to variable: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else
-                    {
-                    report << _(L"String available for translation that probably "
-                                "should not be within: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                report << L"[suspectL10NString]\n";
+                const std::wstring explanation =
+                    (val.m_usage.m_type == usage_type::function) ?
+                        _WXTRANS_WSTR(L"String available for translation that probably "
+                                      "should not be in function call: ") :
+                    (val.m_usage.m_type == usage_type::variable) ?
+                        _WXTRANS_WSTR(L"String available for translation that probably "
+                                      "should not be assigned to variable: ") :
+                        _WXTRANS_WSTR(L"String available for translation that probably "
+                                      "should not be within: ");
+                writeInfoRow(val, explanation + val.m_usage.m_value, L"suspectL10NString", true);
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_with_urls())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                if (val.m_usage.m_type ==
-                    i18n_review::string_info::usage_info::usage_type::function)
-                    {
-                    report << _(L"String available for translation that contains an "
-                                "URL or email address in function call: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else if (val.m_usage.m_type ==
-                         i18n_review::string_info::usage_info::usage_type::variable)
-                    {
-                    report << _(L"String available for translation that contains an "
-                                "URL or email address assigned to variable: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else
-                    {
-                    report << _(L"String available for translation that contains an "
-                                "URL or email address within: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                report << L"[urlInL10NString]\n";
+                const std::wstring explanation =
+                    (val.m_usage.m_type == usage_type::function) ?
+                        _WXTRANS_WSTR(L"String available for translation that contains an "
+                                      "URL or email address in function call: ") :
+                    (val.m_usage.m_type == usage_type::variable) ?
+                        _WXTRANS_WSTR(L"String available for translation that contains an "
+                                      "URL or email address assigned to variable: ") :
+                        _WXTRANS_WSTR(L"String available for translation that contains an "
+                                      "URL or email address within: ");
+                writeInfoRow(val, explanation + val.m_usage.m_value, L"urlInL10NString", true);
                 }
 
             for (const auto& val :
                  sourceParser->get_localizable_strings_with_unlocalizable_content())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"String available for translation that contains a "
-                            "large amount of non-translatable content.");
-                report << L"\"\t[excessiveNonL10NContent]\n";
+                writeInfoRow(val,
+                             _(L"String available for translation that contains a "
+                               "large amount of non-translatable content."),
+                             L"excessiveNonL10NContent", true);
                 }
 
             for (const auto& val : sourceParser->get_suspect_i18n_usage())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << val.m_usage.m_value;
-                report << L"\"\t[suspectI18NUsage]\n";
+                writeInfoRow(val, val.m_usage.m_value, L"suspectI18NUsage", true);
                 }
 
             for (const auto& val :
                  sourceParser->get_localizable_strings_ambiguous_needing_context())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"Ambiguous string available for translation that is "
-                            "lacking a translator comment.");
-                report << L"\"\t[L10NStringNeedsContext]\n";
+                writeInfoRow(val,
+                             _(L"Ambiguous string available for translation that is "
+                               "lacking a translator comment."),
+                             L"L10NStringNeedsContext", true);
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_being_concatenated())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"String available for translation that may be getting concatenated "
-                            "at runtime with other content.");
-                report << L"\"\t[concatenatedStrings]\n";
+                writeInfoRow(val,
+                             _(L"String available for translation that may be getting "
+                               "concatenated at runtime with other content."),
+                             L"concatenatedStrings", true);
                 }
 
             for (const auto& val : sourceParser->get_literal_localizable_strings_being_compared())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"Literal string available for translation that is either being "
-                            "searched for or compared against. It is recommended to make this "
-                            "localizable string a variable and use that for "
-                            "all locations that this string is referenced.");
-                report << L"\"\t[literalL10NStringCompare]\n";
+                writeInfoRow(val,
+                             _(L"Literal string available for translation that is either being "
+                               "searched for or compared against. It is recommended to make this "
+                               "localizable string a variable and use that for "
+                               "all locations that this string is referenced."),
+                             L"literalL10NStringCompare", true);
                 }
 
             for (const auto& val : sourceParser->get_multipart_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"String available for translation may contain multiple sections "
-                            "being sliced at runtime. Consider splitting each section into "
-                            "a separate resource.");
-                report << L"\"\t[multipartString]\n";
+                writeInfoRow(val,
+                             _(L"String available for translation may contain multiple sections "
+                               "being sliced at runtime. Consider splitting each section into "
+                               "a separate resource."),
+                             L"multipartString", true);
                 }
 
             for (const auto& val : sourceParser->get_faux_plural_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"The same string is used for singular and plural situations. "
-                            "Consider using a pluralizing function (if available) or "
-                            "reword the message.");
-                report << L"\"\t[pluralization]\n";
+                writeInfoRow(val,
+                             _(L"The same string is used for singular and plural situations. "
+                               "Consider using a pluralizing function (if available) or "
+                               "reword the message."),
+                             L"pluralization", true);
                 }
 
             for (const auto& val : sourceParser->get_article_issue_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"An article is proceeding dynamic content, or a pronoun is being "
-                            "formatted into a larger message. It is recommended to create "
-                            "multiple versions of this string for all possible contexts instead "
-                            "of using dynamic placeholders.")
-                       << L"\"\t[articleOrPronoun]\n";
+                writeInfoRow(val,
+                             _(L"An article is proceeding dynamic content, or a pronoun is being "
+                               "formatted into a larger message. It is recommended to create "
+                               "multiple versions of this string for all possible contexts "
+                               "instead of using dynamic placeholders."),
+                             L"articleOrPronoun", true);
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_with_halfwidths())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                report << _(L"String available for translation that contains halfwidth characters. "
-                            "Fullwidth characters are recommended.");
-                report << L"\"\t[halfWidth]\n";
+                writeInfoRow(val,
+                             _(L"String available for translation that contains halfwidth "
+                               "characters. Fullwidth characters are recommended."),
+                             L"halfWidth", true);
                 }
 
             for (const auto& val : sourceParser->get_localizable_strings_in_internal_call())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                if (val.m_usage.m_type ==
-                    i18n_review::string_info::usage_info::usage_type::function)
-                    {
-                    report << _(L"Localizable string being used within non-user"
-                                " facing function call: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else if (val.m_usage.m_type ==
-                         i18n_review::string_info::usage_info::usage_type::variable)
-                    {
-                    report << _(L"Localizable string being assigned to non-user facing variable: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else if (!val.m_usage.m_value.empty())
-                    {
-                    report << _(L"Localizable string being assigned to: ") << val.m_usage.m_value
-                           << L"\"\t";
-                    }
-                else
-                    {
-                    report << _(L"Localizable string being used within non-user element.")
-                           << L"\"\t";
-                    }
-                report << L"[suspectL10NUsage]\n";
+                const std::wstring explanation =
+                    (val.m_usage.m_type == usage_type::function) ?
+                        _WXTRANS_WSTR(L"Localizable string being used within non-user"
+                                      " facing function call: ") +
+                            val.m_usage.m_value :
+                    (val.m_usage.m_type == usage_type::variable) ?
+                        _WXTRANS_WSTR(
+                            L"Localizable string being assigned to non-user facing variable: ") +
+                            val.m_usage.m_value :
+                    (!val.m_usage.m_value.empty()) ?
+                        _WXTRANS_WSTR(L"Localizable string being assigned to: ") +
+                            val.m_usage.m_value :
+                        std::wstring{ _WXTRANS_WSTR(
+                            L"Localizable string being used within non-user element.") };
+                writeInfoRow(val, explanation, L"suspectL10NUsage", true);
                 }
 
             for (const auto& val : sourceParser->get_not_available_for_localization_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\"";
-                if (val.m_usage.m_type ==
-                    i18n_review::string_info::usage_info::usage_type::function)
-                    {
-                    report << _(L"String not available for translation in function call: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else if (val.m_usage.m_type ==
-                         i18n_review::string_info::usage_info::usage_type::variable)
-                    {
-                    report << _(L"String not available for translation assigned to variable: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else if (!val.m_usage.m_value.empty())
-                    {
-                    report << _(L"String not available for translation assigned to: ")
-                           << val.m_usage.m_value << L"\"\t";
-                    }
-                else
-                    {
-                    report << _(L"String not available for translation.") << L"\"\t";
-                    }
-                report << L"[notL10NAvailable]\n";
+                const std::wstring explanation =
+                    (val.m_usage.m_type == usage_type::function) ?
+                        _WXTRANS_WSTR(L"String not available for translation in function call: ") +
+                            val.m_usage.m_value :
+                    (val.m_usage.m_type == usage_type::variable) ?
+                        _WXTRANS_WSTR(
+                            L"String not available for translation assigned to variable: ") +
+                            val.m_usage.m_value :
+                    (!val.m_usage.m_value.empty()) ?
+                        _WXTRANS_WSTR(L"String not available for translation assigned to: ") +
+                            val.m_usage.m_value :
+                        std::wstring{ _WXTRANS_WSTR(L"String not available for translation.") };
+                writeInfoRow(val, explanation, L"notL10NAvailable", true);
                 }
 
             for (const auto& val : sourceParser->get_deprecated_macros())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\"" << val.m_usage.m_value
-                       << L"\"\t[deprecatedMacro]\n";
+                writeInfoRow(val, val.m_usage.m_value, L"deprecatedMacro", true);
                 }
 
             for (const auto& val : sourceParser->get_printf_single_numbers())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Prefer using std::to_[w]string() instead of printf() to "
-                            "format a number.")
-                       << L"\"\t[printfSingleNumber]\n";
+                writeInfoRow(val,
+                             _(L"Prefer using std::to_[w]string() instead of printf() to "
+                               "format a number."),
+                             L"printfSingleNumber", true);
                 }
 
             for (const auto& val : sourceParser->get_duplicates_value_assigned_to_ids())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Verify that duplicate assignment was intended. "
-                            "If correct, consider assigning the first ID variable by name "
-                            "to the second one to make this intention clear.")
-                       << L"\"\t[dupValAssignedToIds]\n";
+                writeInfoRow(val,
+                             _(L"Verify that duplicate assignment was intended. "
+                               "If correct, consider assigning the first ID variable by name "
+                               "to the second one to make this intention clear."),
+                             L"dupValAssignedToIds", false);
                 }
 
             for (const auto& val : sourceParser->get_ids_assigned_number())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Prefer using ID constants provided by your framework when "
-                            "assigning values to an ID variable.")
-                       << L"\"\t[numberAssignedToId]\n";
+                writeInfoRow(val,
+                             _(L"Prefer using ID constants provided by your framework when "
+                               "assigning values to an ID variable."),
+                             L"numberAssignedToId", false);
                 }
 
             for (const auto& val : sourceParser->get_malformed_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Malformed syntax in string.") << L"\"\t[malformedString]\n";
+                writeInfoRow(val, _(L"Malformed syntax in string."), L"malformedString", true);
                 }
 
             for (const auto& val : sourceParser->get_unencoded_ext_ascii_strings())
@@ -1082,68 +983,56 @@ namespace i18n_check
                         }
                     }
 
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"String contains extended ASCII characters that should be encoded. "
-                            "Recommended change: '")
-                       << encodingRecommendations.str() << L"'\"\t[unencodedExtASCII]\n";
+                writeInfoRow(val,
+                             _WXTRANS_WSTR(L"String contains extended ASCII characters that "
+                                           "should be encoded. Recommended change: '") +
+                                 encodingRecommendations.str() + L"'",
+                             L"unencodedExtASCII", true);
                 }
 
             for (const auto& val : sourceParser->get_escaped_unicode_strings())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t"
-                       << L"\"" << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"String contains an escaped Unicode character sequence. "
-                            "Prefer using the literal UTF-8 character instead.")
-                       << L"\"\t[escapedUnicode]\n";
+                writeInfoRow(val,
+                             _(L"String contains an escaped Unicode character sequence. "
+                               "Prefer using the literal UTF-8 character instead."),
+                             L"escapedUnicode", true);
                 }
 
             for (const auto& val : sourceParser->get_trailing_spaces())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Trailing spaces detected at end of line.")
-                       << L"\"\t[trailingSpaces]\n";
+                writeInfoRow(val, _(L"Trailing spaces detected at end of line."), L"trailingSpaces",
+                             true);
                 }
 
             for (const auto& val : sourceParser->get_tabs())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Tab detected in file; prefer using spaces.") << L"\"\t[tabs]\n";
+                writeInfoRow(val, _(L"Tab detected in file; prefer using spaces."), L"tabs", true);
                 }
 
             for (const auto& val : sourceParser->get_wide_lines())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\"" << _(L"Line length: ")
-                       << val.m_usage.m_value << L"\"\t[wideLine]\n";
+                writeInfoRow(val, _WXTRANS_WSTR(L"Line length: ") + val.m_usage.m_value,
+                             L"wideLine", true);
                 }
 
             for (const auto& val : sourceParser->get_comments_missing_space())
                 {
-                report << val.m_file_name << L"\t" << val.m_line << L"\t" << val.m_column << L"\t\""
-                       << replaceSpecialSpaces(val.m_string) << L"\"\t\""
-                       << _(L"Space should be inserted between comment tag and comment.")
-                       << L"\"\t[commentMissingSpace]\n";
+                writeInfoRow(val, _(L"Space should be inserted between comment tag and comment."),
+                             L"commentMissingSpace", true);
                 }
 
             if (verbose)
                 {
                 for (const auto& parseErr : sourceParser->get_error_log())
                     {
-                    report << parseErr.m_file_name << L"\t";
-                    if (parseErr.m_line != std::wstring::npos)
-                        {
-                        report << parseErr.m_line;
-                        }
-                    report << L"\t";
-                    if (parseErr.m_column != std::wstring::npos)
-                        {
-                        report << parseErr.m_column;
-                        }
-                    report << L"\t\"" << parseErr.m_resourceString << L"\"\t\""
-                           << parseErr.m_message << L"\"\t[debugParserInfo]\n";
+                    writeRow(parseErr.m_file_name,
+                             (parseErr.m_line != std::wstring::npos) ?
+                                 std::optional<size_t>{ parseErr.m_line } :
+                                 std::nullopt,
+                             (parseErr.m_column != std::wstring::npos) ?
+                                 std::optional<size_t>{ parseErr.m_column } :
+                                 std::nullopt,
+                             parseErr.m_resourceString, parseErr.m_message, L"debugParserInfo");
                     }
                 }
         };
@@ -1151,21 +1040,22 @@ namespace i18n_check
         formatSourceFileWarnings(m_cpp);
         formatSourceFileWarnings(m_csharp);
 
+        // file-level warnings
         for (const auto& file : m_filesThatShouldBeConvertedToUTF8)
             {
-            report << file << L"\t\t\t\t\""
-                   << _(L"File contains extended ASCII characters, "
-                        "but is not encoded as UTF-8.")
-                   << L"\"\t[nonUTF8File]\n";
+            writeRow(file, std::nullopt, std::nullopt, std::wstring_view{},
+                     _(L"File contains extended ASCII characters, "
+                       "but is not encoded as UTF-8."),
+                     L"nonUTF8File");
             }
 
         for (const auto& file : m_filesThatContainUTF8Signature)
             {
-            report << file << L"\t\t\t\t\""
-                   << _(L"File contains UTF-8 signature; "
-                        "It is recommended to save without the file signature for "
-                        "best compiler portability.")
-                   << L"\"\t[UTF8FileWithBOM]\n";
+            writeRow(file, std::nullopt, std::nullopt, std::wstring_view{},
+                     _(L"File contains UTF-8 signature; "
+                       "It is recommended to save without the file signature for "
+                       "best compiler portability."),
+                     L"UTF8FileWithBOM");
             }
 
         return report;
