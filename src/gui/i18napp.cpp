@@ -15,7 +15,7 @@
 #include <wx/display.h>
 #include <wx/uilocale.h>
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,cppcoreguidelines-pro-type-static-cast-downcast)
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,cppcoreguidelines-pro-type-static-cast-downcast,misc-use-internal-linkage)
 wxIMPLEMENT_APP(I18NApp);
 
 I18NArtProvider::I18NArtProvider()

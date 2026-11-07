@@ -730,6 +730,8 @@ namespace i18n_check
                                 (asmStart - m_file_start));
                     return std::next(asmStart, 1);
                     }
+                // non-const pointee is needed because this is returned as wchar_t*
+                // NOLINTNEXTLINE(misc-const-correctness)
                 wchar_t* const closeTag = std::next(asmStart, std::next(end) - asmStart);
                 clear_section(originalStart, closeTag);
                 return closeTag;
@@ -761,6 +763,8 @@ namespace i18n_check
                                 (asmStart - m_file_start));
                     return std::next(asmStart);
                     }
+                // non-const pointee is needed because this is returned as wchar_t*
+                // NOLINTNEXTLINE(misc-const-correctness)
                 wchar_t* const closeTag = std::next(asmStart, std::next(end) - asmStart);
                 clear_section(originalStart, closeTag);
                 return closeTag;

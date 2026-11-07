@@ -375,6 +375,8 @@ namespace string_util
             }
 
         // vanilla version of reading as a number
+        // (wcstod() requires a non-const wchar_t** for its end pointer)
+        // NOLINTNEXTLINE(misc-const-correctness)
         wchar_t* wcstodEnd{ nullptr };
         double value = std::wcstod(buffer, &wcstodEnd);
         const wchar_t* end{ wcstodEnd };
@@ -689,10 +691,8 @@ namespace string_util
 
                 // if wcstod_thousands_separator() didn't move the pointers,
                 // then we are stuck, so return that they are equal
-                if (static_cast<decltype(firstStringIndex)>(firstEnd - firstString) ==
-                        firstStringIndex &&
-                    static_cast<decltype(secondStringIndex)>(secondEnd - secondString) ==
-                        secondStringIndex)
+                if (std::cmp_equal(firstEnd - firstString, firstStringIndex) &&
+                    std::cmp_equal(secondEnd - secondString, secondStringIndex))
                     {
                     return 0;
                     }
@@ -802,15 +802,13 @@ namespace string_util
         long openStack{ 0 };
         while (!stringToSearch.empty())
             {
-            if (stringToSearch.length() >= openSymbol.length() &&
-                stringToSearch.compare(0, openSymbol.length(), openSymbol) == 0)
+            if (stringToSearch.starts_with(openSymbol))
                 {
                 ++openStack;
                 stringToSearch.remove_prefix(openSymbol.length());
                 continue;
                 }
-            if (stringToSearch.length() >= closeSymbol.length() &&
-                stringToSearch.compare(0, closeSymbol.length(), closeSymbol) == 0)
+            if (stringToSearch.starts_with(closeSymbol))
                 {
                 if (openStack == 0)
                     {

@@ -1548,7 +1548,7 @@ namespace i18n_check
             {
             for (const auto& func : m_deprecated_string_functions)
                 {
-                if (fileText.substr(i, func.first.length()).compare(func.first) == 0 &&
+                if (fileText.substr(i, func.first.length()) == func.first &&
                     // ensure function is a whole-word match and has something after it
                     (i + func.first.length() < fileText.length() &&
                      !is_valid_name_char(fileText[i + func.first.length()])) &&
@@ -2449,18 +2449,8 @@ namespace i18n_check
         if (!variableInfo.m_type.empty() &&
             !get_ignored_variable_types().contains(variableInfo.m_type) &&
             !m_ctors_to_ignore.contains(variableInfo.m_type) &&
-            (variableInfo.m_type.length() < 5 ||
-             std::wstring_view(variableInfo.m_type.c_str(), 5)
-                     .compare(std::wstring_view{ L"std::", 5 }) != 0) &&
-            (variableInfo.m_type.length() < 2 ||
-             std::wstring_view(variableInfo.m_type.c_str(), 2)
-                     .compare(std::wstring_view{ L"wx", 2 }) != 0) &&
-            (variableInfo.m_type.length() < 3 ||
-             std::wstring_view(variableInfo.m_type.c_str(), 3)
-                     .compare(std::wstring_view{ L"_wx", 3 }) != 0) &&
-            (variableInfo.m_type.length() < 2 ||
-             std::wstring_view(variableInfo.m_type.c_str(), 2)
-                     .compare(std::wstring_view{ L"My", 2 }) != 0) &&
+            !variableInfo.m_type.starts_with(L"std::") && !variableInfo.m_type.starts_with(L"wx") &&
+            !variableInfo.m_type.starts_with(L"_wx") && !variableInfo.m_type.starts_with(L"My") &&
             variableInfo.m_type != L"auto" && variableInfo.m_type != L"Bar" &&
             variableInfo.m_type != L"ifstream" && variableInfo.m_type != L"ofstream" &&
             variableInfo.m_type != L"const" && variableInfo.m_type != L"char" &&
@@ -3526,12 +3516,12 @@ namespace i18n_check
                     // convert full-width numbers to 7-bit numbers
                     std::wstring strippedText{ std::regex_replace(res.str(0), separatorsRegex,
                                                                   L"") };
-                    std::for_each(strippedText.begin(), strippedText.end(),
-                                  [](wchar_t& chr)
-                                  {
-                                      chr = i18n_string_util::devanagari_number_to_7bit(
-                                          i18n_string_util::full_width_number_to_7bit(chr));
-                                  });
+                    std::ranges::for_each(strippedText,
+                                          [](wchar_t& chr)
+                                          {
+                                              chr = i18n_string_util::devanagari_number_to_7bit(
+                                                  i18n_string_util::full_width_number_to_7bit(chr));
+                                          });
                     results.push_back(std::move(strippedText));
                     }
                 }
@@ -3554,7 +3544,7 @@ namespace i18n_check
             searchStart += res.position() + res.length();
             results.push_back(res.str(0));
             }
-        std::sort(results.begin(), results.end());
+        std::ranges::sort(results);
         return results;
         }
 
@@ -3571,7 +3561,7 @@ namespace i18n_check
             searchStart += res.position() + res.length();
             results.push_back(res.str(0));
             }
-        std::sort(results.begin(), results.end());
+        std::ranges::sort(results);
         return results;
         }
 
@@ -3630,8 +3620,7 @@ namespace i18n_check
             }
 
         // sort by position
-        std::sort(results.begin(), results.end(),
-                  [](const auto& lhv, const auto& rhv) noexcept { return lhv.first < rhv.first; });
+        std::ranges::sort(results, {}, &std::pair<size_t, std::wstring>::first);
 
         std::vector<std::wstring> finalStrings;
         finalStrings.reserve(results.size());

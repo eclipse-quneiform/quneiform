@@ -34,6 +34,7 @@
 #include <wx/wx.h>
 
 /// @brief Which additional pages to show on the dialog when shown.
+// NOLINTNEXTLINE(cppcoreguidelines-use-enum-class)
 enum EditorPageOptions
     {
     /// @brief No extra pages.

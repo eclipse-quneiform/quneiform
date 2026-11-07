@@ -45,7 +45,7 @@
 
 ///@brief Checks which version of GCC we are building with.
 ///     (And actually GCC, not clang.) Always returns @c true if not GCC.
-#if defined(__clang__)
+#ifdef __clang__
     #define CHECK_GCC_VERSION(major, minor, patch) 1
 #elif defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
     #define CHECK_GCC_VERSION(major, minor, patch)                                                 \
@@ -72,6 +72,7 @@
 namespace i18n_check
     {
     /// @brief Tests to perform.
+    // NOLINTNEXTLINE(cppcoreguidelines-use-enum-class)
     enum review_style : int64_t
         {
         /// @brief Do not perform any checks.
