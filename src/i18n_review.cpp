@@ -2226,6 +2226,25 @@ namespace i18n_check
                                 std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                         }
                     }
+                // An empty msgid is a special lookup in gettext:
+                // it returns the catalog's header metadata, not an empty string.
+                else if (currentTextPos == quoteEnd)
+                    {
+                    if (static_cast<bool>(m_review_styles & check_suspect_i18n_usage))
+                        {
+                        m_suspect_i18n_usage.emplace_back(
+                            functionName,
+                            string_info::usage_info(
+                                string_info::usage_info::usage_type::function,
+                                _WXTRANS_WSTR(L"Empty string passed to a translation function. "
+                                              "With gettext, this returns the translation "
+                                              "catalog's header, not an empty string."),
+                                std::wstring{}, variableInfo.m_operator),
+                            m_file_name,
+                            get_line_and_column(static_cast<size_t>(
+                                std::distance<const wchar_t*>(m_file_start, currentTextPos))));
+                        }
+                    }
                 else
                     {
                     m_localizable_strings.emplace_back(

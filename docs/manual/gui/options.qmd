@@ -116,6 +116,8 @@ This will check for issues such as:
   This may indicate that the context and translatable string arguments are reversed.
 - String literals being passed to `_()` and `wxPLURAL()`.
 - Possible strings meant for translation being passed to ID loading functions (e.g., `qtTrId()`).
+- Empty strings being passed to translation functions (e.g., `_("")`).\
+  With *gettext*, an empty string returns the translation catalog's header, not an empty string.
 - Using two-digit year specifiers (\'%g\', \'%y\', and \'%C\') in `strftime`-like functions.\
   This causes ambiguity between years and months/days for end users and is also not Y2K compliant\index{Y2K compliance}.
 - macOS Info.plist files not including any `CFBundleLocalizations` keys\index{macOS!Info.plist issues}.\

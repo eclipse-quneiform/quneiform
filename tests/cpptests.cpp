@@ -138,6 +138,53 @@ TEST_CASE("Localize Non-String Literals", "[cpp][i18n]")
         }
     }
 
+TEST_CASE("Empty Translation Strings", "[cpp][i18n]")
+    {
+    SECTION("Empty msgid")
+        {
+        // gettext("") returns the catalog's header, not an empty string
+        const std::vector<std::wstring> snippets{
+            LR"(var = _("");)",
+            LR"(var = _(L"");)",
+            LR"(var = gettext("");)",
+            LR"(var = wxGetTranslation("");)",
+            LR"(var = tr("");)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp.set_style(check_suspect_i18n_usage);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            // Catch2 can only log narrow strings (these snippets are all ASCII)
+            std::string narrowSnippet;
+            for (const auto ch : snippet) { narrowSnippet += static_cast<char>(ch); }
+            INFO(narrowSnippet);
+            REQUIRE(cpp.get_suspect_i18n_usage().size() == 1);
+            CHECK(cpp.get_localizable_strings().size() == 0);
+            }
+        }
+    SECTION("Empty context is OK")
+        {
+        // an empty context string is legitimate, only the message itself matters
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_suspect_i18n_usage);
+        const wchar_t* code = LR"(var = wxGETTEXT_IN_CONTEXT("", "Open");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_suspect_i18n_usage().size() == 0);
+        CHECK(cpp.get_localizable_strings().size() == 1);
+        }
+    SECTION("Check disabled")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_l10n_strings);
+        const wchar_t* code = LR"(var = _("");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_suspect_i18n_usage().size() == 0);
+        }
+    }
+
 TEST_CASE("Snake case words", "[cpp][i18n]")
     {
     SECTION("user_level_permission")
