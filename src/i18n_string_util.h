@@ -236,7 +236,7 @@ namespace i18n_string_util
     void remove_escaped_unicode_values(std::wstring& str);
 
     /// @returns @c true if @c str contains an escaped Unicode value
-    ///     (e.g., a \uXXXX, \UXXXXXXXX, or \xHH escape sequence).
+    ///     (e.g., a \\uXXXX, \\UXXXXXXXX, or \\xHH escape sequence).
     /// @param str The string to review.
     [[nodiscard]]
     bool contains_escaped_unicode_value(std::wstring_view str);

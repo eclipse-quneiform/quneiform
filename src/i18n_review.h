@@ -33,8 +33,10 @@
     // for the GUI version, include gettext's translation loading support via wxWidgets
     #if __has_include(<wx/wx.h>)
         #include <wx/wx.h>
+        // quneiform-suppress-begin
         // NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp,readability-identifier-naming)
         #define _WXTRANS_WSTR(s) _(s).wc_string()
+        // quneiform-suppress-end
     #else
         #define _(s) (s)
         #define _WXTRANS_WSTR(s) (s)
