@@ -147,6 +147,63 @@ TEST_CASE("untranslatable", "[i18nreview]")
     CHECK(reviewer.is_untranslatable_string(LR"({\"name\": \"%s\", "                 L"\"section\": {})", false).first);
     }
 
+TEST_CASE("untranslatable code and formats", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review reviewer{ false };
+    SECTION("Date/time formats")
+        {
+        CHECK(reviewer.is_untranslatable_string(L"yyyy-MM-dd HH:mm:ss", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"dd/MM/yyyy", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"MMMM d, yyyy", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"hh:mm tt", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"HH:mm", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"yyyy-MM-ddTHH:mm:ss.fffZ", false).first);
+        // already handled (printf/strftime commands are stripped, or too few letters)
+        CHECK(reviewer.is_untranslatable_string(L"%Y-%m-%d", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"%H:%M:%S", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"N2", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"C0", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"o", false).first);
+        // only one date-like token, this is a word
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Hmm...", false).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Date format:", false).first);
+        }
+    SECTION("Reverse-DNS identifiers")
+        {
+        CHECK(reviewer.is_untranslatable_string(L"com.company.product", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"org.kde.konsole", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"com.apple.Safari", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"settings.window.width", false).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Settings saved. Restart the program.", false).first);
+        }
+    SECTION("Shader code")
+        {
+        CHECK(reviewer.is_untranslatable_string(L"#version 330 core", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"#version 330 core\\nlayout (location = 0) in vec3 aPos;\\n", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"#extension GL_ARB_separate_shader_objects : enable", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"uniform mat4 model;", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"uniform sampler2D screenTexture;", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"precision mediump float;", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"out vec4 FragColor;", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"layout (location = 0) in vec3 aPos;", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"gl_Position = projection * view * vec4(aPos, 1.0);", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"float4 main(float4 pos : POSITION) : SV_TARGET", false).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Uniform spacing between items", false).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Precision float values", false).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Version 3 is now available.", false).first);
+        }
+    SECTION("ANSI escape sequences")
+        {
+        // already handled (not enough consecutive letters)
+        CHECK(reviewer.is_untranslatable_string(L"\\033[1;31m", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"\\x1b[2J\\x1b[H", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"\\033[38;5;208m", false).first);
+        CHECK(reviewer.is_untranslatable_string(L"\\x1b[?25l", false).first);
+        // visible text inside of the color codes is still user facing
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"\\033[1;31mThe file could not be opened.\\033[0m", false).first);
+        }
+    }
+
 TEST_CASE("translatable", "[i18nreview]")
     {
     i18n_check::cpp_i18n_review reviewer{ false };

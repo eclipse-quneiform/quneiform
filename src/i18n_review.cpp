@@ -574,9 +574,26 @@ namespace i18n_check
             std::wregex(LR"((<< [\/()A-Za-z0-9[:space:]]*(\\n|[[:space:]])*)+)"),
             std::wregex(
                 LR"((?:\/[A-Za-z0-9[:space:]]* \[[A-Za-z0-9[:space:]%]+\](?:\\n|[[:space:]])*)+)"),
-            // C
+            // C (and GLSL) preprocessor
             std::wregex(
-                LR"(^#(?:include|define|if|ifdef|ifndef|endif|elif|pragma|warning)[[:space:]].*)"),
+                LR"(^#(?:include|define|undef|if|ifdef|ifndef|endif|elif|pragma|warning|error|line|version|extension)[[:space:]].*)"),
+            // GLSL declarations
+            // (e.g., "uniform mat4 model;", "layout (location = 0) in vec3 aPos;")
+            std::wregex(
+                LR"((?:layout[[:space:]]*[(][^)]*[)][[:space:]]*)?(?:(?:uniform|attribute|varying|in|out|inout|flat|const|precision)[[:space:]]+)+(?:(?:lowp|mediump|highp)[[:space:]]+)?(?:float|double|int|uint|bool|[biud]?vec[234]|d?mat[234](?:x[234])?|sampler(?:[123]D|Cube|2DArray|2DShadow))(?:[[:space:]]+[A-Za-z_][A-Za-z0-9_]*)?[[:space:]]*[;\[=].*)"),
+            // GLSL built-in variables (e.g., gl_Position)
+            std::wregex(LR"(.*\bgl_[A-Z][A-Za-z]+\b.*)"),
+            // HLSL semantics and types
+            std::wregex(
+                LR"(.*\b(?:SV_[A-Za-z]+[0-9]?|float[234](?:x[234])?|half[234]|cbuffer)\b.*)"),
+            // Date/time format strings (e.g., "yyyy-MM-dd HH:mm:ss", "MMMM d, yyyy").
+            // Requires at least two repeated-letter tokens and a separator,
+            // so that something like "Hmm..." isn't matched.
+            std::wregex(
+                LR"((?=(?:.*(?:yy|MM|dd|HH|hh|mm|ss)){2})(?=.*[-/:., ])(?:(?:y{1,4}|M{1,4}|d{1,4}|H{1,2}|h{1,2}|m{1,2}|s{1,2}|f{1,7}|F{1,7}|t{1,2}|z{1,3}|K|g{1,2})[-/:., T'Z]*)+)"),
+            // reverse-DNS identifiers and dotted keys
+            // (e.g., "com.company.product", "settings.window.width")
+            std::wregex(LR"([a-z][a-z0-9_\-]*(?:\.[A-Za-z][A-Za-z0-9_\-]*){2,})"),
             // C++
             std::wregex(LR"([a-zA-Z0-9_]+([-][>]|::)[a-zA-Z0-9_]+([(][)];)?)"),
             std::wregex(LR"(#(define|pragma) .*)"),
