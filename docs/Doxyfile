@@ -836,7 +836,7 @@ CITE_BIB_FILES         =
 # messages are off.
 # The default value is: NO.
 
-QUIET                  = NO
+QUIET                  = YES
 
 # The WARNINGS tag can be used to turn on/off the warning messages that are
 # generated to standard error (stderr) by doxygen. If WARNINGS is set to YES
@@ -1050,9 +1050,12 @@ EXCLUDE                = ../src/unicode_extract_text.h \
                          ../src/cxxopts \
                          ../src/utfcpp \
                          ../src/extract_text.h \
-                         ../src/extract_text.h \
                          ../src/char_traits.h \
-                         ../src/i18n_review.cpp
+                         ../src/i18n_review.cpp \
+                         ../gui/wxWidgets_lib \
+                         ../gui/out \
+                         ../out \
+                         ../docs/manual
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -1070,7 +1073,12 @@ EXCLUDE_SYMLINKS       = NO
 
 EXCLUDE_PATTERNS       = i18n_review.cpp \
                          CMakeLists.txt \
-                         subset.cpp
+                         subset.cpp \
+                         */test/* \
+                         */tests/* \
+                         */Testing/* \
+                         */out/build/* \
+                         */CMakeFiles/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -1165,7 +1173,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the doxygen output.
 
-USE_MDFILE_AS_MAINPAGE = README.md
+USE_MDFILE_AS_MAINPAGE = ../README.md
 
 # The Fortran standard specifies that for fixed formatted Fortran code all
 # characters from position 72 are to be considered as comment. A common
