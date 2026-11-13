@@ -3085,6 +3085,95 @@ TEST_CASE("Framework Internal Functions", "[cpp]")
         }
     }
 
+TEST_CASE("Framework Internal Function Parameters", "[cpp]")
+    {
+    // only specific arguments of these functions are internal (e.g., a window class name),
+    // the other arguments must still be reviewed
+    const auto toNarrow = [](const std::wstring& str)
+    {
+        // Catch2 can only log narrow strings (these snippets are all ASCII)
+        std::string narrowStr;
+        for (const auto ch : str) { narrowStr += static_cast<char>(ch); }
+        return narrowStr;
+    };
+
+    SECTION("Internal argument")
+        {
+        const std::vector<std::wstring> snippets{
+            // Win32 window class names
+            LR"(CreateWindowExW(0, L"The main window toolbar", nullptr, WS_CHILD, 0, 0, 10, 10, hParent, nullptr, hInst, nullptr);)",
+            LR"(HWND hwnd = CreateWindowEx(0, L"The main window toolbar", nullptr, WS_CHILD, 0, 0, 10, 10, hParent, nullptr, hInst, nullptr);)",
+            LR"(CreateWindowW(L"The main window toolbar", nullptr, WS_CHILD, 0, 0, 10, 10, hParent, nullptr, hInst, nullptr);)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            INFO(toNarrow(snippet));
+            CHECK(cpp.get_not_available_for_localization_strings().empty());
+            CHECK(cpp.get_internal_strings().size() == 1);
+            }
+        }
+
+    SECTION("Other arguments still reviewed")
+        {
+        const std::vector<std::wstring> snippets{
+            // window titles
+            LR"(CreateWindowExW(0, L"MyAppMainWnd", L"The main window toolbar", WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)",
+            LR"(CreateWindowW(L"MyAppMainWnd", L"The main window toolbar", WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            INFO(toNarrow(snippet));
+            CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
+            }
+        }
+
+    SECTION("Translated title with internal class name")
+        {
+        const std::vector<std::wstring> snippets{
+            LR"(CreateWindowExW(0, L"The main window toolbar", _(L"Document Viewer"), WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)",
+            LR"(HWND hwnd = CreateWindowEx(0, L"The main window toolbar", _(L"Document Viewer"), WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)",
+            LR"(CreateWindowW(L"The main window toolbar", _(L"Document Viewer"), WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            INFO(toNarrow(snippet));
+            CHECK(cpp.get_not_available_for_localization_strings().empty());
+            CHECK(cpp.get_localizable_strings_in_internal_call().empty());
+            CHECK(cpp.get_suspect_i18n_usage().empty());
+            REQUIRE(cpp.get_localizable_strings().size() == 1);
+            CHECK(cpp.get_localizable_strings()[0].m_string == std::wstring{ L"Document Viewer" });
+            REQUIRE(cpp.get_internal_strings().size() == 1);
+            CHECK(cpp.get_internal_strings()[0].m_string == std::wstring{ L"The main window toolbar" });
+            }
+        }
+
+    SECTION("Translated class name")
+        {
+        const std::vector<std::wstring> snippets{
+            LR"(CreateWindowExW(0, _(L"MyAppMainWnd"), _(L"Document Viewer"), WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)",
+            LR"(HWND hwnd = CreateWindowEx(0, _(L"MyAppMainWnd"), _(L"Document Viewer"), WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)",
+            LR"(CreateWindowW(_(L"MyAppMainWnd"), _(L"Document Viewer"), WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, nullptr, nullptr, hInst, nullptr);)" };
+        for (const auto& snippet : snippets)
+            {
+            cpp_i18n_review cpp(false);
+            cpp(snippet, L"");
+            cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+            INFO(toNarrow(snippet));
+            CHECK(cpp.get_localizable_strings().size() == 2);
+            // only the class name is flagged, not the title
+            REQUIRE(cpp.get_localizable_strings_in_internal_call().size() == 1);
+            CHECK(cpp.get_localizable_strings_in_internal_call()[0].m_string == std::wstring{ L"MyAppMainWnd" });
+            CHECK(cpp.get_localizable_strings_in_internal_call()[0].m_usage.m_value.starts_with(L"CreateWindow"));
+            }
+        }
+    }
+
 TEST_CASE("Internal Strings", "[cpp]")
     {
     SECTION("Windows names")

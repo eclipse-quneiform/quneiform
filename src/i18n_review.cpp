@@ -2344,7 +2344,10 @@ namespace i18n_check
                         // internal functions
                         if (is_diagnostic_function(functionNameOuter) ||
                             // CTORs whose arguments should not be translated
-                            m_variable_types_to_ignore.contains(functionNameOuter))
+                            m_variable_types_to_ignore.contains(functionNameOuter) ||
+                            // internal argument of a function (e.g., a window class name)
+                            is_internal_function_parameter(functionNameOuter,
+                                                           parameterPositionOuter))
                             {
                             m_localizable_strings_in_internal_call.emplace_back(
                                 std::wstring(currentTextPos, quoteEnd - currentTextPos),
@@ -2415,7 +2418,8 @@ namespace i18n_check
                         std::distance<const wchar_t*>(m_file_start, currentTextPos))));
                 }
             else if (m_variable_types_to_ignore.contains(functionName) ||
-                     is_key_lookup_function(functionName))
+                     is_key_lookup_function(functionName) ||
+                     is_internal_function_parameter(functionName, parameterPosition))
                 {
                 m_internal_strings.emplace_back(
                     std::wstring(currentTextPos, quoteEnd - currentTextPos),

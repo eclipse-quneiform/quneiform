@@ -1157,6 +1157,27 @@ namespace i18n_check
             return lookupFunctions.contains(extract_base_function(functionName));
             }
 
+        /// @returns @c true if a string argument at a specific position in a function call
+        ///     is internal (e.g., a window class name), while the
+        ///     function's other arguments may still be user-facing.
+        /// @param functionName The function name to review.
+        /// @param parameterPosition The (zero-based) position of the string in the call.
+        [[nodiscard]]
+        static bool is_internal_function_parameter(std::wstring_view functionName,
+                                                   const size_t parameterPosition)
+            {
+            // function name -> position of its internal string argument
+            static const std::map<std::wstring_view, size_t> internalParameters{
+                // Win32 window class names (the window title follows it)
+                { L"CreateWindowEx", 1 }, { L"CreateWindowExW", 1 }, { L"CreateWindowExA", 1 },
+                { L"CreateWindow", 0 },   { L"CreateWindowW", 0 },   { L"CreateWindowA", 0 }
+            };
+
+            const auto foundFunction = internalParameters.find(extract_base_function(functionName));
+            return (foundFunction != internalParameters.cend() &&
+                    foundFunction->second == parameterPosition);
+            }
+
         /// @brief Determines whether a hard-coded string should actually be
         ///     exposed for translation or not.
         /// @details If so, then it will be added to the queue of non-localizable strings;
