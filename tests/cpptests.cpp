@@ -3520,8 +3520,23 @@ TEST_CASE("Strings", "[cpp]")
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_localizable_strings().size() == 0);
-        CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
+        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
         CHECK(cpp.get_internal_strings().size() == 0);
+        // "return" is a keyword, not a variable that the string is assigned to
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::orphan);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value.empty());
+        }
+
+    SECTION("Thrown orphan string")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_not_available_for_l10n);
+        const wchar_t* code = LR"(throw "my message";)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::orphan);
+        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value.empty());
         }
 
     SECTION("Allow punctuation only")

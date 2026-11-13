@@ -280,8 +280,20 @@ namespace i18n_check
                         {
                         std::advance(directiveStart, -1);
                         }
-                    variableInfo.m_name.assign(std::next(directiveStart),
-                                               startPos - directiveStart);
+                    // step forward to the start of the name, unless the name begins
+                    // at the very start of the text
+                    if (!is_valid_name_char(*directiveStart))
+                        {
+                        std::advance(directiveStart, 1);
+                        }
+                    variableInfo.m_name.assign(directiveStart,
+                                               std::next(startPos) - directiveStart);
+                    // a keyword in front of a string (e.g., "return" or "throw")
+                    // is not a variable that it is assigned to, so it is an orphan
+                    if (is_keyword(variableInfo.m_name))
+                        {
+                        variableInfo.m_name.clear();
+                        }
                     }
                 else
                     {
