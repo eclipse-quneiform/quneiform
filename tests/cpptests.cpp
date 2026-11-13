@@ -1555,6 +1555,84 @@ TEST_CASE("Printf", "[cpp]")
         }
     }
 
+TEST_CASE("Printf plural mismatch", "[cpp][i18n]")
+    {
+    const auto toNarrow = [](const std::wstring& str)
+    {
+        std::string result;
+        result.reserve(str.size());
+        for (const auto ch : str)
+            {
+            result += static_cast<char>(ch);
+            }
+        return result;
+    };
+
+    SECTION("Mismatching singular and plural")
+        {
+        cpp_i18n_review cpp(false);
+        cpp(LR"(wxString::Format(ngettext("%d file", "%zu files", n), n);)", L"");
+        cpp.review_strings([](size_t) {}, [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_localizable_strings().size() == 2);
+        REQUIRE(cpp.get_printf_plural_mismatches().size() == 1);
+        CHECK(cpp.get_printf_plural_mismatches()[0].m_string == LR"('%d file' vs. '%zu files')");
+        CHECK(cpp.get_printf_plural_mismatches()[0].m_usage.m_value == L"ngettext");
+        }
+
+    SECTION("Mismatching singular and plural, plural functions with leading arguments")
+        {
+        const std::vector<std::pair<std::wstring, std::wstring>> snippets = {
+            { LR"(auto s = wxPLURAL(L"%d file", L"%zu files", n);)", L"wxPLURAL" },
+            { LR"(auto s = dngettext("myapp", "%d file", "%zu files", n);)", L"dngettext" },
+            { LR"(auto s = npgettext("disk", "%d file", "%zu files", n);)", L"npgettext" },
+            { LR"(auto s = dnpgettext("myapp", "disk", "%d file", "%zu files", n);)",
+              L"dnpgettext" },
+            { LR"(auto s = wxGETTEXT_IN_CONTEXT_PLURAL(L"disk", L"%d file", L"%zu files", n);)",
+              L"wxGETTEXT_IN_CONTEXT_PLURAL" },
+            // same specifiers, but in a different order
+            { LR"(auto s = wxPLURAL(L"%s has %zu file", L"%zu files in %s", n);)", L"wxPLURAL" }
+        };
+        for (const auto& [code, funcName] : snippets)
+            {
+            INFO(toNarrow(code));
+            cpp_i18n_review cpp(false);
+            cpp(code, L"");
+            cpp.review_strings([](size_t) {},
+                               [](size_t, const std::filesystem::path&) { return true; });
+            REQUIRE(cpp.get_printf_plural_mismatches().size() == 1);
+            CHECK(cpp.get_printf_plural_mismatches()[0].m_usage.m_value == funcName);
+            }
+        }
+
+    SECTION("Matching singular and plural")
+        {
+        const std::vector<std::wstring> snippets = {
+            LR"(auto s = wxPLURAL(L"%zu file", L"%zu files", n);)",
+            LR"(auto s = ngettext("%zu file", "%zu files", n);)",
+            LR"(auto s = wxGETTEXT_IN_CONTEXT_PLURAL(L"disk", L"%zu file", L"%zu files", n);)",
+            // singular leaving out the number is allowed by gettext
+            LR"(auto s = wxPLURAL(L"One file", L"%zu files", n);)",
+            // singular leaving out the trailing number is fine also
+            LR"(auto s = wxPLURAL(L"%s: one file", L"%s: %zu files", n);)",
+            // no printf commands at all
+            LR"(auto s = wxPLURAL(L"File", L"Files", n);)",
+            // separate (non-plural) calls should not be compared against each other
+            LR"(auto s = wxString::Format(_(L"%d file"), n) + wxString::Format(_(L"%zu files"), n);)",
+            // two plural calls in a row should not be compared across each other
+            LR"(auto s = wxPLURAL(L"%zu file", L"%zu files", n) + wxPLURAL(L"%d item", L"%d items", i);)"
+        };
+        for (const auto& code : snippets)
+            {
+            INFO(toNarrow(code));
+            cpp_i18n_review cpp(false);
+            cpp(code, L"");
+            cpp.review_strings([](size_t) {},
+                               [](size_t, const std::filesystem::path&) { return true; });
+            CHECK(cpp.get_printf_plural_mismatches().empty());
+            }
+        }
+    }
+
 TEST_CASE("URLs", "[cpp]")
     {
     SECTION("URL in l10n string")

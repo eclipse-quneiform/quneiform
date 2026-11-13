@@ -147,12 +147,31 @@ Check for mismatching `printf()` commands between source and translation strings
 This is performed on *gettext* \*.po files and will analyze format strings for the following languages:
 
 - C/C++
+- Qt and KDE (entries flagged as `qt-format`, `qt-plural-format`, or `kde-format`)
+
+For Qt and KDE strings, the positional arguments (e.g., "*%1*", "*%L1*", "*%n*") are compared between the source and translation strings, rather than `printf()` commands.
 
 ::: {.warningsection data-latex=""}
 The checks performed here are strict; all `printf()` commands in translations must match their source counterpart exactly.
 For example, "*%lu*" vs. "*%l*" will emit a warning.
 Questionable commands such as "*% s*" (space is only meant for numeric formatting) will also emit a warning.
 :::
+
+This is also performed on C/C++ source files, where the singular and plural forms of a plural translation call are compared against each other.
+Because the same arguments are formatted into whichever string is selected at runtime, mismatching commands can result in undefined behavior.
+For example, the following will emit a warning:
+
+```cpp
+wxString::Format(wxPLURAL(L"%d file", L"%zu files", n), n);
+```
+
+The singular string is allowed to leave out trailing commands, as unused arguments are ignored by `printf()`.
+For example, "*One file*" vs. "*%zu files*" will not emit a warning.
+
+The following plural functions are reviewed:
+
+- `ngettext()`, `dngettext()`, `npgettext()`, and `dnpgettext()` (*gettext*)
+- `wxPLURAL()` and `wxGETTEXT_IN_CONTEXT_PLURAL()` (*wxWidgets*)
 
 - `acceleratorMismatch`
 

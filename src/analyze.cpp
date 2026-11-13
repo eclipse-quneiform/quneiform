@@ -929,6 +929,13 @@ namespace i18n_check
                              L"printfSingleNumber", true);
                 }
 
+            for (const auto& val : sourceParser->get_printf_plural_mismatches())
+                {
+                writeInfoRow(val,
+                             _(L"Mismatching printf commands between singular and plural forms."),
+                             L"printfMismatch", true);
+                }
+
             for (const auto& val : sourceParser->get_duplicates_value_assigned_to_ids())
                 {
                 writeInfoRow(val,

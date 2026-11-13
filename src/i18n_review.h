@@ -168,7 +168,9 @@ namespace i18n_check
         check_literal_l10n_string_comparison),
 
         /// @brief Check for mismatching printf commands between source strings and their
-        ///     respective translations.
+        ///     respective translations.\n
+        ///     Also checks the singular and plural forms of plural translation calls
+        ///     (e.g., ngettext(), wxPLURAL()) in source code against each other.
         check_mismatching_printf_commands = (static_cast<int64_t>(1) << 30),
         /// @brief Check for mismatching keyboard accelerators between the
         ///     source and target strings.
@@ -659,6 +661,17 @@ namespace i18n_check
             return m_printf_single_numbers;
             }
 
+        /// @returns Plural translation calls (e.g., ngettext(), wxPLURAL()) whose singular and
+        ///     plural strings have mismatching printf commands.\n
+        ///     Because the same arguments are formatted into whichever string is selected
+        ///     at runtime, mismatching commands (e.g., "%d file" vs. "%zu files") can cause
+        ///     undefined behavior.
+        [[nodiscard]]
+        const std::vector<string_info>& get_printf_plural_mismatches() const noexcept
+            {
+            return m_printf_plural_mismatches;
+            }
+
         /// @returns IDs that are assigned a hard-coded numeric value.
         [[nodiscard]]
         const std::vector<string_info>& get_ids_assigned_number() const noexcept
@@ -1143,6 +1156,41 @@ namespace i18n_check
                            const size_t parameterPosition, const bool isFollowedByComma,
                            const bool isSubscriptKey = false, const bool isComparedLiteral = false);
 
+        /** @brief Pairs the singular and plural forms of a plural translation call
+                (e.g., ngettext(), wxPLURAL()) and records it if their printf commands mismatch.
+            @param str The string literal from the translation call.
+            @param functionVarNamePos The position of the call's function name, used
+                to make sure that both strings are from the same call.
+            @param functionName The translation function's name.
+            @param parameterPosition The string's position in the function call.
+            @param filePosition The string's position in the file.*/
+        void check_plural_printf_commands(const std::wstring& str,
+                                          const wchar_t* functionVarNamePos,
+                                          const std::wstring& functionName,
+                                          const size_t parameterPosition,
+                                          const size_t filePosition);
+
+        /// @returns The parameter position of the singular string in a plural translation
+        ///     function (the plural string follows it), or @c std::nullopt if not a
+        ///     printf-style plural function.
+        /// @param functionName The function name to review.
+        [[nodiscard]]
+        static std::optional<size_t>
+        get_plural_function_singular_position(std::wstring_view functionName)
+            {
+            static const std::map<std::wstring_view, size_t> pluralFunctions{
+                { L"ngettext", 0 },
+                { L"wxPLURAL", 0 },
+                { L"dngettext", 1 },
+                { L"npgettext", 1 },
+                { L"wxGETTEXT_IN_CONTEXT_PLURAL", 1 },
+                { L"dnpgettext", 2 }
+            };
+            const auto pos = pluralFunctions.find(functionName);
+            return (pos != pluralFunctions.cend()) ? std::optional<size_t>{ pos->second } :
+                                                     std::nullopt;
+            }
+
         /// @returns @c true if a function is a container lookup function whose
         ///     string argument is a key (e.g., `map.at("key")` or
         ///     `dict.ContainsKey("key"))`.
@@ -1469,6 +1517,19 @@ namespace i18n_check
         std::vector<string_info> m_unencoded_strings;
         std::vector<string_info> m_escaped_unicode_strings;
         std::vector<string_info> m_printf_single_numbers;
+        std::vector<string_info> m_printf_plural_mismatches;
+
+        // the singular form of the plural translation call currently being read,
+        // queued to be compared against its plural string
+        struct pending_plural_singular
+            {
+            std::filesystem::path m_file_name;
+            const wchar_t* m_function_pos{ nullptr };
+            std::wstring m_function_name;
+            std::wstring m_string;
+            };
+
+        std::optional<pending_plural_singular> m_pending_plural_singular;
         std::vector<string_info> m_ids_assigned_number;
         std::vector<string_info> m_duplicates_value_assigned_to_ids;
         std::vector<string_info> m_malformed_strings;

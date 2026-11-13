@@ -2318,6 +2318,15 @@ namespace i18n_check
                         get_line_and_column(static_cast<size_t>(
                             std::distance<const wchar_t*>(m_file_start, currentTextPos))));
 
+                    if (static_cast<bool>(m_review_styles & check_mismatching_printf_commands))
+                        {
+                        check_plural_printf_commands(
+                            std::wstring(currentTextPos, quoteEnd - currentTextPos),
+                            functionVarNamePos, functionName, parameterPosition,
+                            static_cast<size_t>(
+                                std::distance<const wchar_t*>(m_file_start, currentTextPos)));
+                        }
+
                     assert(functionVarNamePos);
                     if (functionVarNamePos != nullptr &&
                         static_cast<bool>(m_review_styles & check_suspect_l10n_string_usage))
@@ -2602,6 +2611,8 @@ namespace i18n_check
         m_unencoded_strings.clear();
         m_escaped_unicode_strings.clear();
         m_printf_single_numbers.clear();
+        m_printf_plural_mismatches.clear();
+        m_pending_plural_singular.reset();
         m_ids_assigned_number.clear();
         m_duplicates_value_assigned_to_ids.clear();
         m_malformed_strings.clear();
@@ -2612,6 +2623,60 @@ namespace i18n_check
         m_suspect_i18n_usage.clear();
 
         m_wx_info = wx_project_info{};
+        }
+
+    //--------------------------------------------------
+    void i18n_review::check_plural_printf_commands(const std::wstring& str,
+                                                   const wchar_t* functionVarNamePos,
+                                                   const std::wstring& functionName,
+                                                   const size_t parameterPosition,
+                                                   const size_t filePosition)
+        {
+        const auto singularPosition = get_plural_function_singular_position(functionName);
+        if (!singularPosition || functionVarNamePos == nullptr)
+            {
+            return;
+            }
+
+        if (parameterPosition == singularPosition.value())
+            {
+            m_pending_plural_singular =
+                pending_plural_singular{ m_file_name, functionVarNamePos, functionName, str };
+            return;
+            }
+
+        // the plural string, ensuring that its singular came from this same call
+        if (parameterPosition != singularPosition.value() + 1 || !m_pending_plural_singular ||
+            m_pending_plural_singular->m_function_pos != functionVarNamePos ||
+            m_pending_plural_singular->m_function_name != functionName ||
+            m_pending_plural_singular->m_file_name != m_file_name)
+            {
+            return;
+            }
+
+        const std::wstring singular{ std::move(m_pending_plural_singular->m_string) };
+        m_pending_plural_singular.reset();
+
+        std::wstring errorInfo;
+        const auto singularCommands = load_cpp_printf_commands(singular, errorInfo);
+        const auto pluralCommands = load_cpp_printf_commands(str, errorInfo);
+
+        // The singular form is allowed to leave out commands (e.g., "One file" vs. "%zu files"),
+        // and vice versa, as unused trailing arguments are ignored by printf.
+        // The commands, otherwise, must be the same and in the same order, because the same
+        // arguments are formatted into whichever string is selected at runtime.
+        const auto& shorter =
+            (singularCommands.size() <= pluralCommands.size()) ? singularCommands : pluralCommands;
+        const auto& longer =
+            (singularCommands.size() <= pluralCommands.size()) ? pluralCommands : singularCommands;
+        if (!std::equal(shorter.cbegin(), shorter.cend(), longer.cbegin()))
+            {
+            m_printf_plural_mismatches.emplace_back(
+                L"'" + singular + L"' vs. '" + str + L"'",
+                string_info::usage_info(string_info::usage_info::usage_type::function, functionName,
+                                        std::wstring{}, std::wstring{}),
+                m_file_name, get_line_and_column(filePosition));
+            }
         }
 
     //--------------------------------------------------

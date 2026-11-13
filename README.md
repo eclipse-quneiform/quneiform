@@ -205,7 +205,8 @@ loaded by your application for integration testing.
   commentMissingSpace:      Check that there is a space at the start of a comment.
                             This is a code formatting check and is not enabled by default.
   printfMismatch:           Check for mismatching printf() commands between source and
-                            translation strings.
+                            translation strings, and between the singular and plural forms
+                            of plural translation calls (e.g., ngettext(), wxPLURAL()) in source.
   acceleratorMismatch:      Check for mismatching keyboard accelerators between source and
                             translation strings.
   transInconsistency:       Check for inconsistent trailing punctuation, spaces, newlines,
