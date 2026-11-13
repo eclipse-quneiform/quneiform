@@ -1050,13 +1050,13 @@ namespace i18n_check
         /// @returns @c true if @c str is a search or comparison function.
         /// @param str The string to review.
         [[nodiscard]]
-        static bool is_search_or_comparison_function(const std::wstring& str)
+        static bool is_search_or_comparison_function(const std::wstring_view str)
             {
             static const std::set<std::wstring_view> strFunctions{
                 _DT(L"find"),        L"find_first_of", L"find_last_of", L"find_first_not_of",
                 L"find_last_not_of", _DT(L"rfind"),    L"starts_with",  L"ends_with",
                 L"StartsWith",       L"EndsWith",      _DT(L"Cmp"),     L"CmpNoCase",
-                _DT(L"compare")
+                _DT(L"compare"),     _DT(L"Equals")
             };
             return (strFunctions.contains(str));
             }
@@ -1126,13 +1126,15 @@ namespace i18n_check
             @param parameterPosition The string's position in the function call (if applicable).
             @param isFollowedByComma Whether the quote is followed by a comma.
             @param isSubscriptKey Whether the quote is the only thing inside of a
-                subscript (e.g., @c map["key"]), meaning that it is a lookup key.*/
+                subscript (e.g., @c map["key"]), meaning that it is a lookup key.
+            @param isComparedLiteral Whether the quote is directly an operand of
+                an @c == or @c != comparison (e.g., @c if (val == "text")).*/
         void process_quote(wchar_t* currentTextPos, const wchar_t* quoteEnd,
                            const wchar_t* functionVarNamePos, const std::wstring& functionName,
                            const variable_info& variableInfo,
                            const std::wstring& deprecatedMacroEncountered,
                            const size_t parameterPosition, const bool isFollowedByComma,
-                           const bool isSubscriptKey = false);
+                           const bool isSubscriptKey = false, const bool isComparedLiteral = false);
 
         /// @returns @c true if a function is a container lookup function whose
         ///     string argument is a key (e.g., `map.at("key")` or

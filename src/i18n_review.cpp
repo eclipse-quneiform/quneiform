@@ -1503,7 +1503,13 @@ namespace i18n_check
                 return;
                 }
 
-            if (is_untranslatable_string(str.m_string, true).first)
+            // A literal passed to a search or comparison function (e.g., find, starts_with,
+            // CmpNoCase) is almost always being matched against parsed or protocol data.
+            const bool isSearchedOrCompared{ (
+                str.m_usage.m_type == string_info::usage_info::usage_type::function &&
+                is_search_or_comparison_function(extract_base_function(str.m_usage.m_value))) };
+
+            if (isSearchedOrCompared || is_untranslatable_string(str.m_string, true).first)
                 {
                 m_internal_strings.push_back(str);
                 }
@@ -2112,7 +2118,7 @@ namespace i18n_check
                                     const variable_info& variableInfo,
                                     const std::wstring& deprecatedMacroEncountered,
                                     const size_t parameterPosition, const bool isFollowedByComma,
-                                    const bool isSubscriptKey)
+                                    const bool isSubscriptKey, const bool isComparedLiteral)
         {
         // Note that we always pass 'variableInfo.m_operator' as the operator value, even if this
         // quote is really being sent to a function. This will pick up any + or ?: operations in
@@ -2134,8 +2140,10 @@ namespace i18n_check
                     std::distance<const wchar_t*>(m_file_start, currentTextPos))));
             }
 
-        // a lookup key (e.g., map["key"]) is internal (or at least it should be!)
-        if (isSubscriptKey)
+        // A lookup key (e.g., map["key"]) is internal (or at least it should be!).
+        // Likewise, an unmarked literal that is directly compared (==, !=) is almost always
+        // being matched against parsed or protocol data, so it is internal.
+        if (isSubscriptKey || isComparedLiteral)
             {
             m_internal_strings.emplace_back(
                 std::wstring{ currentTextPos, static_cast<size_t>(std::distance<const wchar_t*>(

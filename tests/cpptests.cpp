@@ -42,6 +42,105 @@ TEST_CASE("Literal Strings", "[cpp][i18n]")
                            [](size_t, const std::filesystem::path&) { return true; });
         CHECK(cpp.get_literal_localizable_strings_being_compared().size() == 1);
         }
+    SECTION("== left-hand operand")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_literal_l10n_string_comparison);
+        const wchar_t* code = L"if (_(L\"(index values) \") == val)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_literal_localizable_strings_being_compared().size() == 1);
+        }
+    SECTION("!= left-hand operand")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_literal_l10n_string_comparison);
+        const wchar_t* code = L"if (_(L\"(index values) \") != val)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_literal_localizable_strings_being_compared().size() == 1);
+        }
+    SECTION("Wrapped in another function is not compared")
+        {
+        cpp_i18n_review cpp(false);
+        cpp.set_style(check_literal_l10n_string_comparison);
+        const wchar_t* code = L"if (GetLabel(_(L\"(index values) \")) == val)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_literal_localizable_strings_being_compared().empty());
+        }
+    }
+
+TEST_CASE("Unmarked literal strings in comparisons are internal", "[cpp][i18n]")
+    {
+    const auto runCheck = [](const wchar_t* code)
+    {
+        cpp_i18n_review cpp(false);
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().empty());
+        CHECK(cpp.get_internal_strings().size() == 1);
+    };
+
+    SECTION("==") { runCheck(LR"(if (status == "Connection was refused by server") { return; })"); }
+    SECTION("!=")
+        {
+        runCheck(LR"(if (status != L"Connection was refused by server") { return; })");
+        }
+    SECTION("== left-hand operand")
+        {
+        runCheck(LR"(if ("Connection was refused by server" == status) { return; })");
+        }
+    SECTION("find")
+        {
+        runCheck(LR"(auto pos = response.find(L"Connection was refused by server");)");
+        }
+    SECTION("rfind")
+        {
+        runCheck(LR"(auto pos = response.rfind("Connection was refused by server");)");
+        }
+    SECTION("starts_with")
+        {
+        runCheck(LR"(if (response.starts_with("Connection was refused by server")) { return; })");
+        }
+    SECTION("ends_with")
+        {
+        runCheck(LR"(if (response.ends_with("Connection was refused by server")) { return; })");
+        }
+    SECTION("compare")
+        {
+        runCheck(LR"(if (response.compare("Connection was refused by server") == 0) { return; })");
+        }
+    SECTION("Cmp")
+        {
+        runCheck(LR"(if (response.Cmp(L"Connection was refused by server") == 0) { return; })");
+        }
+    SECTION("CmpNoCase")
+        {
+        runCheck(
+            LR"(if (response.CmpNoCase(L"Connection was refused by server") == 0) { return; })");
+        }
+    SECTION("StartsWith")
+        {
+        runCheck(LR"(if (response.StartsWith(L"Connection was refused by server")) { return; })");
+        }
+    SECTION("Equals")
+        {
+        runCheck(LR"(if (response.Equals(L"Connection was refused by server")) { return; })");
+        }
+    SECTION("Non-comparison function still flagged")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(SetLabel("Connection was refused by server");)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t) {},
+                           [](size_t, const std::filesystem::path&) { return true; });
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
+        }
     }
 
 TEST_CASE("Dates", "[cpp][i18n]")
@@ -3406,11 +3505,23 @@ TEST_CASE("Strings", "[cpp]")
         cpp(code, L"");
         cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
         CHECK(cpp.get_localizable_strings().size() == 0);
-        REQUIRE(cpp.get_not_available_for_localization_strings().size() == 1);
+        // a literal being compared is matched against data, so it is internal
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 0);
+        REQUIRE(cpp.get_internal_strings().size() == 1);
+        CHECK(cpp.get_internal_strings()[0].m_string == std::wstring(L"my message"));
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_value == std::wstring(L""));
+        CHECK(cpp.get_internal_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::orphan);
+        }
+
+    SECTION("Orphan string not compared")
+        {
+        cpp_i18n_review cpp(false);
+        const wchar_t* code = LR"(return "my message";)";
+        cpp(code, L"");
+        cpp.review_strings([](size_t){}, [](size_t, const std::filesystem::path&){ return true; });
+        CHECK(cpp.get_localizable_strings().size() == 0);
+        CHECK(cpp.get_not_available_for_localization_strings().size() == 1);
         CHECK(cpp.get_internal_strings().size() == 0);
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_string == std::wstring(L"my message"));
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_value == std::wstring(L""));
-        CHECK(cpp.get_not_available_for_localization_strings()[0].m_usage.m_type == cpp_i18n_review::string_info::usage_info::usage_type::orphan);
         }
 
     SECTION("Allow punctuation only")

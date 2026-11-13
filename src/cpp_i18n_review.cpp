@@ -264,6 +264,12 @@ namespace i18n_check
                     isSubscriptStart = (is_valid_name_char(*indexedEnd) || *indexedEnd == L']' ||
                                         *indexedEnd == L')');
                     }
+                // See if the quote is the right-hand operand of == or != (e.g., val == "text").
+                // (A left-hand operand, "text" == val, is checked after the end of the quote
+                //  is found.)
+                const bool isComparedRhs{ startPos > m_file_start && *startPos == L'=' &&
+                                          (*std::prev(startPos) == L'=' ||
+                                           *std::prev(startPos) == L'!') };
                 // if we are on a character that can be part of a variable
                 // (and not punctuation) at this point,
                 // then this might be a #defined variable
@@ -467,9 +473,32 @@ namespace i18n_check
                         {
                         ++nextChar;
                         }
+                    const auto isComparisonOperator = [endSentinel](const wchar_t* pos)
+                    {
+                        return std::next(pos) < endSentinel && (*pos == L'=' || *pos == L'!') &&
+                               *std::next(pos) == L'=';
+                    };
+                    const bool isComparedLhs{ isComparisonOperator(nextChar) };
+                    // If inside of an i18n function, then see if the result is the
+                    // left-hand operand of == or != (e.g., _("text") == val).
+                    // (A right-hand operand is detected when reading the function name.)
+                    if (*nextChar == L')' && is_i18n_function(functionName))
+                        {
+                        const wchar_t* afterCall{ std::next(nextChar) };
+                        while (std::next(afterCall) < endSentinel &&
+                               (std::iswspace(*afterCall) != 0))
+                            {
+                            ++afterCall;
+                            }
+                        if (isComparisonOperator(afterCall))
+                            {
+                            variableInfo.m_operator.assign(afterCall, 2);
+                            }
+                        }
                     process_quote(cppText, end, functionVarNamePos, functionName, variableInfo,
                                   deprecatedMacroEncountered, parameterPosition, *nextChar == L',',
-                                  isSubscriptStart && *nextChar == L']');
+                                  isSubscriptStart && *nextChar == L']',
+                                  isComparedRhs || isComparedLhs);
                     // closing quote was just cleared; now, clear the opening one
                     if (isRawString && currentRawStringMarker == L'R')
                         {
