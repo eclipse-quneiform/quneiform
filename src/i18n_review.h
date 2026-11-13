@@ -1097,6 +1097,13 @@ namespace i18n_check
         [[nodiscard]]
         static bool is_string_multipart(std::wstring_view str);
 
+        /// @returns @c true if a string appears to be a block of script or stylesheet code
+        ///     (e.g., embedded JavaScript or CSS). This is deduced from it containing
+        ///     several semicolons and curly braces (not counting placeholders like "{0}").
+        /// @param str The string to review.
+        [[nodiscard]]
+        static bool is_code_block(const std::wstring& str);
+
         /// @returns @c true if a string appears to be used for singular and plural variations.
         /// @param str The string resource to review.
         /// @note The full string resource info is needed (not just the string) because

@@ -731,7 +731,18 @@ namespace i18n_check
             // MIME types
             std::wregex(LR"((?:application|text)\/(x\-)?[a-z\-]+)"),
             std::wregex(LR"(application\/(x\-)?[a-z\-]+\+[a-z\-]+)"),
-            std::wregex(LR"(image\/(x\-)?[a-z\-]+)"), std::wregex(LR"(video\/(x\-)?[a-z\-]+)"),
+            // (with optional structured syntax suffix, e.g., "image/svg+xml")
+            std::wregex(LR"(image\/(x\-)?[a-z\-]+(\+[a-z\-]+)?)"),
+            std::wregex(LR"(video\/(x\-)?[a-z\-]+(\+[a-z\-]+)?)"),
+            // CSS font-family list ending with a generic family
+            // (e.g., "Roboto, 'Helvetica Neue', Arial, sans-serif")
+            std::wregex(
+                LR"(.*,[[:space:]]*(?:sans-serif|serif|monospace|cursive|fantasy|system-ui|ui-sans-serif|ui-serif|ui-monospace|ui-rounded|emoji|math)[[:space:]]*)"),
+            // namespace-qualified XML name (e.g., "xlink:href")
+            std::wregex(LR"([a-z][a-z0-9]*:[a-zA-Z][a-zA-Z0-9_\-.]*)"),
+            // one or more HTML/XML attributes (e.g., class=\"card\" style=\"width:4px\")
+            std::wregex(
+                LR"((?:[[:space:]]*[A-Za-z_][A-Za-z0-9_\-:.]*=(?:\\?"[^"\\]*\\?"|'[^']*'))+[[:space:]]*)"),
             // MIME headers
             std::wregex(LR"(^MIME-Version:.*)"), std::wregex(LR"(^X-Priority:.*)"),
             std::wregex(
@@ -2731,6 +2742,10 @@ namespace i18n_check
                     strToReview, std::wregex(LR"(<script[\d\D]*?>[\d\D]*?</script>)"), L"");
                 strToReview = std::regex_replace(
                     strToReview, std::wregex(LR"(<style[\d\D]*?>[\d\D]*?</style>)"), L"");
+                // keyboard key names (e.g., <kbd>Home</kbd>) are labels for physical keys,
+                // not prose
+                strToReview =
+                    std::regex_replace(strToReview, std::wregex(LR"(<kbd[^>]*>[^<]*</kbd>)"), L"");
                 strToReview = std::regex_replace(
                     strToReview,
                     std::wregex(L"<[?]?[A-Za-z0-9+_/\\-\\.'\"=;:!%[:space:]\\\\,()]+[?]?>"), L"");
@@ -2739,6 +2754,14 @@ namespace i18n_check
                 strToReview = std::regex_replace(strToReview, std::wregex(L"&[a-zA-Z]{2,5};"), L"");
                 strToReview =
                     std::regex_replace(strToReview, std::wregex(L"&#[[:digit:]]{2,4};"), L"");
+                }
+
+            // Embedded JavaScript or CSS, which can be long and contain English in its comments.
+            // Prose rarely has several statement terminators along with curly braces
+            // (placeholders like "{0}" are ignored).
+            if (is_code_block(strToReview))
+                {
+                return std::make_pair(true, strToReview.length());
                 }
 
             // strings that may look like they should not be translatable, but are actually OK
@@ -2876,6 +2899,44 @@ namespace i18n_check
             return std::make_pair(false, strToReview.length());
             }
         // NOLINTEND(readability-redundant-string-cstr)
+        }
+
+    //--------------------------------------------------
+    bool i18n_review::is_code_block(const std::wstring& str)
+        {
+        constexpr size_t MIN_STATEMENT_TERMINATORS{ 3 };
+        constexpr size_t MIN_CODE_BRACES{ 2 };
+        size_t semicolons{ 0 };
+        size_t braces{ 0 };
+        for (size_t i = 0; i < str.length(); ++i)
+            {
+            if (str[i] == L';')
+                {
+                ++semicolons;
+                }
+            else if (str[i] == L'{')
+                {
+                // skip over placeholders, such as "{0}" or "{name}",
+                // that are a normal part of translatable resources
+                size_t closing{ i + 1 };
+                while (closing < str.length() &&
+                       (std::iswalnum(str[closing]) != 0 || str[closing] == L'_'))
+                    {
+                    ++closing;
+                    }
+                if (closing > i + 1 && closing < str.length() && str[closing] == L'}')
+                    {
+                    i = closing;
+                    continue;
+                    }
+                ++braces;
+                }
+            else if (str[i] == L'}')
+                {
+                ++braces;
+                }
+            }
+        return semicolons >= MIN_STATEMENT_TERMINATORS && braces >= MIN_CODE_BRACES;
         }
 
     //--------------------------------------------------

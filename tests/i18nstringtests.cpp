@@ -83,6 +83,113 @@ TEST_CASE("Ambiguous", "[i18nreview]")
         }
     }
 
+TEST_CASE("untranslatable web code", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review reviewer{ false };
+    SECTION("Long JavaScript")
+        {
+        // longer than 200 characters, with English words in comments
+        CHECK(reviewer.is_untranslatable_string(LR"(
+  // per-SVG state that is swapped in and out along with a page's filter choice
+  const choiceKeys = ['svg', 'alt', 'prepared', 'scopes', 'spotBound', 'zoomBound', 'counters',
+                      'countRun', 'inked'];
+  function svgState(page, container) {
+    const svgs = container.querySelectorAll('.page-svg');
+    const state = { svg: svgs[0] || null };
+    return state;
+  })", true).first);
+        CHECK(reviewer.is_untranslatable_string(LR"(
+  function togglePresenting() {
+    if (!document.fullscreenEnabled) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      root.requestFullscreen().catch(function() {});
+    }
+  })", true).first);
+        }
+    SECTION("Long CSS")
+        {
+        CHECK(reviewer.is_untranslatable_string(LR"(
+.dash-toolbar { position: sticky; top: 0; display: flex; gap: 8px; padding: 4px 8px; }
+.dash-card { border: 1px solid var(--border); border-radius: 6px; background: var(--card); }
+.dash-card:hover { outline: 2px solid var(--accent); cursor: pointer; })", true).first);
+        }
+    SECTION("Long messages are still translatable")
+        {
+        CHECK_FALSE(reviewer.is_untranslatable_string(
+            L"The dashboard could not be saved because the destination folder is read-only; "
+            "choose another folder (or change its permissions) and then try again. If the "
+            "problem continues, contact your system administrator for further assistance.", true).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(
+            L"Enter the name of the dataset in {0}; then select the columns to include in {1}; "
+            "finally, choose the variables for {2}; and press OK to build the report with all "
+            "of the selected options applied to the current project.", true).first);
+        }
+    SECTION("MIME type with suffix")
+        {
+        CHECK(reviewer.is_untranslatable_string(L"image/svg+xml", true).first);
+        }
+    SECTION("CSS font family lists")
+        {
+        CHECK(reviewer.is_untranslatable_string(
+            L"system-ui, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif", true).first);
+        CHECK(reviewer.is_untranslatable_string(L"', sans-serif", true).first);
+        CHECK(reviewer.is_untranslatable_string(L"Georgia, 'Times New Roman', serif", true).first);
+        CHECK(reviewer.is_untranslatable_string(L"Consolas, 'Courier New', monospace", true).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Choose a font, such as serif", true).first);
+        }
+    SECTION("Namespaced XML attribute")
+        {
+        CHECK(reviewer.is_untranslatable_string(L"xlink:href", true).first);
+        CHECK(reviewer.is_untranslatable_string(L"xml:space", true).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(L"Note: file saved", true).first);
+        }
+    SECTION("HTML attribute fragments")
+        {
+        CHECK(reviewer.is_untranslatable_string(
+            LR"( data-orient=\"%s\" style=\"--svg-w:%d;--svg-h:%d\")", true).first);
+        CHECK(reviewer.is_untranslatable_string(
+            LR"(class=\"dash-card\" aria-hidden=\"true\")", true).first);
+        CHECK_FALSE(reviewer.is_untranslatable_string(
+            LR"(Set the value to class=\"dash-card\" for the new card)", true).first);
+        }
+    SECTION("Keyboard keys in HTML markup")
+        {
+        CHECK(reviewer.is_untranslatable_string(
+            LR"(<dt><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>%s</dd>\n<dt><kbd>Home</kbd> <kbd>End</kbd></dt><dd>%s</dd>\n<dt><kbd>1</kbd> &ndash; <kbd>9</kbd></dt><dd>%s</dd>\n<dt><kbd>G</kbd></dt><dd>%s</dd>\n)", true).first);
+        CHECK(reviewer.is_untranslatable_string(
+            LR"(<dt><kbd>Space</kbd> <kbd>Enter</kbd></dt><dd>%s</dd>\n<dt><kbd>Esc</kbd></dt><dd>%s</dd>\n)", true).first);
+        // real text around the keys is still translatable
+        CHECK_FALSE(reviewer.is_untranslatable_string(
+            LR"(<p>Press <kbd>Ctrl</kbd>+<kbd>S</kbd> to save the current dashboard</p>)", true).first);
+        }
+    }
+
+TEST_CASE("Raw JavaScript string returned from function", "[i18nreview]")
+    {
+    i18n_check::cpp_i18n_review cpp{ false };
+    const wchar_t* code = LR"(wxString GetScript()
+    {
+    return LR"JS(
+  // shows the version of a page matching its filter groups' choices
+  function showPageChoice(page) {
+    if (!page.filters) return;
+    page.filters.forEach(function(filter) {
+      if (!filter.group) return;
+      filter.group.querySelectorAll('input[type="radio"]').forEach(function(radio, i) {
+        radio.checked = i === filter.index;
+      });
+    });
+  }
+)JS";
+    })";
+    cpp(code, L"");
+    cpp.review_strings([](size_t) {}, [](size_t, const std::filesystem::path&) { return true; });
+    CHECK(cpp.get_not_available_for_localization_strings().empty());
+    CHECK(cpp.get_internal_strings().size() == 1);
+    }
+
 TEST_CASE("untranslatable", "[i18nreview]")
     {
     i18n_check::cpp_i18n_review reviewer{ false };
